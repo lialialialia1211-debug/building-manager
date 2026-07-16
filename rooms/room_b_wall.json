@@ -1,0 +1,292 @@
+{
+  "schemaVersion": 1,
+  "id": "room_b_wall",
+  "title": "牆後的聲音",
+  "startNode": "b1",
+  "safeNode": "b1",
+  "endingAnchor": "ending",
+  "nodes": {
+    "b1": {
+      "candidates": ["b1_glass", "b1_knock", "b1_neighbor"]
+    },
+    "b2_glass": {
+      "candidates": ["b2g_mark", "b2g_record", "b2g_cover"]
+    },
+    "b2_knock": {
+      "candidates": ["b2k_pattern", "b2k_reply", "b2k_stop"]
+    },
+    "b2_neighbor": {
+      "candidates": ["b2n_invite", "b2n_hall", "b2n_refuse"]
+    },
+    "b3": {
+      "candidates": ["b3_blueprint", "b3_share", "b3_music"]
+    },
+    "b4": {
+      "candidates": ["b4_measure", "b4_comfort", "b4_leave"]
+    },
+    "b5": {
+      "candidates": ["b5_record", "b5_ask", "b5_ignore"]
+    },
+    "b6": {
+      "candidates": ["b6_open", "b6_consent", "b6_sleep"]
+    }
+  },
+  "panels": {
+    "b1_glass": {
+      "next": "b2_glass",
+      "previewAsset": "b1_glass",
+      "actionLabel": "貼近玻璃",
+      "dialogue": ["玻璃杯貼上牆面後，規律的敲擊聲變得清楚。"],
+      "dialogueVariants": {
+        "cross_room": ["玻璃杯裡的電流節奏，竟和停電房的隱藏迴路完全一致。"]
+      },
+      "effects": {
+        "trust": 1
+      },
+      "setFlags": ["b_sound_located"]
+    },
+    "b1_knock": {
+      "next": "b2_knock",
+      "previewAsset": "b1_knock",
+      "actionLabel": "敲擊牆面",
+      "dialogue": ["許安寧敲了三下，牆後隔了半拍才傳回同樣節奏。"],
+      "effects": {
+        "trust": 1
+      }
+    },
+    "b1_neighbor": {
+      "next": "b2_neighbor",
+      "previewAsset": "b1_neighbor",
+      "actionLabel": "前往隔壁",
+      "dialogue": ["周衍打開門說：「我也聽見了，而且每天都更近。」"],
+      "effects": {
+        "affection": 1,
+        "trust": 1
+      }
+    },
+    "b2g_mark": {
+      "next": "b3",
+      "previewAsset": "b2g_mark",
+      "actionLabel": "查看牆上痕跡",
+      "dialogue": ["膠帶標出的聲源位置，正好落在兩戶之間的空白處。"],
+      "setFlags": ["b_wall_mark"]
+    },
+    "b2g_record": {
+      "next": "b3",
+      "previewAsset": "b2g_record",
+      "actionLabel": "錄下聲音",
+      "dialogue": ["錄音器捕捉到低頻嗡鳴，裡面夾著像人聲的短句。"],
+      "effects": {
+        "trust": 1
+      },
+      "setFlags": ["b_sound_recorded"]
+    },
+    "b2g_cover": {
+      "next": "b3",
+      "previewAsset": "b2g_cover",
+      "actionLabel": "蓋住玻璃杯",
+      "dialogue": ["她用布蓋住玻璃杯，牆後的聲音暫時被隔開。"]
+    },
+    "b2k_pattern": {
+      "next": "b3",
+      "previewAsset": "b2k_pattern",
+      "actionLabel": "數清敲擊節奏",
+      "dialogue": ["敲擊以六次為一組重複，像是在等待固定的回答。"],
+      "effects": {
+        "trust": 1
+      }
+    },
+    "b2k_reply": {
+      "next": "b3",
+      "previewAsset": "b2k_reply",
+      "actionLabel": "回敲牆面",
+      "dialogue": ["她照著節奏回敲，牆後立刻傳來更急促的回應。"],
+      "setFlags": ["b_reply"]
+    },
+    "b2k_stop": {
+      "next": "b3",
+      "previewAsset": "b2k_stop",
+      "actionLabel": "停下聆聽",
+      "dialogue": ["所有聲音來源關閉後，牆裡仍留下微弱的摩擦聲。"]
+    },
+    "b2n_invite": {
+      "next": "b3",
+      "previewAsset": "b2n_invite",
+      "actionLabel": "邀請對方進門",
+      "dialogue": ["許安寧讓出門口說：「一起聽，也許比較不會漏掉什麼。」"],
+      "effects": {
+        "affection": 1
+      }
+    },
+    "b2n_hall": {
+      "next": "b3",
+      "previewAsset": "b2n_hall",
+      "actionLabel": "走到走廊",
+      "dialogue": ["兩人在走廊比對位置，聲音卻像從不存在的房間傳來。"],
+      "effects": {
+        "trust": 1
+      }
+    },
+    "b2n_refuse": {
+      "next": "b3",
+      "previewAsset": "b2n_refuse",
+      "actionLabel": "關上房門",
+      "dialogue": ["許安寧婉拒協助，隔著門繼續獨自聽牆內動靜。"],
+      "effects": {
+        "trust": -1
+      }
+    },
+    "b3_blueprint": {
+      "next": "b4",
+      "previewAsset": "b3_blueprint",
+      "actionLabel": "展開藍圖",
+      "dialogue": ["藍圖上兩戶之間沒有空間，實際尺寸卻多出近一公尺。"],
+      "setFlags": ["b_blueprint_gap"]
+    },
+    "b3_share": {
+      "next": "b4",
+      "previewAsset": "b3_share",
+      "actionLabel": "交換發現",
+      "dialogue": ["兩人交換聽見的細節，發現聲音總在同一時間出現。"],
+      "effects": {
+        "trust": 1
+      }
+    },
+    "b3_music": {
+      "next": "b4",
+      "previewAsset": "b3_music",
+      "actionLabel": "播放音樂",
+      "dialogue": ["音樂響起後，牆後的節奏竟跟著旋律慢了下來。"],
+      "effects": {
+        "affection": 1
+      }
+    },
+    "b4_measure": {
+      "next": "b5",
+      "previewAsset": "b4_measure",
+      "actionLabel": "測量牆面",
+      "dialogue": ["測量儀顯示牆後是中空的，深度遠超過一般隔間。"],
+      "setFlags": ["b_hidden_space"]
+    },
+    "b4_comfort": {
+      "next": "b5",
+      "previewAsset": "b4_comfort",
+      "actionLabel": "靠近坐下",
+      "dialogue": ["周衍放低聲音說：「如果妳不舒服，我們隨時可以停。」"],
+      "effects": {
+        "intimacy": 1
+      }
+    },
+    "b4_leave": {
+      "next": "b5",
+      "previewAsset": "b4_leave",
+      "actionLabel": "離開房間",
+      "dialogue": ["兩人先退到走廊，讓緊繃的房間重新安靜下來。"]
+    },
+    "b5_record": {
+      "next": "b6",
+      "previewAsset": "b5_record",
+      "actionLabel": "保存錄音",
+      "dialogue": ["降噪後的錄音清楚留下牆板移動與風穿過空間的聲音。"],
+      "setFlags": ["b_evidence"]
+    },
+    "b5_ask": {
+      "next": "b6",
+      "previewAsset": "b5_ask",
+      "actionLabel": "開口詢問",
+      "dialogue": ["許安寧問：「查完之後，你還願意留下來陪我嗎？」"],
+      "effects": {
+        "trust": 1,
+        "intimacy": 1
+      }
+    },
+    "b5_ignore": {
+      "next": "b6",
+      "previewAsset": "b5_ignore",
+      "actionLabel": "收起筆記",
+      "dialogue": ["她關掉錄音器，決定讓這個夜晚停在無法證實的猜測裡。"],
+      "effects": {
+        "trust": -1
+      }
+    },
+    "b6_open": {
+      "next": "ending",
+      "previewAsset": "b6_open",
+      "actionLabel": "推開暗門",
+      "dialogue": ["牆板被推開，後方露出圖紙上從未存在的狹長空間。"],
+      "setFlags": ["b_opened_space"]
+    },
+    "b6_consent": {
+      "next": "ending",
+      "previewAsset": "b6_consent",
+      "actionLabel": "牽住對方的手",
+      "dialogue": ["兩人牽住彼此的手，清楚確認這份靠近出於共同意願。"],
+      "effects": {
+        "intimacy": 2
+      },
+      "setFlags": ["b_consent"]
+    },
+    "b6_sleep": {
+      "next": "ending",
+      "previewAsset": "b6_sleep",
+      "actionLabel": "關燈休息",
+      "dialogue": ["清晨前，牆後的聲音終於停止，兩人靠牆坐著休息。"]
+    }
+  },
+  "endingRules": [
+    {
+      "id": "intimacy",
+      "priority": 300,
+      "conditions": {
+        "allFlags": ["b_consent"],
+        "minimumStats": {
+          "trust": 4,
+          "intimacy": 3
+        }
+      }
+    },
+    {
+      "id": "main",
+      "priority": 200,
+      "conditions": {
+        "allFlags": [
+          "b_hidden_space",
+          "b_evidence",
+          "b_opened_space"
+        ],
+        "minimumStats": {
+          "trust": 2
+        }
+      }
+    },
+    {
+      "id": "normal",
+      "priority": 100,
+      "conditions": {}
+    }
+  ],
+  "endingContent": {
+    "main": {
+      "title": "牆後的空間",
+      "asset": "b_ending_main",
+      "clueIds": [
+        "b_hidden_space",
+        "b_evidence",
+        "b_opened_space"
+      ],
+      "galleryUnlocks": ["room_b_main"]
+    },
+    "normal": {
+      "title": "聲音沉寂之後",
+      "asset": "b_ending_normal",
+      "clueIds": [],
+      "galleryUnlocks": ["room_b_normal"]
+    },
+    "intimacy": {
+      "title": "牆邊的約定",
+      "asset": "b_ending_intimacy",
+      "clueIds": ["b_consent"],
+      "galleryUnlocks": ["room_b_intimacy"]
+    }
+  }
+}

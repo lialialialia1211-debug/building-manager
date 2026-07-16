@@ -1,0 +1,11 @@
+{
+  "sourceCommit": "4e866aa9b80ed6e7ad1cff4ab8b65a836eec139a",
+  "builtAt": "2026-07-17",
+  "validation": {
+    "vitest": "185/185",
+    "playwright": "30/30",
+    "content": "pass",
+    "assets": "greybox-pass",
+    "productionBuild": "pass"
+  }
+}
