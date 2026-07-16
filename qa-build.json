@@ -1,10 +1,10 @@
 {
-  "sourceCommit": "4e866aa9b80ed6e7ad1cff4ab8b65a836eec139a",
+  "sourceCommit": "09720f7ac2777a5311dba657b0f8d4dcd9782cba",
   "builtAt": "2026-07-17",
   "validation": {
-    "vitest": "185/185",
+    "vitest": "201/201",
     "playwright": "30/30",
-    "content": "pass",
+    "content": "24 cards per room; 12-card deals; three endings reachable",
     "assets": "greybox-pass",
     "productionBuild": "pass"
   }
