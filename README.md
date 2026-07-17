@@ -1,30 +1,43 @@
 # 大樓管理員
 
-《大樓管理員》（設計暫名：《夜窗管理員》）是一款預計於 Steam 發行的單機成人向劇情推理／動態漫畫遊戲。
+《大樓管理員》（設計暫名：《夜窗管理員》）是一款單機成人向劇情推理／動態漫畫遊戲。本儲存庫包含已實作的 Web prototype：玩家可在兩個房間中完成各六次選擇，抵達主線、普通或親密結局，並測試跨房線索、成人內容切換、圖鑑與本機進度保存。
 
-玩家扮演夜班大樓管理員，從三個隱藏對白的候選漫畫分鏡中逐格選擇，改變成年住戶的中間劇情。每條合法路線都有完整結局；特定選擇、角色狀態與跨房線索會揭露大樓謎團或解鎖自願親密內容。
+## 執行 Web prototype
 
-## 目前狀態
+需求為 Node.js 24.14.x。
 
-本儲存庫目前是設計與驗證規劃階段，包含：
+```powershell
+npm --prefix prototype-web install
+npm --prefix prototype-web run dev
+```
 
-- [Steam 體驗版遊戲設計規格](docs/superpowers/specs/2026-07-16-night-window-manager-design.md)
-- [Web 可玩原型實作計畫](docs/superpowers/plans/2026-07-16-night-window-manager-web-prototype.md)
-- [AI 美術生產規格](docs/art/2026-07-16-web-prototype-art-production-spec.md)
+開發伺服器啟動後，依終端顯示的本機網址開啟原型。
 
-尚未開始程式實作。
+完整檢查會依序執行內容與資源驗證、單元／元件測試、production build 與 Chromium E2E：
 
-## 開發策略
+```powershell
+npm --prefix prototype-web run check
+```
 
-1. 先使用 React／TypeScript 製作瀏覽器可玩原型。
-2. 驗證選格樂趣、分支結構、重玩意願、介面與美術規格。
-3. 核准玩法與內容後，再另行制定 Godot 移植計畫。
+## 目前限制
 
-預定儲存庫結構：
+- `content/asset-manifest.json` 目前為 `greybox` mode，因此畫面使用測試用灰盒資源，尚未包含正式美術檔。
+- playtest export 僅限本機下載與人工分享；原型不會上傳測試紀錄，也沒有遠端分析服務。
+- Godot migration gate 仍受阻擋。必須先完成真人玩家、美術品質與成人內容關閉狀態的驗收證據，並取得人工核准，才可制定或開始 Godot 移植。
+
+## 儲存庫結構
 
 ```text
-prototype-web/   Web 可玩原型
+prototype-web/   React／TypeScript Web prototype
 content/         引擎無關的故事 JSON 與資源清單
-game-godot/      驗證通過後建立的正式遊戲
-docs/            產品、實作、美術與測試文件
+game-godot/      Gate 核准後才會進入的正式遊戲目標
+docs/            產品、實作、美術、決策與驗收文件
 ```
+
+主要文件：
+
+- [遊戲設計規格](docs/superpowers/specs/2026-07-16-night-window-manager-design.md)
+- [Web prototype 實作計畫](docs/superpowers/plans/2026-07-16-night-window-manager-web-prototype.md)
+- [AI 美術生產規格](docs/art/2026-07-16-web-prototype-art-production-spec.md)
+- [Web prototype 驗收報告](docs/qa/web-prototype-acceptance-report.md)
+- [Godot migration gate](docs/decisions/godot-migration-gate.md)

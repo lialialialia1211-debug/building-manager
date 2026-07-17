@@ -25,6 +25,7 @@ art/work/
 
 # Codex brainstorming and scratch files
 .superpowers/
+.worktrees/
 work/
 outputs/
 

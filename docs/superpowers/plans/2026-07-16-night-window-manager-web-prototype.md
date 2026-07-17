@@ -1,5 +1,7 @@
 # 《大樓管理員》Web 可玩原型 Implementation Plan
 
+> **歷史計畫／已被新規格取代：** 本文件記錄第一版「逐步三選一」灰盒的實作過程，不再是正式玩法來源。2026-07-17 起，正式規格改為每房 24 張牌池、每次隨機發 12 張、確認前自由編排 6 格、確認後整批鎖定並依序揭曉。現行規則以 `docs/superpowers/specs/2026-07-16-night-window-manager-design.md` 與程式測試為準。
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 先以瀏覽器可玩的方式完成兩房劇情、三選一分鏡、三種結局、跨房線索、已讀快轉、本機存檔與回想圖鑑，用最短週期驗證玩法、美術與遊玩時間，再決定 Godot 移植。
@@ -97,7 +99,7 @@ docs/
 - Produces: commands `npm run dev`, `npm run test`, `npm run test:e2e`, `npm run build`, `npm run validate:content`.
 - Produces: page landmarks `data-testid="building-screen"` and `data-testid="app-loading"`.
 
-- [ ] **Step 1: Create package configuration**
+- [x] **Step 1: Create package configuration**
 
 ```json
 {
@@ -142,7 +144,7 @@ docs/
 }
 ```
 
-- [ ] **Step 2: Install dependencies and browser**
+- [x] **Step 2: Install dependencies and browser**
 
 Run:
 
@@ -153,7 +155,7 @@ npm --prefix prototype-web exec playwright install chromium
 
 Expected: `prototype-web/package-lock.json` exists and both commands exit `0`.
 
-- [ ] **Step 3: Configure Vite, TypeScript and tests**
+- [x] **Step 3: Configure Vite, TypeScript and tests**
 
 ```ts
 // prototype-web/vite.config.ts
@@ -206,7 +208,7 @@ export default defineConfig({
 import '@testing-library/jest-dom/vitest'
 ```
 
-- [ ] **Step 4: Create and test the initial app**
+- [x] **Step 4: Create and test the initial app**
 
 ```html
 <!-- prototype-web/index.html -->
@@ -296,7 +298,7 @@ npm --prefix prototype-web test
 
 Expected: one passing test.
 
-- [ ] **Step 5: Mark Godot as intentionally deferred and commit**
+- [x] **Step 5: Mark Godot as intentionally deferred and commit**
 
 ```markdown
 # Godot project
@@ -328,7 +330,7 @@ git commit -m "build: bootstrap web prototype"
 - Produces: `parseCharacters(value: unknown): CharacterDefinition[]`.
 - Produces shared types `RoomDefinition`, `PanelDefinition`, `EndingRule`, `ProgressData`.
 
-- [ ] **Step 1: Write failing schema tests**
+- [x] **Step 1: Write failing schema tests**
 
 ```ts
 // prototype-web/tests/unit/content-schema.test.ts
@@ -364,7 +366,7 @@ describe('content schema', () => {
 })
 ```
 
-- [ ] **Step 2: Create exact TypeScript types**
+- [x] **Step 2: Create exact TypeScript types**
 
 ```ts
 // prototype-web/src/domain/types.ts
@@ -428,7 +430,7 @@ export interface CharacterDefinition {
 }
 ```
 
-- [ ] **Step 3: Implement Zod validation**
+- [x] **Step 3: Implement Zod validation**
 
 ```ts
 // prototype-web/src/domain/content-schema.ts
@@ -496,7 +498,7 @@ export function parseCharacters(value: unknown): CharacterDefinition[] {
 }
 ```
 
-- [ ] **Step 4: Add adult character data and empty runtime roots**
+- [x] **Step 4: Add adult character data and empty runtime roots**
 
 ```json
 [
@@ -519,7 +521,7 @@ export function parseCharacters(value: unknown): CharacterDefinition[] {
 {"schemaVersion":1,"assets":{}}
 ```
 
-- [ ] **Step 5: Run tests and commit**
+- [x] **Step 5: Run tests and commit**
 
 ```powershell
 npm --prefix prototype-web test -- content-schema
@@ -545,7 +547,7 @@ Expected: two passing schema tests.
 - Produces: `choose(panelId): RevealedPanel`.
 - Produces: `resolveEnding(rules, stats, flags): EndingId`.
 
-- [ ] **Step 1: Write failing engine tests**
+- [x] **Step 1: Write failing engine tests**
 
 ```ts
 // prototype-web/tests/unit/story-engine.test.ts
@@ -604,7 +606,7 @@ describe('StoryEngine', () => {
 })
 ```
 
-- [ ] **Step 2: Implement the story engine**
+- [x] **Step 2: Implement the story engine**
 
 ```ts
 // prototype-web/src/domain/story-engine.ts
@@ -675,7 +677,7 @@ export class StoryEngine {
 }
 ```
 
-- [ ] **Step 3: Write and implement ending resolution**
+- [x] **Step 3: Write and implement ending resolution**
 
 ```ts
 // prototype-web/tests/unit/ending-resolver.test.ts
@@ -723,7 +725,7 @@ export function resolveEnding(
 }
 ```
 
-- [ ] **Step 4: Run domain tests**
+- [x] **Step 4: Run domain tests**
 
 ```powershell
 npm --prefix prototype-web test -- story-engine ending-resolver
@@ -731,7 +733,7 @@ npm --prefix prototype-web test -- story-engine ending-resolver
 
 Expected: five passing tests.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```powershell
 git add prototype-web/src/domain prototype-web/tests/unit
@@ -753,7 +755,7 @@ git commit -m "feat: add branching story engine"
 - Room B consumes `a_hidden_circuit`; outputs `b_hidden_space`, `b_evidence`, `b_opened_space`, `b_consent`.
 - Every route finishes after exactly six choices.
 
-- [ ] **Step 1: Encode Room A with these exact nodes**
+- [x] **Step 1: Encode Room A with these exact nodes**
 
 | Node | Candidate IDs | Required effects / flags | Next |
 |---|---|---|---|
@@ -787,7 +789,7 @@ Room A ending conditions:
 ]
 ```
 
-- [ ] **Step 2: Encode Room B with these exact nodes**
+- [x] **Step 2: Encode Room B with these exact nodes**
 
 | Node | Candidate IDs | Required effects / flags | Next |
 |---|---|---|---|
@@ -823,7 +825,7 @@ Ending conditions:
 ]
 ```
 
-- [ ] **Step 3: Write exhaustive route validation**
+- [x] **Step 3: Write exhaustive route validation**
 
 ```ts
 // prototype-web/tests/unit/all-routes.test.ts
@@ -862,7 +864,7 @@ describe('all routes', () => {
 })
 ```
 
-- [ ] **Step 4: Implement CLI content validation**
+- [x] **Step 4: Implement CLI content validation**
 
 ```ts
 // prototype-web/scripts/validate-content.ts
@@ -931,7 +933,7 @@ npm --prefix prototype-web test -- all-routes
 
 Expected: both commands exit `0`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```powershell
 git add content/rooms prototype-web/scripts prototype-web/tests/unit/all-routes.test.ts
@@ -954,7 +956,7 @@ git commit -m "feat: add two complete room graphs"
 - Produces: `createEmptyProgress()`, `loadProgress(storage)`, `saveProgress(storage, progress)`.
 - Stores current irreversible run before reveal.
 
-- [ ] **Step 1: Write failing persistence tests**
+- [x] **Step 1: Write failing persistence tests**
 
 ```ts
 // prototype-web/tests/unit/progress.test.ts
@@ -978,7 +980,7 @@ test('locked choice survives reload', () => {
 })
 ```
 
-- [ ] **Step 2: Implement versioned progress**
+- [x] **Step 2: Implement versioned progress**
 
 ```ts
 // prototype-web/src/domain/progress.ts
@@ -1040,7 +1042,7 @@ export function saveProgress(
 }
 ```
 
-- [ ] **Step 3: Implement read-history keys**
+- [x] **Step 3: Implement read-history keys**
 
 ```ts
 // prototype-web/src/domain/read-history.ts
@@ -1057,7 +1059,7 @@ export function wasRead(history: Record<string, true>, panelId: string, variant?
 }
 ```
 
-- [ ] **Step 4: Build Zustand store with save-before-reveal**
+- [x] **Step 4: Build Zustand store with save-before-reveal**
 
 `choosePanel(panelId)` uses this order:
 
@@ -1100,7 +1102,7 @@ interface AppStore {
 }
 ```
 
-- [ ] **Step 5: Run tests and commit**
+- [x] **Step 5: Run tests and commit**
 
 ```powershell
 npm --prefix prototype-web test -- progress read-history
@@ -1127,7 +1129,7 @@ Expected: persistence and read-history tests pass.
 - Initial rooms: both Room A and Room B are open.
 - Four future rooms render as locked silhouettes.
 
-- [ ] **Step 1: Write failing building-screen test**
+- [x] **Step 1: Write failing building-screen test**
 
 ```tsx
 // prototype-web/tests/components/building-screen.test.tsx
@@ -1145,7 +1147,7 @@ test('opens the selected available room', async () => {
 })
 ```
 
-- [ ] **Step 2: Implement repository**
+- [x] **Step 2: Implement repository**
 
 ```ts
 // prototype-web/src/domain/repository.ts
@@ -1170,7 +1172,7 @@ export async function loadGallery() {
 }
 ```
 
-- [ ] **Step 3: Implement building map**
+- [x] **Step 3: Implement building map**
 
 ```tsx
 // prototype-web/src/screens/BuildingScreen.tsx
@@ -1207,7 +1209,7 @@ export function BuildingScreen({ progress, onOpenRoom, onOpenGallery }: Props) {
 }
 ```
 
-- [ ] **Step 4: Implement briefing and app routing**
+- [x] **Step 4: Implement briefing and app routing**
 
 Room briefing displays:
 
@@ -1220,7 +1222,7 @@ Room briefing displays:
 
 `App.tsx` switches on Zustand `screen`; opening a room stores `selectedRoomId` and routes to `roomBrief`.
 
-- [ ] **Step 5: Run tests and commit**
+- [x] **Step 5: Run tests and commit**
 
 ```powershell
 npm --prefix prototype-web test -- building-screen
@@ -1247,7 +1249,7 @@ Expected: building-screen test passes.
 - Candidate images use `alt=""`; accessible names describe only neutral action, never ending direction.
 - Choosing disables all cards before reveal starts.
 
-- [ ] **Step 1: Write failing irreversible-choice test**
+- [x] **Step 1: Write failing irreversible-choice test**
 
 ```tsx
 // prototype-web/tests/components/comic-screen.test.tsx
@@ -1265,7 +1267,7 @@ test('locks all three candidates immediately after selection', async () => {
 })
 ```
 
-- [ ] **Step 2: Implement candidate card**
+- [x] **Step 2: Implement candidate card**
 
 ```tsx
 // prototype-web/src/components/CandidateCard.tsx
@@ -1290,7 +1292,7 @@ export function CandidateCard({ panelId, previewSrc, disabled, onChoose }: Props
 }
 ```
 
-- [ ] **Step 3: Implement comic screen states**
+- [x] **Step 3: Implement comic screen states**
 
 The component renders:
 
@@ -1310,7 +1312,7 @@ ComicScreen
 
 `onChoose` calls the store method that saves first and reveals second. Until reveal completes, `choiceLocked` remains true.
 
-- [ ] **Step 4: Add neutral greybox assets**
+- [x] **Step 4: Add neutral greybox assets**
 
 Before formal art exists, every candidate uses generated SVG:
 
@@ -1327,7 +1329,7 @@ export function greyboxPanel(panelId: string): string {
 
 Greybox labels are visible only in developer mode; playtest mode uses silhouettes and prop icons without IDs.
 
-- [ ] **Step 5: Run test and commit**
+- [x] **Step 5: Run test and commit**
 
 ```powershell
 npm --prefix prototype-web test -- comic-screen
@@ -1354,7 +1356,7 @@ Expected: comic-screen test passes.
 - Read fast-forward: 280 ms.
 - New dialogue variant always returns to unread speed.
 
-- [ ] **Step 1: Write failing timing tests**
+- [x] **Step 1: Write failing timing tests**
 
 ```ts
 // prototype-web/tests/unit/read-speed.test.ts
@@ -1374,7 +1376,7 @@ test('read panel fast-forwards to 280ms', () => {
 })
 ```
 
-- [ ] **Step 2: Implement exact duration function**
+- [x] **Step 2: Implement exact duration function**
 
 ```ts
 // prototype-web/src/domain/read-speed.ts
@@ -1388,7 +1390,7 @@ export function revealDuration(input: {
 }
 ```
 
-- [ ] **Step 3: Implement CSS-driven layered motion**
+- [x] **Step 3: Implement CSS-driven layered motion**
 
 ```tsx
 // prototype-web/src/components/PanelMotion.tsx
@@ -1436,7 +1438,7 @@ CSS uses one animation timeline:
 @keyframes panel-settle { from { opacity: .01; } to { opacity: 1; } }
 ```
 
-- [ ] **Step 4: Mark read only after reveal completes**
+- [x] **Step 4: Mark read only after reveal completes**
 
 The store updates `readHistory` after `onFinished`; a reload during animation resumes the locked panel and replays its reveal.
 
@@ -1460,7 +1462,7 @@ npm --prefix prototype-web test -- read-speed panel-motion
 
 Expected: timing and motion tests pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```powershell
 git add prototype-web/src prototype-web/tests
@@ -1484,7 +1486,7 @@ git commit -m "feat: animate and fast-forward comic panels"
 - `resolveAsset(entry, adultContent)` never returns an adult path when false.
 - An intimacy ending remains completed when adult content is disabled; only the replay presentation changes.
 
-- [ ] **Step 1: Write failing safe-asset test**
+- [x] **Step 1: Write failing safe-asset test**
 
 ```ts
 // prototype-web/tests/unit/asset-resolver.test.ts
@@ -1500,7 +1502,7 @@ test('safe mode never returns adult asset', () => {
 })
 ```
 
-- [ ] **Step 2: Implement asset resolution**
+- [x] **Step 2: Implement asset resolution**
 
 ```ts
 // prototype-web/src/domain/asset-resolver.ts
@@ -1516,7 +1518,7 @@ export function resolveAsset(variants: AssetVariants, adultContent: boolean): st
 }
 ```
 
-- [ ] **Step 3: Define gallery entries**
+- [x] **Step 3: Define gallery entries**
 
 ```json
 [
@@ -1543,7 +1545,7 @@ export function resolveAsset(variants: AssetVariants, adultContent: boolean): st
 ]
 ```
 
-- [ ] **Step 4: Implement result, gallery and settings screens**
+- [x] **Step 4: Implement result, gallery and settings screens**
 
 Result screen shows ending title, final qualitative stats, new clues and unlocks. Gallery only enables collected entries. Settings toggles:
 
@@ -1568,7 +1570,7 @@ The result root is:
 
 When `adultContent` changes, persist immediately and rerender gallery sequence; do not modify ending completion.
 
-- [ ] **Step 5: Run tests and commit**
+- [x] **Step 5: Run tests and commit**
 
 ```powershell
 npm --prefix prototype-web test -- asset-resolver result-screen
@@ -1594,7 +1596,7 @@ Expected: asset and result tests pass.
 - Room B reads that flag and adds a circuit-light overlay plus `cross_room` dialogue variant without changing the three candidate IDs.
 - Sixth-room tease is visible only after both main endings.
 
-- [ ] **Step 1: Write failing unlock tests**
+- [x] **Step 1: Write failing unlock tests**
 
 ```ts
 // prototype-web/tests/unit/unlocks.test.ts
@@ -1618,7 +1620,7 @@ test('one main ending is insufficient', () => {
 })
 ```
 
-- [ ] **Step 2: Implement unlock rule**
+- [x] **Step 2: Implement unlock rule**
 
 ```ts
 // prototype-web/src/domain/unlocks.ts
@@ -1630,7 +1632,7 @@ export function shouldShowSixthRoom(progress: ProgressData): boolean {
 }
 ```
 
-- [ ] **Step 3: Persist ending outputs**
+- [x] **Step 3: Persist ending outputs**
 
 When Room A finishes main:
 
@@ -1648,7 +1650,7 @@ const roomVisualVariant = progress.crossRoomFlags.a_hidden_circuit ? 'circuit' :
 
 `ComicScreen` sets `data-room-visual-variant={roomVisualVariant}`. The `circuit` CSS variant adds the approved electrical-light overlay; `b1_glass` keeps the same logical panel ID and uses a `cross_room` dialogue variant.
 
-- [ ] **Step 4: Add E2E finale test**
+- [x] **Step 4: Add E2E finale test**
 
 ```ts
 // prototype-web/tests/e2e/sixth-room.spec.ts
@@ -1675,7 +1677,7 @@ test('shows sixth room only after both main endings', async ({ page }) => {
 })
 ```
 
-- [ ] **Step 5: Run tests and commit**
+- [x] **Step 5: Run tests and commit**
 
 ```powershell
 npm --prefix prototype-web test -- unlocks
@@ -1703,7 +1705,7 @@ Expected: unlock and finale tests pass.
 - `ART_MODE=formal npm run validate:assets` requires the exact art-production counts.
 - Formal mode requires 87 panel masters and 20 layered source packages.
 
-- [ ] **Step 1: Define manifest structure**
+- [x] **Step 1: Define manifest structure**
 
 ```json
 {
@@ -1717,7 +1719,7 @@ Expected: unlock and finale tests pass.
 }
 ```
 
-- [ ] **Step 2: Write exact count tests**
+- [x] **Step 2: Write exact count tests**
 
 ```ts
 // prototype-web/tests/unit/asset-counts.test.ts
@@ -1735,7 +1737,7 @@ test('formal art package uses approved counts', () => {
 })
 ```
 
-- [ ] **Step 3: Implement count contract**
+- [x] **Step 3: Implement count contract**
 
 ```ts
 // prototype-web/src/domain/asset-manifest.ts
@@ -1757,7 +1759,7 @@ export const requiredPanelGroups = {
 } as const
 ```
 
-- [ ] **Step 4: Implement formal validator**
+- [x] **Step 4: Implement formal validator**
 
 ```ts
 // prototype-web/scripts/validate-assets.ts
@@ -1838,7 +1840,7 @@ Add:
 "validate:assets": "tsx scripts/validate-assets.ts"
 ```
 
-- [ ] **Step 5: Run greybox validation and commit**
+- [x] **Step 5: Run greybox validation and commit**
 
 ```powershell
 npm --prefix prototype-web run validate:assets
@@ -1865,7 +1867,7 @@ Expected: greybox mode passes; exact count test passes.
 - Events: `session_started`, `screen_viewed`, `candidate_shown`, `choice_made`, `ending_reached`, `replay_started`, `gallery_opened`.
 - Export format: JSON file downloaded by explicit button.
 
-- [ ] **Step 1: Write failing analytics test**
+- [x] **Step 1: Write failing analytics test**
 
 ```ts
 // prototype-web/tests/unit/playtest-log.test.ts
@@ -1884,7 +1886,7 @@ test('records choice without dialogue or personal data', () => {
 })
 ```
 
-- [ ] **Step 2: Implement event log and export**
+- [x] **Step 2: Implement event log and export**
 
 ```ts
 // prototype-web/src/analytics/playtest-log.ts
@@ -1922,7 +1924,7 @@ export class PlaytestLog {
 }
 ```
 
-- [ ] **Step 3: Write exact playtest procedure**
+- [x] **Step 3: Write exact playtest procedure**
 
 `docs/qa/playtest-script.md`:
 
@@ -1952,7 +1954,7 @@ export class PlaytestLog {
 - 大樓共同謎團是否足以讓你想玩正式版？
 ```
 
-- [ ] **Step 4: Add results template**
+- [x] **Step 4: Add results template**
 
 Template includes:
 
@@ -1965,7 +1967,7 @@ Template includes:
 - Top three confusion points.
 - Required changes before next round.
 
-- [ ] **Step 5: Run test and commit**
+- [x] **Step 5: Run test and commit**
 
 ```powershell
 npm --prefix prototype-web test -- playtest-log
@@ -1992,7 +1994,7 @@ Expected: analytics test passes.
 - All six endings have an automated route.
 - Adult-off flow never loads a path containing `/adult/`.
 
-- [ ] **Step 1: Configure three viewports**
+- [x] **Step 1: Configure three viewports**
 
 ```ts
 // prototype-web/playwright.config.ts
@@ -2013,7 +2015,7 @@ export default defineConfig({
 })
 ```
 
-- [ ] **Step 2: Add one route helper**
+- [x] **Step 2: Add one route helper**
 
 ```ts
 // prototype-web/tests/e2e/helpers.ts
@@ -2034,7 +2036,7 @@ export async function playRoute(page: Page, roomName: RegExp, panelIds: string[]
 }
 ```
 
-- [ ] **Step 3: Automate all six endings**
+- [x] **Step 3: Automate all six endings**
 
 Room A:
 
@@ -2058,7 +2060,7 @@ const roomBRoutes = {
 
 Each test expects the correct ending heading.
 
-- [ ] **Step 4: Add responsive and adult-off assertions**
+- [x] **Step 4: Add responsive and adult-off assertions**
 
 At all three sizes:
 
@@ -2070,7 +2072,7 @@ At all three sizes:
 
 Adult-off test listens to requests and fails if any URL contains `/adult/`.
 
-- [ ] **Step 5: Run E2E and commit**
+- [x] **Step 5: Run E2E and commit**
 
 ```powershell
 npm --prefix prototype-web run test:e2e
@@ -2095,7 +2097,7 @@ Expected: all route, responsive and content-toggle tests pass in three projects.
 - `dist/` is uploaded as an Actions artifact, not deployed publicly.
 - Godot implementation cannot begin until the decision document is filled with measured evidence and approved.
 
-- [ ] **Step 1: Add GitHub Actions**
+- [x] **Step 1: Add GitHub Actions**
 
 ```yaml
 # .github/workflows/validate-web.yml
@@ -2130,7 +2132,7 @@ jobs:
           path: prototype-web/dist
 ```
 
-- [ ] **Step 2: Add one full local check**
+- [x] **Step 2: Add one full local check**
 
 Update:
 
@@ -2146,7 +2148,7 @@ npm --prefix prototype-web run check
 
 Expected: exit `0`; `prototype-web/dist/index.html` exists.
 
-- [ ] **Step 3: Create the acceptance report**
+- [x] **Step 3: Create the acceptance report**
 
 ```markdown
 # Web Prototype Acceptance Report
@@ -2188,7 +2190,7 @@ Expected: exit `0`; `prototype-web/dist/index.html` exists.
 
 Replace every `NOT RUN` with measured data before approval.
 
-- [ ] **Step 4: Create exact Godot migration thresholds**
+- [x] **Step 4: Create exact Godot migration thresholds**
 
 ```markdown
 # Godot Migration Gate
@@ -2214,7 +2216,7 @@ Decision:
 - [ ] CONTINUE Web iteration
 ```
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```powershell
 git add .github prototype-web/package.json docs/decisions docs/qa/web-prototype-acceptance-report.md
@@ -2227,14 +2229,14 @@ git commit -m "build: gate Godot migration on web evidence"
 
 Before implementing this plan:
 
-- [ ] Every requirement in the approved game design maps to a task.
-- [ ] Web-only code does not leak into `content/` JSON.
-- [ ] Both rooms contain exactly 24 candidate panels and six choices per run.
-- [ ] Every adult gallery entry has a safe sequence.
-- [ ] No task creates Godot code before the migration gate.
-- [ ] Art counts match the separate production spec: 87 panel masters and 20 layered packages.
-- [ ] E2E routes cover all six endings and three viewports.
-- [ ] Playtest collection is local-only and contains no personal data.
+- [x] Every requirement in the approved game design maps to a task.
+- [x] Web-only code does not leak into `content/` JSON.
+- [x] Both rooms contain exactly 24 candidate panels and six choices per run.
+- [x] Every adult gallery entry has a safe sequence.
+- [x] No task creates Godot code before the migration gate.
+- [x] Art counts match the separate production spec: 87 panel masters and 20 layered packages.
+- [x] E2E routes cover all six endings and three viewports.
+- [x] Playtest collection is local-only and contains no personal data.
 
 ## Execution Handoff
 
