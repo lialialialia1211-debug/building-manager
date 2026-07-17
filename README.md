@@ -38,6 +38,8 @@ docs/            產品、實作、美術、決策與驗收文件
 
 - [遊戲設計規格](docs/superpowers/specs/2026-07-16-night-window-manager-design.md)
 - [Web prototype 實作計畫](docs/superpowers/plans/2026-07-16-night-window-manager-web-prototype.md)
-- [AI 美術生產規格](docs/art/2026-07-16-web-prototype-art-production-spec.md)
+- [Anima 美術生產包（最新核准規格）](docs/art/2026-07-17-anima-production-package/README.md)
+- [劇情與美術設計總規格](docs/superpowers/specs/2026-07-17-anima-story-art-design.md)
+- [舊版 Web 原型 AI 美術生產規格（歷史基線）](docs/art/2026-07-16-web-prototype-art-production-spec.md)
 - [Web prototype 驗收報告](docs/qa/web-prototype-acceptance-report.md)
 - [Godot migration gate](docs/decisions/godot-migration-gate.md)

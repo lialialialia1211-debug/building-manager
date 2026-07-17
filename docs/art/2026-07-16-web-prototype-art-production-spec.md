@@ -1,5 +1,7 @@
 # 《大樓管理員》Web 原型 AI 美術生產規格
 
+> 歷史基線：最新已核准的世界觀、48 張候選卡、8 支結局影片與 Anima／ComfyUI 工作流，請使用 [Anima 美術生產包](2026-07-17-anima-production-package/README.md)。本文件僅保留既有 Web 原型的數量、目錄與灰盒契約，不再作為劇情或 prompt 的 source of truth。
+
 - 日期：2026-07-16
 - 適用範圍：Web 可玩原型
 - 美術負責人：使用者
