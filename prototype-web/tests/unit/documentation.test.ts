@@ -15,13 +15,18 @@ const acceptanceReport = readFileSync(
   'utf8',
 )
 
-test('acceptance report states the exact 30-run viewport breakdown', () => {
+test('acceptance report states the measured adult-off six-ending evidence', () => {
   expect(acceptanceReport).toContain(
     'Unit/component tests：PASS；201 tests。',
   )
   expect(acceptanceReport).toContain(
-    '30 runs：27 project-viewport runs + 3 repeated 600×900 overrides',
+    '45 runs：18 adult-on 路線覆蓋 + 18 adult-off 路線覆蓋 + 6 responsive runs + 3 sixth-room runs',
   )
+  expect(acceptanceReport).toContain('Adult-off 矩陣：PASS')
+  expect(acceptanceReport).toContain('18 runs')
+  expect(acceptanceReport).toContain('/adult/')
+  expect(acceptanceReport).toContain('a_safe_06')
+  expect(acceptanceReport).toContain('b_safe_06')
 })
 
 test('root README documents the implemented prototype workflow and gates', () => {
