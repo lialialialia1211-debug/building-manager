@@ -1,11 +1,13 @@
 # Web 原型驗收報告
 
 - 自動化執行日期：2026-07-17
-- 自動化測試 commit：`d62fab34987ca00416590b5e6aeb012454396557`（adult-off 6/6 E2E 實作 commit）
+- Adult-off E2E 實作 commit：`d62fab34987ca00416590b5e6aeb012454396557`。
+- 完整自動化驗證 commit：`ce5917ae3ba99620d224475461828a414c774506`（完整 `check` 通過）。
 - 人工 QA GitHub 預覽網址：https://lialialialia1211-debug.github.io/building-manager/
-- Pages 靜態產物來源：remote `gh-pages` branch，source commit `09720f7ac2777a5311dba657b0f8d4dcd9782cba`。
-- 人工 QA 環境狀態：READY；Pages build `fe9241e940b4d09b793bc6202888936ead0a1b7a` 已發布。
-- 線上 smoke test：PASS；首頁、Room A JSON、`qa-build.json` 均為 HTTP 200；Chromium 從大樓進入 Room A 後顯示 12 張候選與 6 個槽，實際拖曳兩張卡、交換槽位、補滿六格、確認編排並完成至結局故事。Console errors 0，request failures 0。
+- Pages 靜態產物來源：remote `gh-pages` branch，deploy commit `828ca800fe38c31b217190f0e316d8c6cfd2db0b`；source commit `ce5917ae3ba99620d224475461828a414c774506`。
+- 人工 QA 環境狀態：READY；Pages build `828ca800fe38c31b217190f0e316d8c6cfd2db0b` 已發布。
+- 部署版本核對：PASS；公開 `qa-build.json` 的 source commit 為 `ce5917ae3ba99620d224475461828a414c774506`，並記錄 201/201 unit/component tests、45/45 E2E 與 18/18 adult-off runs。
+- 線上 smoke test：PASS；首頁、Room A JSON、`qa-build.json` 均為 HTTP 200；Chromium 從大樓進入 Room A 後顯示 12 張候選與 6 個槽，第一張候選卡可放入第一格。Console errors 0，request failures 0。
 - 第一輪測試者：NOT RUN
 - 第二輪測試者：NOT RUN
 
