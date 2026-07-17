@@ -1,7 +1,7 @@
 # Web 原型驗收報告
 
 - 自動化執行日期：2026-07-17
-- 自動化測試 commit：`09720f7ac2777a5311dba657b0f8d4dcd9782cba`（合併後 `main`）
+- 自動化測試 commit：`d62fab34987ca00416590b5e6aeb012454396557`（adult-off 6/6 E2E 實作 commit）
 - 人工 QA GitHub 預覽網址：https://lialialialia1211-debug.github.io/building-manager/
 - Pages 靜態產物來源：remote `gh-pages` branch，source commit `09720f7ac2777a5311dba657b0f8d4dcd9782cba`。
 - 人工 QA 環境狀態：READY；Pages build `fe9241e940b4d09b793bc6202888936ead0a1b7a` 已發布。
@@ -14,7 +14,7 @@
 - Content validation：PASS；兩房各 24 張完整劇情卡、每局 12 張不重複牌、12 選 6 組合可收束三種結局。
 - Asset validation：PASS；mode 為 `greybox`，尚不要求正式美術檔。
 - Unit/component tests：PASS；201 tests。
-- E2E tests：PASS；30 runs：27 project-viewport runs + 3 repeated 600×900 overrides。
+- E2E tests：PASS；45 runs：18 adult-on 路線覆蓋 + 18 adult-off 路線覆蓋 + 6 responsive runs + 3 sixth-room runs。Adult-off 矩陣：PASS；Room A、Room B 的 main、normal、intimacy 共 3 種結局於 3 個 viewport 完成 18 runs，沒有任何 `/adult/` request，且結果資源皆為安全資源 `a_safe_06`、`b_safe_06`。
 - Production build：PASS；`prototype-web/dist/index.html` 已產生。
 
 ## 玩家證據
@@ -38,7 +38,6 @@
 
 ## 尚未解除的阻擋
 
-- NOT RUN：成人內容關閉狀態下的六個結局完整 6/6 證據；目前只驗證 Room A 親密結局的安全資源流程。
 - NOT RUN：第一輪 5 人與第二輪至少 5 人的真人玩家測試。
 - NOT RUN：12 張候選辨識、編排理解、重玩意願、完成時間、結果關聯性與共同謎團興趣的量測。
 - NOT RUN：正式美術 style-lock、角色／手部／道具一致性與 3 秒動態穩定性驗收。

@@ -4,10 +4,12 @@
 
 自動化證據基線：2026-07-17，commit `0f756ead5fab15d8bc8ba5472d078c301de7dd7e`（Task 14 前 HEAD）。完整結果記錄於 `docs/qa/web-prototype-acceptance-report.md`。
 
+2026-07-17，commit `d62fab34987ca00416590b5e6aeb012454396557` 的 adult-off 矩陣完成 18 runs，零 `/adult/` requests，並使用安全的親密結局結果資源 `a_safe_06` 與 `b_safe_06`。
+
 ## 門檻
 
 - [x] 兩個自動化房間圖皆為零斷路；每條合法路線都在六次選擇後抵達結局。
-- [ ] 六個結局在成人內容開啟與關閉時都可完成；目前六個結局僅在預設成人內容開啟狀態有 E2E 證據，關閉狀態只驗證 Room A 親密結局的安全資源流程，尚未完成 6/6 關閉狀態證據。
+- [x] 六個結局在成人內容開啟與關閉時都可完成；adult-off E2E 已於 Room A、Room B 的 main、normal、intimacy 3 種結局及 3 個 viewport 完成 18 runs，沒有任何 `/adult/` request，且結果資源為安全資源 `a_safe_06`、`b_safe_06`。
 - [ ] 至少 10 人完成一個房間。
 - [ ] 至少 5 人完成兩個房間。
 - [ ] 無對白抽樣候選三選一中，至少 80% 可正確區分三個行動意圖。
