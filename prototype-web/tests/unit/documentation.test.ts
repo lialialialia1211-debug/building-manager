@@ -17,16 +17,14 @@ const acceptanceReport = readFileSync(
 
 test('acceptance report states the measured adult-off six-ending evidence', () => {
   expect(acceptanceReport).toContain(
-    'Unit/component tests：PASS；201 tests。',
+    'd62fab34987ca00416590b5e6aeb012454396557',
   )
   expect(acceptanceReport).toContain(
-    '45 runs：18 adult-on 路線覆蓋 + 18 adult-off 路線覆蓋 + 6 responsive runs + 3 sixth-room runs',
+    'E2E tests：PASS（45 runs：18 adult-on 路徑 + 18 adult-off 路徑 + 6 responsive runs + 3 sixth-room runs）。',
   )
-  expect(acceptanceReport).toContain('Adult-off 矩陣：PASS')
-  expect(acceptanceReport).toContain('18 runs')
-  expect(acceptanceReport).toContain('/adult/')
-  expect(acceptanceReport).toContain('a_safe_06')
-  expect(acceptanceReport).toContain('b_safe_06')
+  expect(acceptanceReport).toContain(
+    'Adult-off 證據：PASS；Room A／Room B 的 main、normal、intimacy 於 3 個 viewport 共 18 runs，零 `/adult/` requests；兩個 intimacy endings 分別使用 `a_safe_06` 與 `b_safe_06`。',
+  )
 })
 
 test('root README documents the implemented prototype workflow and gates', () => {

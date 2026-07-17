@@ -14,7 +14,8 @@
 - Content validation：PASS；兩房各 24 張完整劇情卡、每局 12 張不重複牌、12 選 6 組合可收束三種結局。
 - Asset validation：PASS；mode 為 `greybox`，尚不要求正式美術檔。
 - Unit/component tests：PASS；201 tests。
-- E2E tests：PASS；45 runs：18 adult-on 路線覆蓋 + 18 adult-off 路線覆蓋 + 6 responsive runs + 3 sixth-room runs。Adult-off 矩陣：PASS；Room A、Room B 的 main、normal、intimacy 共 3 種結局於 3 個 viewport 完成 18 runs，沒有任何 `/adult/` request，且結果資源皆為安全資源 `a_safe_06`、`b_safe_06`。
+- E2E tests：PASS（45 runs：18 adult-on 路徑 + 18 adult-off 路徑 + 6 responsive runs + 3 sixth-room runs）。
+- Adult-off 證據：PASS；Room A／Room B 的 main、normal、intimacy 於 3 個 viewport 共 18 runs，零 `/adult/` requests；兩個 intimacy endings 分別使用 `a_safe_06` 與 `b_safe_06`。
 - Production build：PASS；`prototype-web/dist/index.html` 已產生。
 
 ## 玩家證據
