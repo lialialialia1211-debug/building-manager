@@ -1,9 +1,10 @@
 {
-  "sourceCommit": "09720f7ac2777a5311dba657b0f8d4dcd9782cba",
+  "sourceCommit": "ce5917ae3ba99620d224475461828a414c774506",
   "builtAt": "2026-07-17",
   "validation": {
     "vitest": "201/201",
-    "playwright": "30/30",
+    "playwright": "45/45",
+    "adultOff": "18/18; zero /adult/ requests; intimacy assets a_safe_06 and b_safe_06",
     "content": "24 cards per room; 12-card deals; three endings reachable",
     "assets": "greybox-pass",
     "productionBuild": "pass"
