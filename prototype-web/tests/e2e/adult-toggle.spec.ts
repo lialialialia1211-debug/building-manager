@@ -1,34 +1,44 @@
 import { expect, test } from '@playwright/test'
+import { endingRoutes } from './ending-routes'
 import { playRoute } from './helpers'
 
-test('adult-off intimacy flow never requests adult assets', async ({
-  page,
-}) => {
-  const adultRequests: string[] = []
-  page.on('request', (request) => {
-    if (request.url().includes('/adult/')) {
-      adultRequests.push(request.url())
-    }
-  })
+for (const route of endingRoutes) {
+  test(
+    `adult-off ${route.roomLabel} ${route.endingId} reaches the correct ending without adult assets`,
+    async ({ page }) => {
+      const adultRequests: string[] = []
+      page.on('request', (request) => {
+        if (request.url().includes('/adult/')) {
+          adultRequests.push(request.url())
+        }
+      })
 
-  await playRoute(
-    page,
-    /停電之夜/,
-    [
-      'a1_door',
-      'a2d_listen',
-      'a3_share',
-      'a4_comfort',
-      'a5_ask',
-      'a6_consent',
-    ],
-    {
-      adultContent: false,
-      dealSeed: '00000000-0000-4000-8000-000000000018',
+      await playRoute(
+        page,
+        route.roomName,
+        [...route.panels],
+        {
+          adultContent: false,
+          dealSeed: route.dealSeed,
+        },
+      )
+
+      await expect(
+        page.getByRole('heading', {
+          level: 1,
+          name: route.heading,
+        }),
+      ).toBeVisible()
+
+      expect(adultRequests).toEqual([])
+
+      if (route.safeResultAssetId) {
+        await expect(page.getByTestId('result-art'))
+          .toHaveAttribute(
+            'data-asset-id',
+            route.safeResultAssetId,
+          )
+      }
     },
   )
-
-  await expect(page.getByTestId('result-art'))
-    .toHaveAttribute('data-asset-id', 'a_safe_06')
-  expect(adultRequests).toEqual([])
-})
+}
