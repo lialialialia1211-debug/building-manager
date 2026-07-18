@@ -6,6 +6,9 @@ import { DraftStoryEngine } from '@/domain/draft-story-engine'
 import { createEmptyProgress } from '@/domain/progress'
 import type { PanelDefinition, RoomDefinition } from '@/domain/types'
 import { ComicScreen } from '@/screens/ComicScreen'
+import { makeTestCatalog } from '../helpers/catalog'
+
+const catalog = makeTestCatalog()
 
 const approvedPanelIds = [
   'a1_door',
@@ -52,6 +55,8 @@ function createRoom(): RoomDefinition {
     schemaVersion: 1,
     id: 'room_a_blackout',
     title: '編排測試',
+    backgroundAsset: 'bg_room_a',
+    openingAssets: ['a_open_01', 'a_open_02', 'a_open_03'],
     startNode: 'legacy',
     safeNode: 'legacy',
     endingAnchor: 'ending',
@@ -127,7 +132,7 @@ afterEach(() => {
 })
 
 test('shows twelve random cards, six slots, and a disabled confirm action', () => {
-  render(<ComicScreen roomId={room.id} />)
+  render(<ComicScreen roomId={room.id} catalog={catalog} />)
 
   expect(screen.getAllByRole('button', {
     name: /^加入編排：/,
@@ -141,7 +146,7 @@ test('shows twelve random cards, six slots, and a disabled confirm action', () =
 
 test('keeps full dialogue hidden until all six cards are confirmed', async () => {
   const user = userEvent.setup()
-  render(<ComicScreen roomId={room.id} />)
+  render(<ComicScreen roomId={room.id} catalog={catalog} />)
   const candidates = screen.getAllByRole('button', {
     name: /^加入編排：/,
   })
@@ -174,7 +179,7 @@ test('keeps full dialogue hidden until all six cards are confirmed', async () =>
 
 test('supports removing and keyboard-friendly left-right reordering', async () => {
   const user = userEvent.setup()
-  render(<ComicScreen roomId={room.id} />)
+  render(<ComicScreen roomId={room.id} catalog={catalog} />)
   const candidates = screen.getAllByRole('button', {
     name: /^加入編排：/,
   })
@@ -204,7 +209,7 @@ test('supports removing and keyboard-friendly left-right reordering', async () =
 
 test('supports dragging a placed slot onto another slot to swap them', async () => {
   const user = userEvent.setup()
-  const { container } = render(<ComicScreen roomId={room.id} />)
+  const { container } = render(<ComicScreen roomId={room.id} catalog={catalog} />)
   const candidates = screen.getAllByRole('button', {
     name: /^加入編排：/,
   })

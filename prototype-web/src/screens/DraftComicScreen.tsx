@@ -1,11 +1,15 @@
 import type { DragEvent } from 'react'
 import { useAppStore } from '@/app/store'
 import { ComicPanel } from '@/components/ComicPanel'
+import { RuntimeImage } from '@/components/RuntimeImage'
 import { StatusStrip } from '@/components/StatusStrip'
 import type {
   DraftStoryEngine,
 } from '@/domain/draft-story-engine'
-import { greyboxAnchor, greyboxPanel } from '@/domain/greybox-assets'
+import {
+  backgroundUrl,
+  type AssetCatalog,
+} from '@/domain/runtime-assets'
 import { wasRead } from '@/domain/read-history'
 import { revealDuration } from '@/domain/read-speed'
 import { resolveRoomPresentation } from '@/domain/room-presentation'
@@ -15,6 +19,19 @@ import type { PanelDefinition, StatName } from '@/domain/types'
 interface DraftComicScreenProps {
   roomId: string
   engine: DraftStoryEngine
+  catalog: AssetCatalog
+}
+
+function safeBackground(
+  catalog: AssetCatalog,
+  backgroundId: string | undefined,
+): string | undefined {
+  if (!backgroundId) return undefined
+  try {
+    return backgroundUrl(catalog, backgroundId)
+  } catch {
+    return undefined
+  }
 }
 
 type DragPayload =
@@ -82,6 +99,7 @@ function effectText(
 export function DraftComicScreen({
   roomId,
   engine,
+  catalog,
 }: DraftComicScreenProps) {
   const progress = useAppStore((state) => state.progress)
   const choiceLocked = useAppStore((state) => state.choiceLocked)
@@ -117,8 +135,9 @@ export function DraftComicScreen({
   const candidates = engine.getCandidates()
   const selected = new Set(slots.filter(Boolean))
   const filledCount = selected.size
-  const showPanelIds = (
-    import.meta.env.VITE_GREYBOX_SHOW_IDS === 'true'
+  const anchorSrc = safeBackground(
+    catalog,
+    engine.room.backgroundAsset,
   )
   const presentation = resolveRoomPresentation(
     engine.room.id,
@@ -188,7 +207,7 @@ export function DraftComicScreen({
           <ComicPanel
             testId="comic-opening"
             label="固定開場"
-            imageSrc={greyboxAnchor('固定開場')}
+            imageSrc={anchorSrc}
           />
 
           <div className="comic-choice-grid">
@@ -236,15 +255,9 @@ export function DraftComicScreen({
                         ? `已編排分鏡 ${slotIndex + 1}`
                         : `空白分鏡 ${slotIndex + 1}`
                     }
-                    imageSrc={
-                      panelId
-                        ? greyboxPanel(
-                            panelId,
-                            slotIndex,
-                            showPanelIds,
-                          )
-                        : undefined
-                    }
+                    catalog={catalog}
+                    assetId={panelId ?? undefined}
+                    variant="full"
                     focused={
                       !confirmed
                       && slotIndex === slots.indexOf(null)
@@ -302,7 +315,7 @@ export function DraftComicScreen({
           <ComicPanel
             testId="comic-ending"
             label="三結局收束錨點"
-            imageSrc={greyboxAnchor('三結局收束', true)}
+            imageSrc={anchorSrc}
           />
         </div>
 
@@ -377,7 +390,7 @@ export function DraftComicScreen({
             </button>
           </div>
           <div className="candidate-grid draft-candidate-grid">
-            {candidates.map((candidate, index) => {
+            {candidates.map((candidate) => {
               const isSelected = selected.has(candidate.id)
               const disabled = (
                 choiceLocked
@@ -385,41 +398,39 @@ export function DraftComicScreen({
                 || filledCount >= 6
               )
               return (
-                <button
+                <article
                   className={[
                     'candidate-card',
                     isSelected ? 'candidate-card-selected' : '',
                   ].filter(Boolean).join(' ')}
                   key={candidate.id}
-                  type="button"
-                  disabled={disabled}
-                  draggable={!disabled}
-                  aria-label={`加入編排：${candidate.actionLabel}`}
-                  aria-pressed={isSelected}
-                  data-panel-id={candidate.id}
-                  onClick={() => placePanel(candidate.id)}
-                  onDragStart={(event) => {
-                    setDragPayload(event, {
-                      source: 'tray',
-                      panelId: candidate.id,
-                    })
-                  }}
                 >
-                  <img
-                    src={greyboxPanel(
-                      candidate.id,
-                      index,
-                      showPanelIds,
-                    )}
+                  <RuntimeImage
+                    catalog={catalog}
+                    assetId={candidate.id}
+                    variant="preview"
                     alt=""
-                    draggable={false}
+                    className="candidate-card-image"
                   />
-                  {isSelected && (
-                    <span className="candidate-selected-mark">
-                      已放入
-                    </span>
-                  )}
-                </button>
+                  <button
+                    className="candidate-card-choose"
+                    type="button"
+                    disabled={disabled}
+                    draggable={!disabled}
+                    aria-label={`加入編排：${candidate.actionLabel}`}
+                    aria-pressed={isSelected}
+                    data-panel-id={candidate.id}
+                    onClick={() => placePanel(candidate.id)}
+                    onDragStart={(event) => {
+                      setDragPayload(event, {
+                        source: 'tray',
+                        panelId: candidate.id,
+                      })
+                    }}
+                  >
+                    {isSelected ? '已放入' : candidate.actionLabel}
+                  </button>
+                </article>
               )
             })}
           </div>

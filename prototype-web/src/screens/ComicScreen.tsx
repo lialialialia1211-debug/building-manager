@@ -4,9 +4,9 @@ import { StatusStrip } from '@/components/StatusStrip'
 import { useAppStore } from '@/app/store'
 import { DraftStoryEngine } from '@/domain/draft-story-engine'
 import {
-  greyboxAnchor,
-  greyboxPanel,
-} from '@/domain/greybox-assets'
+  backgroundUrl,
+  type AssetCatalog,
+} from '@/domain/runtime-assets'
 import { wasRead } from '@/domain/read-history'
 import { revealDuration } from '@/domain/read-speed'
 import { resolveRoomPresentation } from '@/domain/room-presentation'
@@ -24,9 +24,22 @@ import '@/styles/comic.css'
 
 interface ComicScreenProps {
   roomId: string
+  catalog: AssetCatalog
 }
 
 const choiceSlots = [0, 1, 2, 3, 4, 5] as const
+
+function safeBackground(
+  catalog: AssetCatalog,
+  backgroundId: string | undefined,
+): string | undefined {
+  if (!backgroundId) return undefined
+  try {
+    return backgroundUrl(catalog, backgroundId)
+  } catch {
+    return undefined
+  }
+}
 const statLabels: Record<StatName, string> = {
   affection: '好感',
   trust: '信任',
@@ -91,17 +104,23 @@ function visibleCandidates(
   return engine.getCandidates()
 }
 
-export function ComicScreen({ roomId }: ComicScreenProps) {
+export function ComicScreen({ roomId, catalog }: ComicScreenProps) {
   const engine = useAppStore((state) => state.engine)
 
   if (engine instanceof DraftStoryEngine) {
-    return <DraftComicScreen roomId={roomId} engine={engine} />
+    return (
+      <DraftComicScreen
+        roomId={roomId}
+        engine={engine}
+        catalog={catalog}
+      />
+    )
   }
 
-  return <LegacyComicScreen roomId={roomId} />
+  return <LegacyComicScreen roomId={roomId} catalog={catalog} />
 }
 
-function LegacyComicScreen({ roomId }: ComicScreenProps) {
+function LegacyComicScreen({ roomId, catalog }: ComicScreenProps) {
   const engine = useAppStore((state) => state.engine)
   const choiceLocked = useAppStore((state) => state.choiceLocked)
   const revealedPanelId = useAppStore(
@@ -129,8 +148,9 @@ function LegacyComicScreen({ roomId }: ComicScreenProps) {
 
   const { choiceCount, chosenPanels, stats } = engine.snapshot
   const candidates = visibleCandidates(engine, revealedPanelId)
-  const showPanelIds = (
-    import.meta.env.VITE_GREYBOX_SHOW_IDS === 'true'
+  const anchorSrc = safeBackground(
+    catalog,
+    engine.room.backgroundAsset,
   )
   const currentStep = Math.min(
     6,
@@ -195,7 +215,7 @@ function LegacyComicScreen({ roomId }: ComicScreenProps) {
           <ComicPanel
             testId="comic-opening"
             label="固定開場"
-            imageSrc={greyboxAnchor('固定開場')}
+            imageSrc={anchorSrc}
           />
 
           <div className="comic-choice-grid">
@@ -211,15 +231,9 @@ function LegacyComicScreen({ roomId }: ComicScreenProps) {
                       ? `已選分鏡 ${slotIndex + 1}`
                       : `空白分鏡 ${slotIndex + 1}`
                   }
-                  imageSrc={
-                    panelId
-                      ? greyboxPanel(
-                          panelId,
-                          slotIndex,
-                          showPanelIds,
-                        )
-                      : undefined
-                  }
+                  catalog={catalog}
+                  assetId={panelId ?? undefined}
+                  variant="full"
                   focused={slotIndex === focusedSlot}
                   revealed={panelId === revealedPanelId}
                   revealDurationMs={
@@ -240,7 +254,7 @@ function LegacyComicScreen({ roomId }: ComicScreenProps) {
           <ComicPanel
             testId="comic-ending"
             label="固定結尾錨點"
-            imageSrc={greyboxAnchor('結尾錨點', true)}
+            imageSrc={anchorSrc}
           />
         </div>
 
@@ -303,16 +317,13 @@ function LegacyComicScreen({ roomId }: ComicScreenProps) {
           <p>選定後將立即保存，無法撤回。</p>
         </div>
         <div className="candidate-grid">
-          {candidates.map((candidate, index) => (
+          {candidates.map((candidate) => (
             <CandidateCard
               key={candidate.id}
               panelId={candidate.id}
               actionLabel={candidate.actionLabel}
-              previewSrc={greyboxPanel(
-                candidate.id,
-                index,
-                showPanelIds,
-              )}
+              catalog={catalog}
+              variant="preview"
               disabled={candidatesDisabled}
               onChoose={choosePanel}
             />
