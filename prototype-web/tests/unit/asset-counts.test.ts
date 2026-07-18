@@ -1,5 +1,13 @@
-import { readFileSync } from 'node:fs'
+import {
+  cpSync,
+  mkdtempSync,
+  mkdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs'
 import { resolve } from 'node:path'
+import { tmpdir } from 'node:os'
 import { spawnSync } from 'node:child_process'
 import { expect, test } from 'vitest'
 import {
@@ -424,4 +432,53 @@ test('asset CLI validates the generated playable runtime catalogs', () => {
   expect(result.stdout).toContain(
     'asset-manifest: playable runtime catalogs valid, 75 common assets, 12 adult assets, 2 backgrounds',
   )
+})
+
+test('asset CLI rejects a mutated playable content reference', () => {
+  const fixtureRoot = mkdtempSync(resolve(tmpdir(), 'asset-content-'))
+  const sourceRoot = resolve(process.cwd(), '../content')
+  try {
+    mkdirSync(resolve(fixtureRoot, 'rooms'), { recursive: true })
+    for (const file of [
+      'asset-manifest.json',
+      'adult-asset-manifest.json',
+      'gallery.json',
+    ]) {
+      cpSync(resolve(sourceRoot, file), resolve(fixtureRoot, file))
+    }
+    for (const file of [
+      'room_a_blackout.json',
+      'room_b_wall.json',
+    ]) {
+      cpSync(
+        resolve(sourceRoot, 'rooms', file),
+        resolve(fixtureRoot, 'rooms', file),
+      )
+    }
+
+    const roomPath = resolve(fixtureRoot, 'rooms/room_a_blackout.json')
+    const room = JSON.parse(readFileSync(roomPath, 'utf8'))
+    room.openingAssets[0] = 'a_intimacy_01'
+    writeFileSync(roomPath, `${JSON.stringify(room, null, 2)}\n`)
+
+    const result = spawnSync(
+      process.execPath,
+      ['--import', 'tsx', 'scripts/validate-assets.ts'],
+      {
+        cwd: process.cwd(),
+        encoding: 'utf8',
+        env: {
+          ...process.env,
+          BUILDING_MANAGER_CONTENT_ROOT: fixtureRoot,
+        },
+      },
+    )
+
+    expect(result.status).toBe(1)
+    expect(result.stderr).toContain(
+      'room room_a_blackout openingAssets references non-common asset a_intimacy_01',
+    )
+  } finally {
+    rmSync(fixtureRoot, { recursive: true, force: true })
+  }
 })

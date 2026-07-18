@@ -1,5 +1,4 @@
 import {
-  access,
   copyFile,
   mkdir,
   readFile,
@@ -8,12 +7,14 @@ import {
   stat,
   writeFile,
 } from 'node:fs/promises'
+import { createHash } from 'node:crypto'
 import { dirname, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import {
   assertRuntimeAssetCopyTargets,
   createRuntimeAssetPlan,
   type RuntimeAssetPlan,
+  type PlannedSourceAsset,
 } from './runtime-asset-plan'
 
 const here = fileURLToPath(new URL('.', import.meta.url))
@@ -21,6 +22,34 @@ const repositoryRoot = resolve(here, '../..')
 const assetsRoot = resolve(repositoryRoot, 'content/assets')
 const commonAssetsRoot = resolve(assetsRoot, 'common')
 const adultAssetsRoot = resolve(assetsRoot, 'adult')
+const lockPath = resolve(repositoryRoot, 'content/runtime-assets.lock.json')
+
+interface RuntimeAssetLockEntry {
+  id: string
+  scope: PlannedSourceAsset['scope']
+  sourceId: string
+  metadataAssetId: string
+  source: {
+    master: string
+    preview: string
+    metadata: string
+  }
+  target: {
+    preview?: string
+    full?: string
+    background?: string
+  }
+  targetSha256: {
+    preview?: string
+    full?: string
+    background?: string
+  }
+}
+
+interface RuntimeAssetLock {
+  schemaVersion: 1
+  assets: RuntimeAssetLockEntry[]
+}
 
 function sortRecord<T>(record: Record<string, T>): Record<string, T> {
   return Object.fromEntries(Object.entries(record).sort(
@@ -62,21 +91,40 @@ function absolutePath(repoRelativePath: string): string {
   return absolute
 }
 
-async function assertSourcesExist(plan: RuntimeAssetPlan): Promise<void> {
-  const missing: string[] = []
-  for (const copy of plan.copies) {
-    try {
-      await access(absolutePath(copy.sourcePath))
-    } catch {
-      missing.push(copy.sourcePath)
-    }
+function sourceAbsolutePath(
+  sourceRoot: string,
+  sourceRelativePath: string,
+): string {
+  const absolute = resolve(sourceRoot, sourceRelativePath)
+  if (relative(sourceRoot, absolute).startsWith('..')) {
+    throw new Error(`source path escapes source root: ${sourceRelativePath}`)
   }
-  if (missing.length > 0) {
-    throw new Error(`missing runtime asset sources:\n${missing.join('\n')}`)
-  }
+  return absolute
 }
 
-async function copyPlannedAssets(plan: RuntimeAssetPlan): Promise<void> {
+async function sourceState(
+  plan: RuntimeAssetPlan,
+  sourceRoot: string,
+): Promise<'absent' | 'complete'> {
+  try {
+    await stat(resolve(sourceRoot, 'art/deliverables'))
+  } catch {
+    return 'absent'
+  }
+  const errors = plan.validateSources(sourceRoot)
+  if (errors.length > 0) {
+    throw new Error([
+      'runtime asset source checkout is partially present or invalid:',
+      ...errors,
+    ].join('\n'))
+  }
+  return 'complete'
+}
+
+async function copyPlannedAssets(
+  plan: RuntimeAssetPlan,
+  sourceRoot: string,
+): Promise<void> {
   assertSafeTargetRoots()
   await rm(commonAssetsRoot, { recursive: true, force: true })
   await rm(adultAssetsRoot, { recursive: true, force: true })
@@ -84,7 +132,10 @@ async function copyPlannedAssets(plan: RuntimeAssetPlan): Promise<void> {
   for (const copy of plan.copies) {
     const targetPath = absolutePath(copy.targetPath)
     await mkdir(dirname(targetPath), { recursive: true })
-    await copyFile(absolutePath(copy.sourcePath), targetPath)
+    await copyFile(
+      sourceAbsolutePath(sourceRoot, copy.sourcePath),
+      targetPath,
+    )
   }
 }
 
@@ -98,6 +149,62 @@ async function writeManifests(plan: RuntimeAssetPlan): Promise<void> {
     resolve(repositoryRoot, 'content/adult-asset-manifest.json'),
     manifests.adult,
   )
+}
+
+function sha256(bytes: Uint8Array): string {
+  return createHash('sha256').update(bytes).digest('hex')
+}
+
+function targetsForSource(
+  plan: RuntimeAssetPlan,
+  source: PlannedSourceAsset,
+): RuntimeAssetLockEntry['target'] {
+  const copies = plan.copies.filter((copy) => copy.id === source.id)
+  if (source.scope === 'background') {
+    return { background: copies[0]?.targetPath }
+  }
+  return {
+    preview: copies.find((copy) => copy.variant === 'preview')?.targetPath,
+    full: copies.find((copy) => copy.variant === 'full')?.targetPath,
+  }
+}
+
+async function createRuntimeLock(
+  plan: RuntimeAssetPlan,
+): Promise<RuntimeAssetLock> {
+  const assets: RuntimeAssetLockEntry[] = []
+  for (const source of plan.sources) {
+    const target = targetsForSource(plan, source)
+    const targetSha256: RuntimeAssetLockEntry['targetSha256'] = {}
+    for (const [variant, path] of Object.entries(target)) {
+      if (!path) continue
+      targetSha256[variant as keyof typeof targetSha256] = sha256(
+        await readFile(absolutePath(path)),
+      )
+    }
+    assets.push({
+      id: source.id,
+      scope: source.scope,
+      sourceId: source.sourceId,
+      metadataAssetId: source.metadataAssetId,
+      source: {
+        master: source.masterPath,
+        preview: source.previewPath,
+        metadata: source.metadataPath,
+      },
+      target,
+      targetSha256,
+    })
+  }
+  return { schemaVersion: 1, assets }
+}
+
+function lockContents(lock: RuntimeAssetLock): string {
+  return `${JSON.stringify(lock, null, 2)}\n`
+}
+
+async function writeRuntimeLock(plan: RuntimeAssetPlan): Promise<void> {
+  await writeFile(lockPath, lockContents(await createRuntimeLock(plan)))
 }
 
 async function collectFiles(directory: string): Promise<string[]> {
@@ -124,7 +231,11 @@ async function collectFiles(directory: string): Promise<string[]> {
   return files.sort()
 }
 
-async function checkRuntimeAssets(plan: RuntimeAssetPlan): Promise<string[]> {
+async function checkRuntimeAssets(
+  plan: RuntimeAssetPlan,
+  sourceRoot: string,
+  state: 'absent' | 'complete',
+): Promise<string[]> {
   const errors: string[] = []
   const manifests = manifestContents(plan)
   for (const [path, expected] of [
@@ -153,14 +264,26 @@ async function checkRuntimeAssets(plan: RuntimeAssetPlan): Promise<string[]> {
     }
   }
 
+  try {
+    const expectedLock = lockContents(await createRuntimeLock(plan))
+    if (await readFile(lockPath, 'utf8') !== expectedLock) {
+      errors.push('content/runtime-assets.lock.json is out of sync')
+    }
+  } catch {
+    errors.push('content/runtime-assets.lock.json is missing or invalid')
+  }
+
   for (const copy of plan.copies) {
     try {
-      const [source, target] = await Promise.all([
-        readFile(absolutePath(copy.sourcePath)),
-        readFile(absolutePath(copy.targetPath)),
-      ])
-      if (!source.equals(target)) {
-        errors.push(`${copy.targetPath} differs from ${copy.sourcePath}`)
+      const target = await readFile(absolutePath(copy.targetPath))
+      if (state === 'complete') {
+        const source = await readFile(sourceAbsolutePath(
+          sourceRoot,
+          copy.sourcePath,
+        ))
+        if (!source.equals(target)) {
+          errors.push(`${copy.targetPath} differs from ${copy.sourcePath}`)
+        }
       }
     } catch {
       errors.push(`${copy.targetPath} is missing`)
@@ -178,16 +301,26 @@ async function main(): Promise<void> {
 
   const plan = createRuntimeAssetPlan(repositoryRoot)
   assertRuntimeAssetCopyTargets(repositoryRoot, plan.copies)
-  await assertSourcesExist(plan)
+  const configuredSourceRoot = process.env.BUILDING_MANAGER_ART_SOURCE_ROOT
+  const sourceRoot = configuredSourceRoot
+    ? resolve(configuredSourceRoot)
+    : repositoryRoot
+  const state = await sourceState(plan, sourceRoot)
 
   if (mode === '--write') {
-    await copyPlannedAssets(plan)
+    if (state === 'absent') {
+      throw new Error(
+        'runtime asset sources are required for --write',
+      )
+    }
+    await copyPlannedAssets(plan, sourceRoot)
     await writeManifests(plan)
+    await writeRuntimeLock(plan)
     console.log('runtime assets synchronized: 75 common assets, 12 adult assets, 2 backgrounds')
     return
   }
 
-  const errors = await checkRuntimeAssets(plan)
+  const errors = await checkRuntimeAssets(plan, sourceRoot, state)
   if (errors.length > 0) {
     for (const error of errors) {
       console.error(error)
@@ -195,7 +328,11 @@ async function main(): Promise<void> {
     process.exitCode = 1
     return
   }
-  console.log('runtime assets are in sync')
+  console.log(
+    state === 'absent'
+      ? 'runtime assets are in sync with committed runtime lock (source checkout absent)'
+      : 'runtime assets are in sync with sources and committed runtime lock',
+  )
 }
 
 void main().catch((error: unknown) => {

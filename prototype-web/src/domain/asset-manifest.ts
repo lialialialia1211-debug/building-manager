@@ -260,6 +260,7 @@ interface RuntimeAssetEntry {
 export interface AssetValidationOptions {
   rooms?: readonly RoomDefinition[]
   gallery?: readonly GalleryEntry[]
+  adultAssetIds?: readonly string[]
   pathExists?(path: string): boolean
 }
 
@@ -550,6 +551,7 @@ function validateRuntimeUrls(
 function validatePlayableAssetManifest(
   manifest: Record<string, unknown>,
   choicePanelIds: readonly string[],
+  options: AssetValidationOptions,
 ): AssetManifestValidation {
   const errors: string[] = []
   if (!hasExactKeys(manifest, [
@@ -602,6 +604,85 @@ function validatePlayableAssetManifest(
     requiredIds,
   )
   validateRuntimeUrls(errors, 'common asset', assets, '/assets/common/')
+
+  const commonAssetIds = new Set(Object.keys(assets))
+  const adultAssetIds = new Set(options.adultAssetIds ?? [])
+  const backgroundIds = new Set(
+    isRecord(manifest.backgrounds)
+      ? Object.keys(manifest.backgrounds)
+      : [],
+  )
+  const validateCommonReference = (
+    location: string,
+    reference: string,
+  ): void => {
+    if (commonAssetIds.has(reference)) return
+    errors.push(
+      adultAssetIds.has(reference)
+        ? `${location} references non-common asset ${reference}`
+        : `${location} references missing common asset ${reference}`,
+    )
+  }
+  const validateAdultReference = (
+    location: string,
+    reference: string,
+  ): void => {
+    if (adultAssetIds.has(reference)) return
+    errors.push(
+      commonAssetIds.has(reference)
+        ? `${location} references non-adult asset ${reference}`
+        : `${location} references missing adult asset ${reference}`,
+    )
+  }
+
+  for (const room of options.rooms ?? []) {
+    if (!backgroundIds.has(room.backgroundAsset)) {
+      errors.push(
+        `room ${room.id} backgroundAsset references missing background ${room.backgroundAsset}`,
+      )
+    }
+    for (const reference of room.openingAssets) {
+      validateCommonReference(
+        `room ${room.id} openingAssets`,
+        reference,
+      )
+    }
+    for (const [panelId, panel] of Object.entries(room.panels)) {
+      for (const [field, reference] of [
+        ['previewAsset', panel.previewAsset],
+        ['fullAsset', panel.fullAsset],
+        ['safeAsset', panel.safeAsset],
+      ] as const) {
+        if (reference) {
+          validateCommonReference(
+            `room ${room.id} panel ${panelId} ${field}`,
+            reference,
+          )
+        }
+      }
+    }
+    for (const [endingId, ending] of Object.entries(room.endingContent)) {
+      validateCommonReference(
+        `room ${room.id} ending ${endingId} asset`,
+        ending.asset,
+      )
+    }
+  }
+
+  for (const entry of options.gallery ?? []) {
+    for (const reference of entry.safeSequence ?? []) {
+      validateCommonReference(
+        `gallery ${entry.id} safeSequence`,
+        reference,
+      )
+    }
+    for (const reference of entry.adultSequence ?? []) {
+      validateAdultReference(
+        `gallery ${entry.id} adultSequence`,
+        reference,
+      )
+    }
+  }
 
   return { mode: 'playable', errors }
 }
@@ -657,7 +738,7 @@ export function validateAssetManifest(
   }
 
   if (value.schemaVersion === 2) {
-    return validatePlayableAssetManifest(value, choicePanelIds)
+    return validatePlayableAssetManifest(value, choicePanelIds, options)
   }
 
   const mode = value.mode === 'greybox' || value.mode === 'formal'

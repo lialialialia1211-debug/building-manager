@@ -11,7 +11,9 @@ import {
 } from '../src/domain/content-schema'
 
 const here = fileURLToPath(new URL('.', import.meta.url))
-const contentRoot = resolve(here, '../../content')
+const contentRoot = process.env.BUILDING_MANAGER_CONTENT_ROOT
+  ? resolve(process.env.BUILDING_MANAGER_CONTENT_ROOT)
+  : resolve(here, '../../content')
 const repositoryRoot = resolve(here, '../..')
 
 function readJson(path: string): unknown {
@@ -34,18 +36,30 @@ const choicePanelIds = rooms.flatMap((room) => [
   ])
 const gallery = parseGallery(readJson('gallery.json'))
 
+const adultManifest = readJson('adult-asset-manifest.json')
+const adultErrors = validateAdultAssetManifest(adultManifest)
+const adultAssetIds = (
+  adultManifest
+  && typeof adultManifest === 'object'
+  && !Array.isArray(adultManifest)
+  && 'assets' in adultManifest
+  && adultManifest.assets
+  && typeof adultManifest.assets === 'object'
+  && !Array.isArray(adultManifest.assets)
+)
+  ? Object.keys(adultManifest.assets)
+  : []
+
 const result = validateAssetManifest(
   readJson('asset-manifest.json'),
   choicePanelIds,
   {
     rooms,
     gallery,
+    adultAssetIds,
     pathExists: (path) =>
       existsSync(resolve(repositoryRoot, path)),
   },
-)
-const adultErrors = validateAdultAssetManifest(
-  readJson('adult-asset-manifest.json'),
 )
 
 const errors = [...result.errors, ...adultErrors]

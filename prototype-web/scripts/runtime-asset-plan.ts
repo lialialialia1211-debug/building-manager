@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { isAbsolute, relative, resolve } from 'node:path'
 
 export type AssetVariant = 'preview' | 'full'
@@ -16,11 +16,24 @@ export interface PlannedCopy {
   targetPath: string
 }
 
+export interface PlannedSourceAsset {
+  id: string
+  scope: PlannedCopy['scope']
+  sourceId: string
+  directory: string
+  masterPath: string
+  previewPath: string
+  metadataPath: string
+  metadataAssetId: string
+}
+
 export interface RuntimeAssetPlan {
   common: Record<string, RuntimeAssetEntry>
   adult: Record<string, RuntimeAssetEntry>
   backgrounds: Record<string, string>
   copies: PlannedCopy[]
+  sources: PlannedSourceAsset[]
+  validateSources(sourceRoot: string): string[]
 }
 
 const canonicalAssetIdPattern = /^[a-z][a-z0-9_]*$/
@@ -131,11 +144,145 @@ function panelEntry(path: string): RuntimeAssetEntry {
   }
 }
 
+const metadataPrefixAnomalies = new Set([
+  'a1_fuse',
+  'a2d_chain',
+  'a4_comfort',
+  'b1_glass',
+  'b2n_hall',
+  'b6_open',
+])
+
+function expectedMetadataAssetId(
+  id: string,
+  scope: PlannedCopy['scope'],
+  sourceId: string,
+): string {
+  if (scope === 'background') {
+    return `bg-${sourceId.replace(/^bg_/, '')}`
+  }
+  return metadataPrefixAnomalies.has(id)
+    ? `card-${sourceId}`
+    : sourceId
+}
+
+function collectMetadataFiles(directory: string): string[] {
+  if (!existsSync(directory)) return []
+  const files: string[] = []
+  for (const entry of readdirSync(directory, { withFileTypes: true })) {
+    const path = resolve(directory, entry.name)
+    if (entry.isDirectory()) {
+      files.push(...collectMetadataFiles(path))
+    } else if (entry.isFile() && entry.name.endsWith('_meta.json')) {
+      files.push(path)
+    }
+  }
+  return files.sort()
+}
+
+function sourceRelativePath(sourceRoot: string, absolutePath: string): string {
+  return relative(sourceRoot, absolutePath).replaceAll('\\', '/')
+}
+
+function validateSourceMetadata(
+  sourceRoot: string,
+  sources: readonly PlannedSourceAsset[],
+): string[] {
+  const errors: string[] = []
+  const expectedMetadataPaths = new Set(
+    sources.map((source) => source.metadataPath),
+  )
+  const actualMetadataPaths = [
+    ...collectMetadataFiles(resolve(
+      sourceRoot,
+      'art/deliverables/panels',
+    )),
+    ...collectMetadataFiles(resolve(
+      sourceRoot,
+      'art/deliverables/backgrounds',
+    )),
+  ].map((path) => sourceRelativePath(sourceRoot, path))
+
+  for (const path of actualMetadataPaths) {
+    if (!expectedMetadataPaths.has(path)) {
+      errors.push(`unknown source metadata ${path}`)
+    }
+  }
+
+  const metadataIds = new Map<string, number>()
+  for (const source of sources) {
+    for (const [kind, path] of [
+      ['master', source.masterPath],
+      ['preview', source.previewPath],
+      ['metadata', source.metadataPath],
+    ] as const) {
+      if (!existsSync(resolve(sourceRoot, path))) {
+        errors.push(`missing source ${kind} ${path}`)
+      }
+    }
+
+    const metadataPath = resolve(sourceRoot, source.metadataPath)
+    if (!existsSync(metadataPath)) continue
+    let metadata: Record<string, unknown>
+    try {
+      const parsed = JSON.parse(readFileSync(metadataPath, 'utf8'))
+      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+        throw new Error('metadata must be an object')
+      }
+      metadata = parsed as Record<string, unknown>
+    } catch {
+      errors.push(`invalid source metadata ${source.metadataPath}`)
+      continue
+    }
+
+    const assetId = metadata.asset_id
+    if (typeof assetId !== 'string') {
+      errors.push(`${source.metadataPath} asset_id must be a string`)
+    } else {
+      metadataIds.set(assetId, (metadataIds.get(assetId) ?? 0) + 1)
+      if (assetId !== source.metadataAssetId) {
+        errors.push(
+          `${source.metadataPath} asset_id must be ${source.metadataAssetId}`,
+        )
+      }
+    }
+
+    const exported = metadata.export
+    if (exported && typeof exported === 'object' && !Array.isArray(exported)) {
+      const master = (exported as Record<string, unknown>).master
+      if (master !== `${source.sourceId}_master.webp`) {
+        errors.push(
+          `${source.metadataPath} export.master must be ${source.sourceId}_master.webp`,
+        )
+      }
+    } else {
+      const selectedSource = metadata.source
+      const allowedSourceIds = source.sourceId.endsWith('_poster_intimacy')
+        ? [source.sourceId, source.sourceId.replace('poster_intimacy', 'safe_06')]
+        : [source.sourceId]
+      if (
+        typeof selectedSource !== 'string'
+        || !allowedSourceIds.some((id) => selectedSource.includes(id))
+      ) {
+        errors.push(
+          `${source.metadataPath} must map its selected source to ${source.sourceId}`,
+        )
+      }
+    }
+  }
+
+  for (const [assetId, count] of metadataIds) {
+    if (count > 1) errors.push(`duplicate metadata asset_id ${assetId}`)
+  }
+  return errors
+}
+
 export function createRuntimeAssetPlan(repoRoot: string): RuntimeAssetPlan {
   const common: Record<string, RuntimeAssetEntry> = {}
   const adult: Record<string, RuntimeAssetEntry> = {}
   const backgrounds: Record<string, string> = {}
   const copies: PlannedCopy[] = []
+  const sources: PlannedSourceAsset[] = []
 
   function addPanel(
     id: string,
@@ -156,6 +303,17 @@ export function createRuntimeAssetPlan(repoRoot: string): RuntimeAssetPlan {
       : 'adult'
 
     entries[id] = panelEntry(`${urlDirectory}/${id}`)
+    const directory = `panels/${sourceDirectory}`
+    sources.push({
+      id,
+      scope,
+      sourceId,
+      directory,
+      masterPath: `art/deliverables/${directory}/${sourceId}_master.webp`,
+      previewPath: `art/deliverables/${directory}/${sourceId}_preview.webp`,
+      metadataPath: `art/deliverables/${directory}/${sourceId}_meta.json`,
+      metadataAssetId: expectedMetadataAssetId(id, scope, sourceId),
+    })
     for (const [variant, suffix] of [
       ['preview', 'preview'],
       ['full', 'master'],
@@ -207,6 +365,21 @@ export function createRuntimeAssetPlan(repoRoot: string): RuntimeAssetPlan {
     ['building_b', 'bg_room_b'],
   ] as const) {
     backgrounds[id] = `/assets/common/backgrounds/${id}_master.webp`
+    const directory = 'backgrounds'
+    sources.push({
+      id,
+      scope: 'background',
+      sourceId,
+      directory,
+      masterPath: `art/deliverables/${directory}/${sourceId}_master.webp`,
+      previewPath: `art/deliverables/${directory}/${sourceId}_preview.webp`,
+      metadataPath: `art/deliverables/${directory}/${sourceId}_meta.json`,
+      metadataAssetId: expectedMetadataAssetId(
+        id,
+        'background',
+        sourceId,
+      ),
+    })
     copies.push({
       id,
       scope: 'background',
@@ -216,5 +389,16 @@ export function createRuntimeAssetPlan(repoRoot: string): RuntimeAssetPlan {
     })
   }
 
-  return { common, adult, backgrounds, copies }
+  sources.sort((left, right) => left.id.localeCompare(right.id))
+  return {
+    common,
+    adult,
+    backgrounds,
+    copies,
+    sources,
+    validateSources: (sourceRoot) => validateSourceMetadata(
+      sourceRoot,
+      sources,
+    ),
+  }
 }

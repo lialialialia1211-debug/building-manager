@@ -10,6 +10,7 @@ import {
   parseCommonRuntimeManifest,
 } from '@/domain/runtime-assets'
 import {
+  parseGallery,
   parseRoom,
 } from '@/domain/content-schema'
 
@@ -25,6 +26,10 @@ const choicePanelIds = rooms.flatMap((room) => [
     Object.values(room.nodes).flatMap((node) => node.candidates),
   ),
 ])
+const gallery = parseGallery(JSON.parse(readFileSync(
+  resolve(process.cwd(), '../content/gallery.json'),
+  'utf8',
+)))
 
 test('accepts the generated playable common manifest', () => {
   const manifest = JSON.parse(readFileSync(
@@ -32,10 +37,99 @@ test('accepts the generated playable common manifest', () => {
     'utf8',
   ))
 
-  expect(validateAssetManifest(manifest, choicePanelIds)).toEqual({
+  const adultManifest = JSON.parse(readFileSync(
+    resolve(process.cwd(), '../content/adult-asset-manifest.json'),
+    'utf8',
+  ))
+  expect(validateAssetManifest(manifest, choicePanelIds, {
+    rooms,
+    gallery,
+    adultAssetIds: Object.keys(adultManifest.assets),
+  })).toEqual({
     mode: 'playable',
     errors: [],
   })
+})
+
+test.each([
+  [
+    'room background typo',
+    (changedRooms: typeof rooms, _changedGallery: typeof gallery) => {
+      changedRooms[0]!.backgroundAsset = 'missing_background'
+    },
+    'room room_a_blackout backgroundAsset references missing background missing_background',
+  ],
+  [
+    'opening cross-scope reference',
+    (changedRooms: typeof rooms, _changedGallery: typeof gallery) => {
+      changedRooms[0]!.openingAssets[0] = 'a_intimacy_01'
+    },
+    'room room_a_blackout openingAssets references non-common asset a_intimacy_01',
+  ],
+  [
+    'panel preview typo',
+    (changedRooms: typeof rooms, _changedGallery: typeof gallery) => {
+      changedRooms[0]!.panels.a1_door!.previewAsset = 'missing_preview'
+    },
+    'room room_a_blackout panel a1_door previewAsset references missing common asset missing_preview',
+  ],
+  [
+    'panel full cross-scope reference',
+    (changedRooms: typeof rooms, _changedGallery: typeof gallery) => {
+      changedRooms[0]!.panels.a1_door!.fullAsset = 'a_intimacy_01'
+    },
+    'room room_a_blackout panel a1_door fullAsset references non-common asset a_intimacy_01',
+  ],
+  [
+    'panel safe typo',
+    (changedRooms: typeof rooms, _changedGallery: typeof gallery) => {
+      changedRooms[0]!.panels.a1_door!.safeAsset = 'missing_safe'
+    },
+    'room room_a_blackout panel a1_door safeAsset references missing common asset missing_safe',
+  ],
+  [
+    'ending typo',
+    (changedRooms: typeof rooms, _changedGallery: typeof gallery) => {
+      changedRooms[0]!.endingContent.main.asset = 'missing_ending'
+    },
+    'room room_a_blackout ending main asset references missing common asset missing_ending',
+  ],
+  [
+    'gallery safe cross-scope reference',
+    (_changedRooms: typeof rooms, changedGallery: typeof gallery) => {
+      changedGallery.find((entry) => entry.id === 'room_a_intimacy')!
+        .safeSequence![0] = 'a_intimacy_01'
+    },
+    'gallery room_a_intimacy safeSequence references non-common asset a_intimacy_01',
+  ],
+  [
+    'gallery adult common-scope reference',
+    (_changedRooms: typeof rooms, changedGallery: typeof gallery) => {
+      changedGallery.find((entry) => entry.id === 'room_a_intimacy')!
+        .adultSequence![0] = 'a_safe_01'
+    },
+    'gallery room_a_intimacy adultSequence references non-adult asset a_safe_01',
+  ],
+  [
+    'gallery adult typo',
+    (_changedRooms: typeof rooms, changedGallery: typeof gallery) => {
+      changedGallery.find((entry) => entry.id === 'room_a_intimacy')!
+        .adultSequence![0] = 'missing_adult'
+    },
+    'gallery room_a_intimacy adultSequence references missing adult asset missing_adult',
+  ],
+])('playable validation rejects %s', (_name, mutate, expectedError) => {
+  const manifest = commonManifestFixture()
+  const adultManifest = adultManifestFixture()
+  const changedRooms = structuredClone(rooms)
+  const changedGallery = structuredClone(gallery)
+  mutate(changedRooms, changedGallery)
+
+  expect(validateAssetManifest(manifest, choicePanelIds, {
+    rooms: changedRooms,
+    gallery: changedGallery,
+    adultAssetIds: Object.keys(adultManifest.assets),
+  }).errors).toContain(expectedError)
 })
 
 test('keeps runtime catalogs isolated and resolves URLs below Vite base', async () => {
