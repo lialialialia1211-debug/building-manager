@@ -1,12 +1,12 @@
 {
-  "sourceCommit": "ce5917ae3ba99620d224475461828a414c774506",
-  "builtAt": "2026-07-17",
+  "sourceCommit": "b067373fd816e089dd351756e96c07a1e3d20342",
+  "builtAt": "2026-07-18",
   "validation": {
-    "vitest": "201/201",
-    "playwright": "45/45",
-    "adultOff": "18/18; zero /adult/ requests; intimacy assets a_safe_06 and b_safe_06",
-    "content": "24 cards per room; 12-card deals; three endings reachable",
-    "assets": "greybox-pass",
-    "productionBuild": "pass"
+    "vitest": "324/324",
+    "playwright": "51/51",
+    "adultDefault": "off; fresh profile makes zero adult manifest or image requests",
+    "runtimeAssets": "89 source triples; source-present parity and source-absent committed lock pass",
+    "productionBuild": "pass",
+    "pagesBuild": "pass"
   }
 }
