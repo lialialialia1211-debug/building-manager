@@ -231,6 +231,36 @@ const galleryEntrySchema = z.object({
         message: 'adult and safe sequences must align',
       })
     }
+    const prefix = entry.roomId === 'room_a_blackout' ? 'a' : 'b'
+    const safePattern = new RegExp(
+      `^${prefix}_safe_[a-zA-Z0-9][a-zA-Z0-9_-]*$`,
+    )
+    const adultPattern = new RegExp(
+      `^${prefix}_intimacy_[a-zA-Z0-9][a-zA-Z0-9_-]*$`,
+    )
+    if (entry.safeSequence.some((assetId) => !safePattern.test(assetId))) {
+      context.addIssue({
+        code: 'custom',
+        message: `safe sequence must use ${prefix}_safe_ asset IDs`,
+        path: ['safeSequence'],
+      })
+    }
+    if (entry.adultSequence.some((assetId) => !adultPattern.test(assetId))) {
+      context.addIssue({
+        code: 'custom',
+        message: `adult sequence must use ${prefix}_intimacy_ asset IDs`,
+        path: ['adultSequence'],
+      })
+    }
+    if (
+      new Set(entry.safeSequence).size !== entry.safeSequence.length
+      || new Set(entry.adultSequence).size !== entry.adultSequence.length
+    ) {
+      context.addIssue({
+        code: 'custom',
+        message: 'adult and safe sequence asset IDs must be unique',
+      })
+    }
     return
   }
 

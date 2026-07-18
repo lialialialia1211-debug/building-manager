@@ -360,4 +360,31 @@ describe('gallery schema', () => {
 
     expect(() => parseGallery(invalid)).toThrow()
   })
+
+  test('rejects adult or cross-room IDs in safe sequences', () => {
+    const adultInSafe = structuredClone(validGallery)
+    adultInSafe[2]!.safeSequence![0] = 'a_intimacy_01'
+    const crossRoomSafe = structuredClone(validGallery)
+    crossRoomSafe[2]!.safeSequence![0] = 'b_safe_01'
+
+    expect(() => parseGallery(adultInSafe)).toThrow('safe sequence')
+    expect(() => parseGallery(crossRoomSafe)).toThrow('safe sequence')
+  })
+
+  test('rejects safe or cross-room IDs in adult sequences', () => {
+    const safeInAdult = structuredClone(validGallery)
+    safeInAdult[2]!.adultSequence![0] = 'a_safe_01'
+    const crossRoomAdult = structuredClone(validGallery)
+    crossRoomAdult[2]!.adultSequence![0] = 'b_intimacy_01'
+
+    expect(() => parseGallery(safeInAdult)).toThrow('adult sequence')
+    expect(() => parseGallery(crossRoomAdult)).toThrow('adult sequence')
+  })
+
+  test('rejects duplicate authored intimacy asset IDs', () => {
+    const duplicate = structuredClone(validGallery)
+    duplicate[2]!.safeSequence![5] = 'a_safe_05'
+
+    expect(() => parseGallery(duplicate)).toThrow('unique')
+  })
 })

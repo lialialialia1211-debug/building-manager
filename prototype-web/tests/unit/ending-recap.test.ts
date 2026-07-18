@@ -1,4 +1,5 @@
 import { buildEndingRecap } from '@/domain/ending-recap'
+import type { AssetCatalog } from '@/domain/runtime-assets'
 import type { GalleryEntry, RoomDefinition } from '@/domain/types'
 
 const ending = {
@@ -49,6 +50,33 @@ const intimacyEntry: GalleryEntry = {
   ),
 }
 
+const customIntimacyEntry: GalleryEntry = {
+  ...intimacyEntry,
+  adultSequence: Array.from(
+    { length: 6 },
+    (_, index) => `a_intimacy_aftercare_0${index + 1}`,
+  ),
+  safeSequence: Array.from(
+    { length: 6 },
+    (_, index) => `a_safe_aftercare_0${index + 1}`,
+  ),
+}
+
+const catalog: AssetCatalog = {
+  common: Object.fromEntries([
+    ...room.openingAssets,
+    ...Object.keys(room.panels),
+    ...Object.values(room.endingContent).map((value) => value.asset),
+    ...intimacyEntry.safeSequence!,
+    ...customIntimacyEntry.safeSequence!,
+  ].map((id) => [id, { preview: `/common/${id}`, full: `/common/${id}` }])),
+  adult: Object.fromEntries([
+    ...intimacyEntry.adultSequence!,
+    ...customIntimacyEntry.adultSequence!,
+  ].map((id) => [id, { preview: `/adult/${id}`, full: `/adult/${id}` }])),
+  backgrounds: {},
+}
+
 test.each(['main', 'normal'] as const)(
   'uses the saved six-panel %s recap followed by its poster',
   (endingId) => {
@@ -58,6 +86,7 @@ test.each(['main', 'normal'] as const)(
       savedRecap: ['a1', 'a2', 'a3', 'a4', 'a5', 'a6'],
       adultContent: false,
       adultCatalogReady: false,
+      catalog,
     })).toEqual({
       assetIds: [
         'a1', 'a2', 'a3', 'a4', 'a5', 'a6',
@@ -74,6 +103,7 @@ test('uses the deterministic opening and poster fallback for an old save', () =>
     endingId: 'main',
     adultContent: true,
     adultCatalogReady: true,
+    catalog,
   }).assetIds).toEqual([
     'a_open_01',
     'a_open_02',
@@ -89,6 +119,7 @@ test('uses the adult intimacy sequence only when adult assets are ready', () => 
     galleryEntry: intimacyEntry,
     adultContent: true,
     adultCatalogReady: true,
+    catalog,
   })).toEqual({
     assetIds: [
       ...intimacyEntry.adultSequence!,
@@ -106,6 +137,7 @@ test.each([
     room,
     endingId: 'intimacy',
     galleryEntry: intimacyEntry,
+    catalog,
     ...availability,
   })
 
@@ -127,10 +159,90 @@ test('filters cross-room recap panels and never returns an empty sequence', () =
     savedRecap: ['b1', 'b2'],
     adultContent: false,
     adultCatalogReady: false,
+    catalog,
   }).assetIds).toEqual([
     'a_open_01',
     'a_open_02',
     'a_open_03',
     'a_ending_normal',
   ])
+})
+
+test.each([
+  ['partial', ['a1', 'a2', 'a3', 'a4', 'a5']],
+  ['mixed room', ['a1', 'a2', 'a3', 'a4', 'a5', 'b1']],
+  ['duplicate', ['a1', 'a2', 'a3', 'a4', 'a5', 'a5']],
+] as const)('falls back to opening assets for a %s saved recap', (_label, savedRecap) => {
+  expect(buildEndingRecap({
+    room,
+    endingId: 'main',
+    savedRecap,
+    adultContent: false,
+    adultCatalogReady: false,
+    catalog,
+  }).assetIds).toEqual([
+    'a_open_01',
+    'a_open_02',
+    'a_open_03',
+    'a_ending_main',
+  ])
+})
+
+test('accepts authored intimacy IDs instead of synthesizing canonical IDs', () => {
+  expect(buildEndingRecap({
+    room,
+    endingId: 'intimacy',
+    galleryEntry: customIntimacyEntry,
+    adultContent: true,
+    adultCatalogReady: true,
+    catalog,
+  }).assetIds).toEqual([
+    ...customIntimacyEntry.adultSequence!,
+    'a_ending_intimacy',
+  ])
+})
+
+test('rejects adult IDs smuggled into a safe sequence', () => {
+  const malicious: GalleryEntry = {
+    ...intimacyEntry,
+    safeSequence: [...intimacyEntry.adultSequence!],
+  }
+  const result = buildEndingRecap({
+    room,
+    endingId: 'intimacy',
+    galleryEntry: malicious,
+    adultContent: false,
+    adultCatalogReady: false,
+    catalog,
+  })
+
+  expect(result.assetIds).toEqual([
+    'a_open_01',
+    'a_open_02',
+    'a_open_03',
+    'a_ending_intimacy',
+  ])
+  expect(result.assetIds.join(' ')).not.toContain('intimacy_')
+})
+
+test('rejects safe IDs in the adult list and falls back to authored safe art', () => {
+  const malicious: GalleryEntry = {
+    ...intimacyEntry,
+    adultSequence: [...intimacyEntry.safeSequence!],
+  }
+
+  expect(buildEndingRecap({
+    room,
+    endingId: 'intimacy',
+    galleryEntry: malicious,
+    adultContent: true,
+    adultCatalogReady: true,
+    catalog,
+  })).toEqual({
+    assetIds: [
+      ...intimacyEntry.safeSequence!,
+      'a_ending_intimacy',
+    ],
+    usedSafeFallback: true,
+  })
 })

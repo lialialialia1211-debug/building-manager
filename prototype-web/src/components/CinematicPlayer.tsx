@@ -1,9 +1,13 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { RuntimeImage } from './RuntimeImage'
 import {
-  assetUrl,
-  type AssetCatalog,
-} from '@/domain/runtime-assets'
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
+import { RuntimeImage } from './RuntimeImage'
+import type { AssetCatalog } from '@/domain/runtime-assets'
+
+const CROSSFADE_DURATION_MS = 450
 
 export interface CinematicPlayerProps {
   assetIds: string[]
@@ -12,6 +16,21 @@ export interface CinematicPlayerProps {
   autoPlay?: boolean
   title: string
   onFinished?(): void
+}
+
+function useReducedMotion(): boolean {
+  const [reducedMotion, setReducedMotion] = useState(false)
+
+  useEffect(() => {
+    if (typeof window.matchMedia !== 'function') return
+    const query = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const update = () => setReducedMotion(query.matches)
+    update()
+    query.addEventListener?.('change', update)
+    return () => query.removeEventListener?.('change', update)
+  }, [])
+
+  return reducedMotion
 }
 
 export function CinematicPlayer({
@@ -23,15 +42,16 @@ export function CinematicPlayer({
   onFinished,
 }: CinematicPlayerProps) {
   const hasFrames = assetIds.length > 0
+  const reducedMotion = useReducedMotion()
   const [frameIndex, setFrameIndex] = useState(0)
   const [previousAssetId, setPreviousAssetId] = useState<string | null>(null)
-  const [isPlaying, setIsPlaying] = useState(
-    autoPlay && hasFrames,
-  )
+  const [isPlaying, setIsPlaying] = useState(autoPlay && hasFrames)
+  const [playbackGeneration, setPlaybackGeneration] = useState(0)
   const frameIndexRef = useRef(0)
   const finishedRef = useRef(false)
   const onFinishedRef = useRef(onFinished)
   const sequenceKey = `${title}\u0000${assetIds.join('\u0000')}`
+  const timelineGeneration = `${sequenceKey}\u0000${playbackGeneration}`
 
   useEffect(() => {
     onFinishedRef.current = onFinished
@@ -46,12 +66,25 @@ export function CinematicPlayer({
   }, [autoPlay, hasFrames, sequenceKey])
 
   useEffect(() => {
+    if (!previousAssetId || reducedMotion) {
+      if (reducedMotion) setPreviousAssetId(null)
+      return
+    }
+    const cleanup = window.setTimeout(
+      () => setPreviousAssetId(null),
+      CROSSFADE_DURATION_MS,
+    )
+    return () => window.clearTimeout(cleanup)
+  }, [previousAssetId, reducedMotion, timelineGeneration])
+
+  useEffect(() => {
     if (!isPlaying || !hasFrames) return
 
     const frameDuration = Math.max(1, durationMs / assetIds.length)
     const timer = window.setInterval(() => {
       if (frameIndexRef.current < assetIds.length - 1) {
-        setPreviousAssetId(assetIds[frameIndexRef.current] ?? null)
+        const previous = assetIds[frameIndexRef.current] ?? null
+        setPreviousAssetId(reducedMotion ? null : previous)
         frameIndexRef.current += 1
         setFrameIndex(frameIndexRef.current)
         return
@@ -65,7 +98,13 @@ export function CinematicPlayer({
     }, frameDuration)
 
     return () => window.clearInterval(timer)
-  }, [assetIds.length, durationMs, hasFrames, isPlaying])
+  }, [
+    durationMs,
+    hasFrames,
+    isPlaying,
+    reducedMotion,
+    timelineGeneration,
+  ])
 
   const replay = useCallback(() => {
     if (!hasFrames) return
@@ -74,6 +113,7 @@ export function CinematicPlayer({
     setFrameIndex(0)
     setPreviousAssetId(null)
     setIsPlaying(true)
+    setPlaybackGeneration((generation) => generation + 1)
   }, [hasFrames])
 
   const togglePlayback = useCallback(() => {
@@ -83,31 +123,31 @@ export function CinematicPlayer({
       frameIndexRef.current = 0
       setFrameIndex(0)
       setPreviousAssetId(null)
+      setPlaybackGeneration((generation) => generation + 1)
     }
     setIsPlaying((playing) => !playing)
   }, [assetIds.length, frameIndex, hasFrames, isPlaying])
 
   const showPrevious = useCallback(() => {
     finishedRef.current = false
-    setPreviousAssetId(assetIds[frameIndexRef.current] ?? null)
+    const previous = assetIds[frameIndexRef.current] ?? null
+    setPreviousAssetId(reducedMotion ? null : previous)
     frameIndexRef.current = Math.max(0, frameIndexRef.current - 1)
     setFrameIndex(frameIndexRef.current)
-  }, [assetIds])
+  }, [assetIds, reducedMotion])
 
   const showNext = useCallback(() => {
     finishedRef.current = false
-    setPreviousAssetId(assetIds[frameIndexRef.current] ?? null)
+    const previous = assetIds[frameIndexRef.current] ?? null
+    setPreviousAssetId(reducedMotion ? null : previous)
     frameIndexRef.current = Math.min(
       assetIds.length - 1,
       frameIndexRef.current + 1,
     )
     setFrameIndex(frameIndexRef.current)
-  }, [assetIds])
+  }, [assetIds, reducedMotion])
 
   const currentAssetId = assetIds[frameIndex]
-  const previousSource = previousAssetId
-    ? assetUrl(catalog, previousAssetId, 'full')
-    : ''
 
   return (
     <section
@@ -120,25 +160,34 @@ export function CinematicPlayer({
         data-testid="cinematic-stage"
         data-asset-id={currentAssetId}
       >
-        {previousSource && (
-          <img
-            className="cinematic-frame cinematic-frame-previous"
-            src={previousSource}
-            alt=""
-            aria-hidden="true"
-            draggable={false}
-          />
+        {previousAssetId && !reducedMotion && (
+          <div className="cinematic-previous-layer">
+            <RuntimeImage
+              key={`${timelineGeneration}-previous-${previousAssetId}`}
+              assetId={previousAssetId}
+              variant="full"
+              catalog={catalog}
+              alt=""
+              className="cinematic-frame cinematic-frame-previous"
+            />
+          </div>
         )}
         {currentAssetId
           ? (
-              <RuntimeImage
-                key={`${sequenceKey}-${frameIndex}`}
-                assetId={currentAssetId}
-                variant="full"
-                catalog={catalog}
-                alt={`${title} ${frameIndex + 1} / ${assetIds.length}`}
-                className="cinematic-frame"
-              />
+              <div
+                key={`${timelineGeneration}-layer-${frameIndex}`}
+                className="cinematic-current-layer"
+                onAnimationEnd={() => setPreviousAssetId(null)}
+              >
+                <RuntimeImage
+                  key={`${timelineGeneration}-current-${frameIndex}`}
+                  assetId={currentAssetId}
+                  variant="full"
+                  catalog={catalog}
+                  alt={`${title} ${frameIndex + 1} / ${assetIds.length}`}
+                  className="cinematic-frame"
+                />
+              </div>
             )
           : (
               <p className="cinematic-empty" role="status">

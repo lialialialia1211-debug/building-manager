@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen } from '@testing-library/react'
 import { createEmptyProgress } from '@/domain/progress'
 import type { AssetCatalog } from '@/domain/runtime-assets'
 import type { GalleryEntry, RoomDefinition } from '@/domain/types'
@@ -177,4 +177,71 @@ test('switching entries stops the prior playback and restarts at frame one', () 
   )
   expect(screen.getByRole('button', { name: '停電之夜：親密結局' }))
     .toHaveAttribute('aria-pressed', 'true')
+})
+
+describe('gallery playback timer isolation', () => {
+  beforeEach(() => vi.useFakeTimers())
+  afterEach(() => {
+    vi.clearAllTimers()
+    vi.useRealTimers()
+  })
+
+  test('safe-to-adult same-length rerender gets a fresh full frame duration', () => {
+    const progress = createEmptyProgress()
+    progress.settings.adultContent = false
+    progress.galleryUnlocks = ['room_a_intimacy']
+    const { rerender } = renderGallery(progress, 'disabled')
+    act(() => vi.advanceTimersByTime(1_000))
+
+    progress.settings.adultContent = true
+    rerender(
+      <GalleryScreen
+        entries={entries}
+        rooms={rooms}
+        progress={progress}
+        catalog={catalog}
+        adultStatus="ready"
+        onBack={() => {}}
+      />,
+    )
+    act(() => vi.advanceTimersByTime(800))
+
+    expect(screen.getByTestId('cinematic-stage')).toHaveAttribute(
+      'data-asset-id',
+      'a_intimacy_01',
+    )
+    expect(document.querySelector('.cinematic-frame-previous')).toBeNull()
+
+    act(() => vi.advanceTimersByTime(915))
+    expect(screen.getByTestId('cinematic-stage')).toHaveAttribute(
+      'data-asset-id',
+      'a_intimacy_02',
+    )
+  })
+
+  test('switching entries while playing stops the old entry timer', () => {
+    const progress = createEmptyProgress()
+    progress.settings.adultContent = true
+    progress.galleryUnlocks = ['room_a_main', 'room_a_intimacy']
+    progress.endingRecaps[room.id] = {
+      main: ['a1', 'a2', 'a3', 'a4', 'a5', 'a6'],
+    }
+    renderGallery(progress, 'ready')
+    act(() => vi.advanceTimersByTime(1_000))
+
+    fireEvent.click(screen.getByRole('button', {
+      name: '停電之夜：親密結局',
+    }))
+    act(() => vi.advanceTimersByTime(800))
+
+    expect(screen.getByTestId('cinematic-stage')).toHaveAttribute(
+      'data-asset-id',
+      'a_intimacy_01',
+    )
+    act(() => vi.advanceTimersByTime(915))
+    expect(screen.getByTestId('cinematic-stage')).toHaveAttribute(
+      'data-asset-id',
+      'a_intimacy_02',
+    )
+  })
 })

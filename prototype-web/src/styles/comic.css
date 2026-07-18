@@ -419,12 +419,22 @@
   min-height: inherit;
 }
 
-.cinematic-frame {
+.cinematic-current-layer,
+.cinematic-previous-layer {
   position: absolute;
   inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.cinematic-current-layer {
+  animation: cinematic-crossfade 450ms ease-out both;
+}
+
+.cinematic-frame {
   display: block;
   object-fit: contain;
-  animation: cinematic-frame-enter 1.8s ease-out both;
+  animation: cinematic-ken-burns 1.8s ease-out both;
 }
 
 .cinematic-frame-previous {
@@ -483,14 +493,22 @@
   background: #211d15;
 }
 
-@keyframes cinematic-frame-enter {
+@keyframes cinematic-crossfade {
   from {
     opacity: 0;
-    transform: scale(1.035);
   }
 
   to {
     opacity: 1;
+  }
+}
+
+@keyframes cinematic-ken-burns {
+  from {
+    transform: scale(1.035);
+  }
+
+  to {
     transform: scale(1);
   }
 }
@@ -589,6 +607,7 @@
     animation-duration: 1ms;
   }
 
+  .cinematic-current-layer,
   .cinematic-frame {
     animation: none;
     transform: none;

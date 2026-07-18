@@ -56,6 +56,7 @@ export function GalleryScreen({
         adultContent: progress.settings.adultContent,
         adultCatalogReady: adultStatus === 'ready'
           && catalog.adult !== null,
+        catalog,
       })
     : null
 

@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react'
-import { useAppStore } from './store'
+import {
+  useAppStore,
+  type SettledResult,
+} from './store'
 import { OpeningSequence } from '@/components/OpeningSequence'
 import {
   loadCharacters,
@@ -10,6 +13,7 @@ import type {
   CharacterDefinition,
   GalleryEntry,
   RoomDefinition,
+  StatName,
 } from '@/domain/types'
 import type { AssetCatalog } from '@/domain/runtime-assets'
 import { useRuntimeAssets } from '@/hooks/use-runtime-assets'
@@ -31,6 +35,78 @@ interface RoomBriefRouteProps {
 interface BriefContent {
   room: RoomDefinition
   characters: CharacterDefinition[]
+}
+
+interface ResultRouteProps {
+  room: RoomDefinition
+  result: SettledResult
+  stats: Record<StatName, number>
+  progress: ReturnType<typeof useAppStore.getState>['progress']
+  catalog: AssetCatalog
+  adultStatus: 'disabled' | 'loading' | 'ready' | 'error'
+  onReplay(): void
+  onReturn(): void
+}
+
+function ResultRoute({
+  room,
+  result,
+  stats,
+  progress,
+  catalog,
+  adultStatus,
+  onReplay,
+  onReturn,
+}: ResultRouteProps) {
+  const [galleryState, setGalleryState] = useState<{
+    status: 'loading' | 'ready' | 'error'
+    entry?: GalleryEntry
+  }>({
+    status: result.endingId === 'intimacy' ? 'loading' : 'ready',
+  })
+
+  useEffect(() => {
+    if (result.endingId !== 'intimacy') {
+      setGalleryState({ status: 'ready' })
+      return
+    }
+
+    let active = true
+    setGalleryState({ status: 'loading' })
+    void loadGallery().then(
+      (entries) => {
+        if (!active) return
+        const entry = entries.find((candidate) => (
+          candidate.roomId === room.id
+          && candidate.endingId === result.endingId
+        ))
+        setGalleryState(entry
+          ? { status: 'ready', entry }
+          : { status: 'error' })
+      },
+      () => {
+        if (active) setGalleryState({ status: 'error' })
+      },
+    )
+    return () => {
+      active = false
+    }
+  }, [result.endingId, room.id])
+
+  return (
+    <ResultScreen
+      room={room}
+      result={result}
+      stats={stats}
+      progress={progress}
+      catalog={catalog}
+      adultStatus={adultStatus}
+      galleryEntry={galleryState.entry}
+      galleryStatus={galleryState.status}
+      onReplay={onReplay}
+      onReturn={onReturn}
+    />
+  )
 }
 
 function RoomBriefRoute({
@@ -311,7 +387,7 @@ export function App() {
     case 'result':
       content = engine && settledResult
         ? (
-            <ResultScreen
+            <ResultRoute
               room={engine.room}
               result={settledResult}
               stats={engine.snapshot.stats}

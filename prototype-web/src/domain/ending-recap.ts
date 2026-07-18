@@ -1,3 +1,4 @@
+import type { AssetCatalog } from './runtime-assets'
 import type {
   EndingId,
   GalleryEntry,
@@ -11,6 +12,7 @@ export interface EndingRecapRequest {
   galleryEntry?: GalleryEntry
   adultContent: boolean
   adultCatalogReady: boolean
+  catalog: AssetCatalog
 }
 
 export interface EndingRecap {
@@ -18,36 +20,50 @@ export interface EndingRecap {
   usedSafeFallback: boolean
 }
 
-function roomAssetPrefix(
+function roomAssetPrefix(room: RoomDefinition): string {
+  if (room.id === 'room_a_blackout') return 'a'
+  if (room.id === 'room_b_wall') return 'b'
+  return room.openingAssets[0].split('_')[0] ?? ''
+}
+
+function isCompleteSavedRecap(
+  savedRecap: readonly string[] | undefined,
   room: RoomDefinition,
-  endingId: EndingId,
-): string {
-  const marker = `_ending_${endingId}`
-  const poster = room.endingContent[endingId].asset
-  return poster.endsWith(marker)
-    ? poster.slice(0, -marker.length)
-    : room.openingAssets[0].split('_')[0] ?? ''
+): savedRecap is readonly [string, string, string, string, string, string] {
+  return savedRecap?.length === 6
+    && new Set(savedRecap).size === 6
+    && savedRecap.every((panelId) => panelId in room.panels)
 }
 
-function generatedSequence(
-  prefix: string,
-  variant: 'intimacy' | 'safe',
-): string[] {
-  return Array.from(
-    { length: 6 },
-    (_, index) => `${prefix}_${variant}_0${index + 1}`,
-  )
-}
-
-function sameRoomAssets(
+function validAuthoredSequence(
   assetIds: readonly string[] | undefined,
   prefix: string,
-): string[] {
-  if (!assetIds) return []
-  return assetIds.filter((assetId) => (
-    assetId.startsWith(`${prefix}_`)
-    && !assetId.toLowerCase().includes('/adult/')
-  ))
+  variant: 'safe' | 'intimacy',
+  catalog: AssetCatalog,
+): string[] | null {
+  if (!assetIds || assetIds.length !== 6 || new Set(assetIds).size !== 6) {
+    return null
+  }
+  const pattern = new RegExp(
+    `^${prefix}_${variant}_[a-zA-Z0-9][a-zA-Z0-9_-]*$`,
+  )
+  const source = variant === 'safe' ? catalog.common : catalog.adult
+  if (!source) return null
+  if (assetIds.some((assetId) => !pattern.test(assetId) || !source[assetId])) {
+    return null
+  }
+  return [...assetIds]
+}
+
+function matchingIntimacyEntry(
+  entry: GalleryEntry | undefined,
+  room: RoomDefinition,
+): GalleryEntry | undefined {
+  return entry?.roomId === room.id
+    && entry.endingId === 'intimacy'
+    && entry.adult
+    ? entry
+    : undefined
 }
 
 export function buildEndingRecap({
@@ -57,17 +73,15 @@ export function buildEndingRecap({
   galleryEntry,
   adultContent,
   adultCatalogReady,
+  catalog,
 }: EndingRecapRequest): EndingRecap {
   const poster = room.endingContent[endingId].asset
 
   if (endingId !== 'intimacy') {
-    const authoredRecap = (savedRecap ?? []).filter(
-      (panelId) => panelId in room.panels,
-    )
     return {
       assetIds: [
-        ...(authoredRecap.length > 0
-          ? authoredRecap
+        ...(isCompleteSavedRecap(savedRecap, room)
+          ? savedRecap
           : room.openingAssets),
         poster,
       ],
@@ -75,32 +89,32 @@ export function buildEndingRecap({
     }
   }
 
-  const prefix = roomAssetPrefix(room, endingId)
+  const prefix = roomAssetPrefix(room)
+  const authored = matchingIntimacyEntry(galleryEntry, room)
+  const safeSequence = validAuthoredSequence(
+    authored?.safeSequence,
+    prefix,
+    'safe',
+    catalog,
+  )
   if (adultContent && adultCatalogReady) {
-    const suppliedAdult = sameRoomAssets(
-      galleryEntry?.adultSequence,
+    const adultSequence = validAuthoredSequence(
+      authored?.adultSequence,
       prefix,
+      'intimacy',
+      catalog,
     )
-    return {
-      assetIds: [
-        ...(suppliedAdult.length > 0
-          ? suppliedAdult
-          : generatedSequence(prefix, 'intimacy')),
-        poster,
-      ],
-      usedSafeFallback: false,
+    if (adultSequence) {
+      return {
+        assetIds: [...adultSequence, poster],
+        usedSafeFallback: false,
+      }
     }
   }
 
-  const suppliedSafe = sameRoomAssets(
-    galleryEntry?.safeSequence,
-    prefix,
-  )
   return {
     assetIds: [
-      ...(suppliedSafe.length > 0
-        ? suppliedSafe
-        : generatedSequence(prefix, 'safe')),
+      ...(safeSequence ?? room.openingAssets),
       poster,
     ],
     usedSafeFallback: true,

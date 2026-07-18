@@ -7,6 +7,7 @@ import { galleryUnlockLabel } from '@/domain/gallery-labels'
 import type { ProgressData } from '@/domain/progress'
 import type { AssetCatalog } from '@/domain/runtime-assets'
 import type {
+  GalleryEntry,
   RoomDefinition,
   StatName,
 } from '@/domain/types'
@@ -18,6 +19,8 @@ interface ResultScreenProps {
   progress: ProgressData
   catalog: AssetCatalog
   adultStatus: 'disabled' | 'loading' | 'ready' | 'error'
+  galleryEntry?: GalleryEntry
+  galleryStatus: 'loading' | 'ready' | 'error'
   onReplay(): void
   onReturn(): void
 }
@@ -29,6 +32,8 @@ export function ResultScreen({
   progress,
   catalog,
   adultStatus,
+  galleryEntry,
+  galleryStatus,
   onReplay,
   onReturn,
 }: ResultScreenProps) {
@@ -39,7 +44,20 @@ export function ResultScreen({
     savedRecap: progress.endingRecaps[room.id]?.[result.endingId],
     adultContent: progress.settings.adultContent,
     adultCatalogReady: adultStatus === 'ready' && catalog.adult !== null,
+    galleryEntry,
+    catalog,
   })
+  const fallbackMessage = result.endingId !== 'intimacy'
+    ? null
+    : galleryStatus === 'loading'
+      ? '回想資料載入中，暫時播放安全開場。'
+      : galleryStatus === 'error'
+        ? '回想資料載入失敗，已改用安全開場。'
+        : recap.usedSafeFallback && progress.settings.adultContent
+          ? adultStatus === 'ready'
+            ? '成人回想資料無法使用，已改用安全版。'
+            : '成人美術暫時無法載入，此回想已改用安全版。'
+          : null
 
   return (
     <section
@@ -61,13 +79,11 @@ export function ResultScreen({
         />
       </div>
 
-      {recap.usedSafeFallback
-        && progress.settings.adultContent
-        && (
+      {fallbackMessage && (
           <p className="ending-safe-fallback" role="status">
-            成人美術暫時無法載入，此回想已改用安全版。
+            {fallbackMessage}
           </p>
-        )}
+      )}
 
       {endingContent.dialogue && (
         <section

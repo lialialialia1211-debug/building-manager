@@ -3,6 +3,7 @@ import {
   act,
   render,
   screen,
+  waitFor,
 } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useRuntimeAssets as useRuntimeAssetsHook } from '@/hooks/use-runtime-assets'
@@ -33,6 +34,17 @@ const catalog = {
       preview: '/art/a-open-03-preview.webp',
       full: '/art/a-open-03-full.webp',
     },
+    'ending-fixture': {
+      preview: '/art/ending-fixture-preview.webp',
+      full: '/art/ending-fixture-full.webp',
+    },
+    ...Object.fromEntries(Array.from({ length: 6 }, (_, index) => {
+      const id = `a_safe_0${index + 1}`
+      return [id, {
+        preview: `/art/${id}-preview.webp`,
+        full: `/art/${id}-full.webp`,
+      }]
+    })),
   },
   adult: null,
   backgrounds: {
@@ -370,7 +382,65 @@ test('shows a resume load error, preserves the run, and retries successfully', a
   expect(useAppStore.getState().error).toBeNull()
 })
 
-test('uses the formal result route after an ending settles', () => {
+test('loads the authored gallery entry for the formal result route', async () => {
+  const fetchMock = vi.fn(async () => ({
+    ok: true,
+    json: async () => [
+      {
+        id: 'room_a_main',
+        roomId: 'room_a_blackout',
+        endingId: 'main',
+        adult: false,
+      },
+      {
+        id: 'room_a_normal',
+        roomId: 'room_a_blackout',
+        endingId: 'normal',
+        adult: false,
+      },
+      {
+        id: 'room_a_intimacy',
+        roomId: 'room_a_blackout',
+        endingId: 'intimacy',
+        adult: true,
+        adultSequence: Array.from(
+          { length: 6 },
+          (_, index) => `a_intimacy_0${index + 1}`,
+        ),
+        safeSequence: Array.from(
+          { length: 6 },
+          (_, index) => `a_safe_0${index + 1}`,
+        ),
+      },
+      {
+        id: 'room_b_main',
+        roomId: 'room_b_wall',
+        endingId: 'main',
+        adult: false,
+      },
+      {
+        id: 'room_b_normal',
+        roomId: 'room_b_wall',
+        endingId: 'normal',
+        adult: false,
+      },
+      {
+        id: 'room_b_intimacy',
+        roomId: 'room_b_wall',
+        endingId: 'intimacy',
+        adult: true,
+        adultSequence: Array.from(
+          { length: 6 },
+          (_, index) => `b_intimacy_0${index + 1}`,
+        ),
+        safeSequence: Array.from(
+          { length: 6 },
+          (_, index) => `b_safe_0${index + 1}`,
+        ),
+      },
+    ],
+  }))
+  vi.stubGlobal('fetch', fetchMock)
   const engine = new StoryEngine(room)
   engine.choose('a1_door')
   useAppStore.setState({
@@ -399,6 +469,44 @@ test('uses the formal result route after an ending settles', () => {
   expect(
     screen.getByRole('button', { name: '返回大樓' }),
   ).toBeInTheDocument()
+  await waitFor(() => {
+    expect(screen.getByTestId('cinematic-stage')).toHaveAttribute(
+      'data-asset-id',
+      'a_safe_01',
+    )
+  })
+  expect(fetchMock).toHaveBeenCalledWith('/gallery.json')
+})
+
+test('keeps result controls available when authored gallery loading fails', async () => {
+  vi.stubGlobal('fetch', vi.fn(async () => {
+    throw new Error('gallery unavailable')
+  }))
+  const engine = new StoryEngine(room)
+  engine.choose('a1_door')
+  const progress = createEmptyProgress()
+  progress.settings.exactStats = true
+  useAppStore.setState({
+    screen: 'result',
+    selectedRoomId: room.id,
+    progress,
+    engine,
+    settledResult: {
+      roomId: room.id,
+      endingId: 'intimacy',
+      newClues: [],
+      newGalleryUnlocks: [],
+    },
+  })
+
+  render(<App />)
+
+  expect(await screen.findByText(/回想資料載入失敗/)).toBeInTheDocument()
+  expect(screen.getByTestId('exact-stat-trust')).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: '重新遊玩' })).toBeEnabled()
+  expect(screen.getByRole('button', { name: '返回大樓' })).toBeEnabled()
+  expect(screen.getByTestId('result-screen').innerHTML)
+    .not.toContain('/adult/')
 })
 
 test('uses the formal gallery and settings routes', async () => {
