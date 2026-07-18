@@ -141,6 +141,57 @@ const requiredSixthRoomPanelIds = [
   'sixth_03',
 ] as const
 
+export const requiredPlayableChoicePanelIds = [
+  'a1_door',
+  'a1_fuse',
+  'a1_note',
+  'a2d_chain',
+  'a2d_listen',
+  'a2d_open',
+  'a2f_call',
+  'a2f_reset',
+  'a2f_tools',
+  'a2n_follow',
+  'a2n_photo',
+  'a2n_wait',
+  'a3_candle',
+  'a3_share',
+  'a3_trace',
+  'a4_comfort',
+  'a4_ground',
+  'a4_sleep',
+  'a5_ask',
+  'a5_ignore',
+  'a5_photo',
+  'a6_consent',
+  'a6_morning',
+  'a6_report',
+  'b1_glass',
+  'b1_knock',
+  'b1_neighbor',
+  'b2g_cover',
+  'b2g_mark',
+  'b2g_record',
+  'b2k_pattern',
+  'b2k_reply',
+  'b2k_stop',
+  'b2n_hall',
+  'b2n_invite',
+  'b2n_refuse',
+  'b3_blueprint',
+  'b3_music',
+  'b3_share',
+  'b4_comfort',
+  'b4_leave',
+  'b4_measure',
+  'b5_ask',
+  'b5_ignore',
+  'b5_record',
+  'b6_consent',
+  'b6_open',
+  'b6_sleep',
+] as const
+
 export const requiredLayeredPanelIds = [
   'a_open_01',
   'a_open_03',
@@ -578,6 +629,18 @@ export function validateAdultAssetManifest(value: unknown): string[] {
   )
   validateRuntimeUrls(errors, 'adult asset', assets, '/assets/adult/')
   return errors
+}
+
+export function validatePlayableRuntimeManifest(value: unknown): string[] {
+  const result = validateAssetManifest(
+    value,
+    requiredPlayableChoicePanelIds,
+  )
+  return result.mode === 'playable'
+    ? result.errors
+    : result.errors.length > 0
+      ? result.errors
+      : ['asset manifest must be playable']
 }
 
 export function validateAssetManifest(

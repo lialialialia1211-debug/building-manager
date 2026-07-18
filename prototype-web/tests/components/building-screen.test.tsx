@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { createEmptyProgress } from '@/domain/progress'
 import type { AssetCatalog } from '@/domain/runtime-assets'
@@ -114,4 +114,33 @@ test('does not render the sixth-room tease after one main ending', () => {
   expect(
     screen.queryByLabelText('不存在的第六房間'),
   ).not.toBeInTheDocument()
+})
+
+test('retries a failed room background without nesting controls', async () => {
+  const user = userEvent.setup()
+  render(
+    <BuildingScreen
+      progress={createEmptyProgress()}
+      catalog={catalog}
+      onOpenRoom={() => {}}
+      onOpenGallery={() => {}}
+      onOpenSettings={() => {}}
+    />,
+  )
+  const roomControl = screen.getByRole('button', {
+    name: /停電之夜/,
+  })
+
+  fireEvent.error(
+    screen.getByRole('img', { name: '停電之夜房間背景' }),
+  )
+
+  const retry = screen.getByRole('button', { name: '重試' })
+  expect(roomControl).not.toContainElement(retry)
+  await user.click(retry)
+  expect(screen.getByRole('img', { name: '停電之夜房間背景' }))
+    .toHaveAttribute(
+      'src',
+      '/art/building-a.webp?runtimeRetry=1',
+    )
 })

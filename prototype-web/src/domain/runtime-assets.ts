@@ -1,6 +1,10 @@
 import { contentUrl } from './repository'
+import {
+  validateAdultAssetManifest,
+  validatePlayableRuntimeManifest,
+} from './asset-manifest'
 
-export type RuntimeAssetKind = 'preview' | 'full'
+export type RuntimeAssetKind = 'preview' | 'full' | 'background'
 
 export interface RuntimeAssetEntry {
   preview: string
@@ -54,6 +58,10 @@ function readAssetEntries(
 export function parseCommonRuntimeManifest(
   value: unknown,
 ): CommonRuntimeManifest {
+  const validationErrors = validatePlayableRuntimeManifest(value)
+  if (validationErrors.length > 0) {
+    throw new Error(validationErrors.join('; '))
+  }
   if (
     !isRecord(value)
     || value.schemaVersion !== 2
@@ -82,6 +90,10 @@ export function parseCommonRuntimeManifest(
 export function parseAdultRuntimeManifest(
   value: unknown,
 ): AdultRuntimeManifest {
+  const validationErrors = validateAdultAssetManifest(value)
+  if (validationErrors.length > 0) {
+    throw new Error(validationErrors.join('; '))
+  }
   if (!isRecord(value) || value.schemaVersion !== 1) {
     throw new Error('invalid adult asset manifest')
   }
@@ -114,6 +126,10 @@ export function assetUrl(
   kind: RuntimeAssetKind,
   baseUrl = import.meta.env.BASE_URL,
 ): string {
+  if (kind === 'background') {
+    const background = catalog.backgrounds[id]
+    return background ? contentUrl(background, baseUrl) : ''
+  }
   const entry = catalog.common[id] ?? catalog.adult?.[id]
   return entry ? contentUrl(entry[kind], baseUrl) : ''
 }

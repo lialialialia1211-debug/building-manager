@@ -1,6 +1,5 @@
 import { RuntimeImage } from '@/components/RuntimeImage'
 import type { ProgressData } from '@/domain/progress'
-import { contentUrl } from '@/domain/repository'
 import type { AssetCatalog } from '@/domain/runtime-assets'
 import { shouldShowSixthRoom } from '@/domain/unlocks'
 
@@ -77,26 +76,32 @@ export function BuildingScreen({
           )
 
           return (
-            <button
+            <article
               className="room-window room-window-open"
-              type="button"
               key={room.id}
-              onClick={() => onOpenRoom(room.id)}
             >
-              <img
+              <RuntimeImage
+                assetId={room.backgroundAsset}
+                variant="background"
+                catalog={catalog}
                 className="room-window-art"
-                src={contentUrl(
-                  catalog.backgrounds[room.backgroundAsset] ?? '',
-                )}
                 alt={`${room.title}房間背景`}
               />
               <span className="room-window-gradient" aria-hidden="true" />
-              <span className="room-window-content">
+              <div className="room-window-content">
                 <span className="room-status">可進入</span>
                 <strong>{room.title}</strong>
                 <span>{completedCount} / 3 結局</span>
-              </span>
-            </button>
+                <button
+                  className="room-window-action"
+                  type="button"
+                  aria-label={`進入${room.title}`}
+                  onClick={() => onOpenRoom(room.id)}
+                >
+                  進入房間
+                </button>
+              </div>
+            </article>
           )
         })}
 

@@ -1,4 +1,5 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { createEmptyProgress } from '@/domain/progress'
 import type { AssetCatalog } from '@/domain/runtime-assets'
 import type {
@@ -228,4 +229,29 @@ test('shows Room B clue labels without internal IDs', () => {
       /b_hidden_space|b_evidence|b_opened_space|b_consent/,
     ),
   ).not.toBeInTheDocument()
+})
+
+test('retries a failed room briefing background', async () => {
+  const user = userEvent.setup()
+  render(
+    <RoomBriefScreen
+      room={room}
+      catalog={catalog}
+      characters={characters}
+      progress={createEmptyProgress()}
+      onStart={() => {}}
+      onBack={() => {}}
+    />,
+  )
+
+  fireEvent.error(
+    screen.getByRole('img', { name: '停電之夜房間背景' }),
+  )
+
+  await user.click(screen.getByRole('button', { name: '重試' }))
+  expect(screen.getByRole('img', { name: '停電之夜房間背景' }))
+    .toHaveAttribute(
+      'src',
+      '/art/building-a.webp?runtimeRetry=1',
+    )
 })

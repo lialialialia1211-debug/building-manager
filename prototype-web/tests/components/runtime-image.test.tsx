@@ -56,16 +56,21 @@ test('shows an explicit error and retries the same path with a query token', asy
     )
 })
 
-test('reports a missing catalog asset instead of rendering an empty image', () => {
+test('offers catalog recovery when a hand-built catalog is incomplete', async () => {
+  const user = userEvent.setup()
+  const retryCatalog = vi.fn()
   render(
     <RuntimeImage
       assetId="missing"
       variant="full"
       catalog={catalog}
       alt="不存在的圖片"
+      onRetry={retryCatalog}
     />,
   )
 
   expect(screen.getByRole('alert')).toHaveTextContent('圖片載入失敗')
   expect(screen.queryByRole('img')).not.toBeInTheDocument()
+  await user.click(screen.getByRole('button', { name: '重試' }))
+  expect(retryCatalog).toHaveBeenCalledOnce()
 })

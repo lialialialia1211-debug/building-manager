@@ -102,6 +102,7 @@
 
 .room-window-gradient {
   background: linear-gradient(180deg, transparent 24%, rgb(8 12 19 / 92%));
+  pointer-events: none;
 }
 
 .room-window-content {
@@ -112,8 +113,27 @@
   padding: 22px;
 }
 
+.room-window-action {
+  justify-self: start;
+  margin-top: 4px;
+  padding: 7px 12px;
+  border: 1px solid #d8bd79;
+  border-radius: 999px;
+  color: inherit;
+  background: rgb(73 58 29 / 92%);
+  cursor: pointer;
+}
+
+.room-window-art.runtime-image-error {
+  z-index: 2;
+  inset: 12px 12px auto;
+  width: auto;
+  height: auto;
+  min-height: 74px;
+}
+
 .room-window-open:hover,
-.room-window-open:focus-visible {
+.room-window-open:has(.room-window-action:focus-visible) {
   border-color: #e9c978;
   outline: none;
   box-shadow: 0 0 0 3px rgb(233 201 120 / 18%);
@@ -168,7 +188,7 @@
   border-radius: 18px;
 }
 
-.brief-hero > img {
+.brief-hero-art {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -181,6 +201,7 @@
   inset: 0;
   content: '';
   background: linear-gradient(180deg, transparent, rgb(9 13 21 / 90%));
+  pointer-events: none;
 }
 
 .brief-back {

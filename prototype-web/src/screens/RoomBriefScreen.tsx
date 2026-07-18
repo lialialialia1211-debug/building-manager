@@ -1,7 +1,6 @@
 import { RuntimeImage } from '@/components/RuntimeImage'
 import { clueLabel } from '@/domain/clue-labels'
 import type { ProgressData } from '@/domain/progress'
-import { contentUrl } from '@/domain/repository'
 import type { AssetCatalog } from '@/domain/runtime-assets'
 import type {
   CharacterDefinition,
@@ -70,9 +69,12 @@ export function RoomBriefScreen({
       </button>
 
       <div className="brief-hero">
-        <img
-          src={contentUrl(catalog.backgrounds[room.backgroundAsset] ?? '')}
+        <RuntimeImage
+          assetId={room.backgroundAsset}
+          variant="background"
+          catalog={catalog}
           alt={`${room.title}房間背景`}
+          className="brief-hero-art"
         />
         <header className="brief-header">
           <p>住戶事件</p>

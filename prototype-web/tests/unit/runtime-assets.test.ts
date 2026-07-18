@@ -6,6 +6,10 @@ import {
   validateAssetManifest,
 } from '@/domain/asset-manifest'
 import {
+  parseAdultRuntimeManifest,
+  parseCommonRuntimeManifest,
+} from '@/domain/runtime-assets'
+import {
   parseRoom,
 } from '@/domain/content-schema'
 
@@ -79,4 +83,64 @@ test('rejects adult URLs in the playable common manifest', () => {
 
   expect(validateAssetManifest(manifest, choicePanelIds).errors)
     .toContain('common asset a1_fuse preview must use /assets/common/')
+})
+
+const commonManifestPath = resolve(
+  process.cwd(),
+  '../content/asset-manifest.json',
+)
+const adultManifestPath = resolve(
+  process.cwd(),
+  '../content/adult-asset-manifest.json',
+)
+
+function commonManifestFixture(): Record<string, any> {
+  return JSON.parse(readFileSync(commonManifestPath, 'utf8'))
+}
+
+function adultManifestFixture(): Record<string, any> {
+  return JSON.parse(readFileSync(adultManifestPath, 'utf8'))
+}
+
+test.each([
+  ['missing asset', (manifest: Record<string, any>) => {
+    delete manifest.assets.a1_fuse
+  }],
+  ['extra asset', (manifest: Record<string, any>) => {
+    manifest.assets.unexpected = manifest.assets.a1_fuse
+  }],
+  ['mis-rooted asset', (manifest: Record<string, any>) => {
+    manifest.assets.a1_fuse.preview = '/wrong/a1_fuse.webp'
+  }],
+  ['missing background', (manifest: Record<string, any>) => {
+    delete manifest.backgrounds.building_a
+  }],
+  ['extra background', (manifest: Record<string, any>) => {
+    manifest.backgrounds.unexpected = manifest.backgrounds.building_a
+  }],
+  ['mis-rooted background', (manifest: Record<string, any>) => {
+    manifest.backgrounds.building_a = '/wrong/building_a.webp'
+  }],
+])('runtime parser rejects a common manifest with %s', (_name, mutate) => {
+  const manifest = commonManifestFixture()
+  mutate(manifest)
+
+  expect(() => parseCommonRuntimeManifest(manifest)).toThrow()
+})
+
+test.each([
+  ['missing asset', (manifest: Record<string, any>) => {
+    delete manifest.assets.a_intimacy_01
+  }],
+  ['extra asset', (manifest: Record<string, any>) => {
+    manifest.assets.unexpected = manifest.assets.a_intimacy_01
+  }],
+  ['mis-rooted asset', (manifest: Record<string, any>) => {
+    manifest.assets.a_intimacy_01.full = '/assets/common/wrong.webp'
+  }],
+])('runtime parser rejects an adult manifest with %s', (_name, mutate) => {
+  const manifest = adultManifestFixture()
+  mutate(manifest)
+
+  expect(() => parseAdultRuntimeManifest(manifest)).toThrow()
 })

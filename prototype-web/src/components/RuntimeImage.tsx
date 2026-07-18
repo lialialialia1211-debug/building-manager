@@ -11,6 +11,7 @@ export interface RuntimeImageProps {
   catalog: AssetCatalog
   alt: string
   className?: string
+  onRetry?(): void
 }
 
 export function RuntimeImage({
@@ -19,6 +20,7 @@ export function RuntimeImage({
   catalog,
   alt,
   className,
+  onRetry,
 }: RuntimeImageProps) {
   const source = assetUrl(catalog, assetId, variant)
   const [failed, setFailed] = useState(source === '')
@@ -31,12 +33,22 @@ export function RuntimeImage({
 
   if (failed || source === '') {
     return (
-      <div className="runtime-image-error" role="alert">
+      <div
+        className={[
+          'runtime-image-error',
+          className,
+        ].filter(Boolean).join(' ')}
+        role="alert"
+      >
         <span>圖片載入失敗</span>
-        {source !== '' && (
+        {(source !== '' || onRetry) && (
           <button
             type="button"
             onClick={() => {
+              if (source === '') {
+                onRetry?.()
+                return
+              }
               setRetryToken((token) => token + 1)
               setFailed(false)
             }}

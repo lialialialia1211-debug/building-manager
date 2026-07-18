@@ -10,6 +10,18 @@ export interface OpeningSequenceProps {
   onComplete(): void
 }
 
+function isInteractiveTarget(target: EventTarget | null): boolean {
+  return target instanceof Element && target.closest([
+    'button',
+    'a[href]',
+    'input',
+    'select',
+    'textarea',
+    'summary',
+    '[contenteditable]:not([contenteditable="false"])',
+  ].join(',')) !== null
+}
+
 export function OpeningSequence({
   title,
   assetIds,
@@ -36,6 +48,7 @@ export function OpeningSequence({
         return
       }
       if (event.key === 'Enter' || event.key === ' ') {
+        if (isInteractiveTarget(event.target)) return
         event.preventDefault()
         advance()
       }

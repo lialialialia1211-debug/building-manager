@@ -186,3 +186,55 @@ test('treats an invalid common manifest as a blocking error', async () => {
   })
   expect(result.current.catalog).toBeNull()
 })
+
+test('blocks an incomplete playable common manifest and retries it', async () => {
+  const runtimeAssets = await loadHook()
+  const incomplete = structuredClone(commonManifest)
+  delete incomplete.assets.a1_fuse
+  let attempts = 0
+  vi.stubGlobal('fetch', vi.fn(() => {
+    attempts += 1
+    return Promise.resolve(jsonResponse(
+      attempts === 1 ? incomplete : commonManifest,
+    ))
+  }))
+
+  expect(runtimeAssets).not.toBeNull()
+  const { result } = renderHook(() =>
+    runtimeAssets!.useRuntimeAssets(false))
+
+  await waitFor(() => {
+    expect(result.current.commonStatus).toBe('error')
+  })
+  expect(result.current.catalog).toBeNull()
+
+  act(() => result.current.retryCommon())
+  await waitFor(() => {
+    expect(result.current.commonStatus).toBe('ready')
+  })
+  expect(attempts).toBe(2)
+})
+
+test('uses the safe catalog when the adult manifest is incomplete', async () => {
+  const runtimeAssets = await loadHook()
+  const incompleteAdult = structuredClone(adultManifest)
+  delete incompleteAdult.assets.a_intimacy_01
+  vi.stubGlobal('fetch', vi.fn((url: string) =>
+    Promise.resolve(jsonResponse(
+      url.endsWith('adult-asset-manifest.json')
+        ? incompleteAdult
+        : commonManifest,
+    )),
+  ))
+
+  expect(runtimeAssets).not.toBeNull()
+  const { result } = renderHook(() =>
+    runtimeAssets!.useRuntimeAssets(true))
+
+  await waitFor(() => {
+    expect(result.current.adultStatus).toBe('error')
+  })
+  expect(result.current.commonStatus).toBe('ready')
+  expect(result.current.catalog?.adult).toBeNull()
+  expect(Object.keys(result.current.catalog?.common ?? {})).toHaveLength(75)
+})

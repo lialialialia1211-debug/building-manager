@@ -89,3 +89,72 @@ test('supports keyboard progress and escape skip', () => {
     screen.getByRole('button', { name: '跳過開場' }),
   ).toBeInTheDocument()
 })
+
+test('lets Enter activate image retry without advancing the opening', async () => {
+  const user = userEvent.setup()
+  render(
+    <OpeningSequence
+      title="停電之夜"
+      assetIds={['open_01', 'open_02', 'open_03']}
+      dialogue={[]}
+      catalog={catalog}
+      onComplete={() => {}}
+    />,
+  )
+  fireEvent.error(screen.getByRole('img', { name: '停電之夜開場 1' }))
+  const retry = screen.getByRole('button', { name: '重試' })
+  retry.focus()
+
+  await user.keyboard('{Enter}')
+
+  expect(screen.getByText('1 / 3')).toBeInTheDocument()
+  expect(screen.getByRole('img', { name: '停電之夜開場 1' }))
+    .toHaveAttribute(
+      'src',
+      '/assets/open-01-full.webp?runtimeRetry=1',
+    )
+})
+
+test.each([
+  ['Enter', '{Enter}'],
+  ['Space', ' '],
+])('lets %s activate the focused skip button', async (_name, key) => {
+  const user = userEvent.setup()
+  const onComplete = vi.fn()
+  render(
+    <OpeningSequence
+      title="停電之夜"
+      assetIds={['open_01', 'open_02', 'open_03']}
+      dialogue={[]}
+      catalog={catalog}
+      onComplete={onComplete}
+    />,
+  )
+  screen.getByRole('button', { name: '跳過開場' }).focus()
+
+  await user.keyboard(key)
+
+  expect(onComplete).toHaveBeenCalledOnce()
+  expect(screen.getByText('1 / 3')).toBeInTheDocument()
+})
+
+test('does not advance from a contenteditable target', async () => {
+  const user = userEvent.setup()
+  render(
+    <>
+      <div contentEditable role="textbox" aria-label="編輯內容" />
+      <OpeningSequence
+        title="停電之夜"
+        assetIds={['open_01', 'open_02', 'open_03']}
+        dialogue={[]}
+        catalog={catalog}
+        onComplete={() => {}}
+      />
+    </>,
+  )
+  await user.click(screen.getByRole('textbox', { name: '編輯內容' }))
+
+  await user.keyboard('{Enter}')
+
+  expect(screen.getByText('1 / 3')).toBeInTheDocument()
+})
