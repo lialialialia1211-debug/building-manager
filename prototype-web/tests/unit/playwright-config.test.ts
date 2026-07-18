@@ -51,6 +51,16 @@ function expectExactLine(block: string, indentation: number, value: string) {
   )
 }
 
+function exactLineIndex(block: string, indentation: number, value: string) {
+  const index = block
+    .split('\n')
+    .indexOf(`${' '.repeat(indentation)}${value}`)
+
+  expect(index).toBeGreaterThanOrEqual(0)
+
+  return index
+}
+
 test('isolates Playwright on one strict dedicated server', () => {
   const server = Array.isArray(config.webServer)
     ? config.webServer[0]
@@ -88,14 +98,23 @@ test('deploys the fully checked GitHub Pages build from the project base path', 
   expectExactLine(build, 8, 'uses: actions/upload-pages-artifact@v4')
   expectExactLine(build, 10, 'path: prototype-web/dist')
 
-  const installIndex = build.indexOf('run: npm ci')
-  const checkIndex = build.indexOf('run: npm --prefix prototype-web run check')
-  const pagesBuildIndex = build.indexOf(
+  const installIndex = exactLineIndex(build, 8, 'run: npm ci')
+  const checkIndex = exactLineIndex(
+    build,
+    8,
+    'run: npm --prefix prototype-web run check',
+  )
+  const pagesBuildIndex = exactLineIndex(
+    build,
+    8,
     'run: npm --prefix prototype-web run build:pages',
   )
-  const uploadIndex = build.indexOf('uses: actions/upload-pages-artifact@v4')
+  const uploadIndex = exactLineIndex(
+    build,
+    8,
+    'uses: actions/upload-pages-artifact@v4',
+  )
 
-  expect(installIndex).toBeGreaterThanOrEqual(0)
   expect(checkIndex).toBeGreaterThan(installIndex)
   expect(pagesBuildIndex).toBeGreaterThan(checkIndex)
   expect(uploadIndex).toBeGreaterThan(pagesBuildIndex)

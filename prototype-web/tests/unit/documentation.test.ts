@@ -79,17 +79,23 @@ test('documents adult-off isolation and online-only QA evidence states', () => {
   const openResult = reportLine('URL open result')
   const manualQa = reportLine('Manual QA')
   const deployedCommit = reportLine('Deployed game commit')
+  const hasExactCommit = (line: string) => /`[0-9a-f]{40}`/.test(line)
   const pendingDeployment =
+    hasExactCommit(testedCommit) &&
     workflowRun.includes('尚無 workflow run') &&
     pagesUrl.includes('尚未取得') &&
     openResult.includes('尚未執行') &&
     manualQa.includes('blocked')
+  const deployedState = `${workflowRun}\n${pagesUrl}\n${openResult}`
+  const deployedStateHasFailure =
+    /未成功|失敗|尚未|HTTP\s*[45]\d\d/.test(deployedState)
   const completedDeployment =
     /https:\/\/github\.com\/.+\/actions\/runs\/\d+/.test(workflowRun) &&
     /https:\/\//.test(pagesUrl) &&
-    /(?:成功|已開啟|HTTP\s*2\d\d)/.test(openResult) &&
-    /`[0-9a-f]{40}`/.test(testedCommit) &&
-    /`[0-9a-f]{40}`/.test(deployedCommit)
+    /開啟成功|成功開啟|HTTP\s*2\d\d/.test(openResult) &&
+    !deployedStateHasFailure &&
+    hasExactCommit(testedCommit) &&
+    hasExactCommit(deployedCommit)
 
   expect(adultOffDocumentation).toMatch(
     /adultContent|adult-off|成熟內容預設關閉|成人內容關閉/,
