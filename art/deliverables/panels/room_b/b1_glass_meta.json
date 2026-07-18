@@ -1,0 +1,19 @@
+{
+ "asset_id": "card-b1_glass",
+ "seed": 443,
+ "steps": 36,
+ "cfg": 4.5,
+ "sampler": "er_sde",
+ "scheduler": "simple",
+ "width": 1536,
+ "height": 864,
+ "model_filename": "anima-aesthetic-v1.1.safetensors",
+ "style": "anima native illustration",
+ "note": "v3 retry: normal-size glass fix",
+ "review_status": "selected_v01",
+ "export": {
+  "master": "b1_glass_master.webp",
+  "size_kb": 91,
+  "upscale": "lanczos 1536x864->2560x1440"
+ }
+}

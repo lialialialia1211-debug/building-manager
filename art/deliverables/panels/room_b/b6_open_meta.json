@@ -1,0 +1,19 @@
+{
+ "asset_id": "card-b6_open",
+ "seed": 442,
+ "steps": 36,
+ "cfg": 4.5,
+ "sampler": "er_sde",
+ "scheduler": "simple",
+ "width": 1536,
+ "height": 864,
+ "model_filename": "anima-aesthetic-v1.1.safetensors",
+ "style": "anima native illustration",
+ "note": "v3 retry: opened-panel-as-subject fix",
+ "review_status": "selected_v01",
+ "export": {
+  "master": "b6_open_master.webp",
+  "size_kb": 156,
+  "upscale": "lanczos 1536x864->2560x1440"
+ }
+}

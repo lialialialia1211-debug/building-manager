@@ -1,0 +1,19 @@
+{
+ "asset_id": "card-b2n_hall",
+ "seed": 403,
+ "steps": 36,
+ "cfg": 4.5,
+ "sampler": "er_sde",
+ "scheduler": "simple",
+ "width": 1536,
+ "height": 864,
+ "model_filename": "anima-aesthetic-v1.1.safetensors",
+ "workflow_filename": "stylelock_batch.py",
+ "positive_prompt": "masterpiece, best quality, year 2025, newest, highres, safe, anime screenshot, clean cel animation, crisp dark lineart, two-step cel shading, mature adult characters, clear silhouette, cinematic night lighting, controlled highlights, detailed expressive adult eyes, 16:9 composition, no text in image.\n\nXu Anning (placeholder cast: sanhua (wuthering waves)), a 29-year-old adult woman, 168 cm tall, natural mature build, medium grey hair with a single braid, red eyes with mismatched pupils, a small mole under her mouth. She wears a dark green lightweight jacket over a black top and dark trousers. Alert, direct, precise listening and recording gestures.\n\nZhou Yan (placeholder cast: male rover (wuthering waves)), 1boy, a 33-year-old adult man, 185 cm tall, broad stable build, short black hair with crossed bangs and one long thin braid, glowing yellow eyes, subtle stubble on his chin. He wears a graphite-gray high-collar work jacket, dark work trousers, durable ankle boots. Calm professional posture.\n\nInside a fictional low-magic urban apartment at night. The fixed room layout has the abnormal shared wall on frame right, the entrance on frame left, a sound-editing desk and sofa in the center, and a short hallway visible through the door. Cool moonlit teal, muted gray-violet surfaces, controlled green recorder lights, and a dim abnormal yellow glow behind the wall. Clean cel animation, consistent room geometry, no readable text or waveform labels.\n\nHigh-angle long-perspective hallway composition. Xu stands near the apartment door on frame left and Zhou near the opposite door on frame right, using a tape measure and two simple laser points. An impossible doorless width lies between them. Their positions and measurement direction remain easy to read. Their bodies do not overlap.\n\nMaintain the exact approved character face, adult age appearance, hairstyle, hair accessory or eyebrow scar, eye color, body proportions, clothing state, handedness, room layout, prop design, camera-side continuity, and light direction. Do not add people, props, jewelry, text, or background openings.",
+ "negative_prompt": "worst quality, low quality, blurry, jpeg artifacts, chromatic aberration, artist name, text, watermark, logo, photorealistic, 3d render, chibi, child, teenager, school uniform, young-looking face, duplicate person, extra person, extra fingers, missing fingers, fused hands, malformed tools, inconsistent hair, inconsistent clothes, different eye color, cropped face, cropped hands, unreadable action, excessive bloom, broken perspective, mirrored room layout, nsfw, explicit, nudity, exposed genitals, sexual intercourse",
+ "comfy_output": "stylelock\\cards/card-b2n_hall_s403_00001_.png",
+ "placeholder_cast": "wuthering waves",
+ "generation_date": "2026-07-17",
+ "manual_edits": "none",
+ "review_status": "pending"
+}

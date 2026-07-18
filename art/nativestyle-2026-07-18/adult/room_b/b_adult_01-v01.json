@@ -1,0 +1,21 @@
+{
+ "asset_id": "b_adult_01",
+ "seed": 822,
+ "steps": 36,
+ "cfg": 4.5,
+ "sampler": "er_sde",
+ "scheduler": "simple",
+ "width": 1536,
+ "height": 864,
+ "model_filename": "anima-aesthetic-v1.1.safetensors",
+ "workflow_filename": "native_batch.py",
+ "positive_prompt": "sensitive, 1girl, 1boy, hetero couple.\n\n1girl segment: sanhua (wuthering waves), wuthering waves, grey hair, medium hair, single braid, red eyes, mismatched pupils, mole under mouth. She wears a dark green light jacket over a black top and dark trousers.\n\n1boy segment: rover (wuthering waves), wuthering waves, male focus, black hair, crossed bangs, long braid, yellow eyes, stubble. He wears a graphite grey high-collar jacket and dark trousers.\n\nInside a modern apartment at night: entrance on the left, a sound-editing desk and sofa in the center, the shared wall on the right, moonlight through the window and small green recorder lights.\n\nTwo-character shot near the sealed wall. Xu voluntarily takes Zhou's hand; he stops, meets her gaze, and returns the grip after her clear response. Quiet moonlit mood, both faces visible.\n\nno text.",
+ "negative_prompt": "worst quality, low quality, score_1, score_2, score_3, blurry, jpeg artifacts, sepia, artist name, text, watermark, extra fingers, missing fingers, fused hands, duplicate person, extra person, split screen, comic panels, multiple panels, child, unconscious, sleeping, intoxicated, coercion, restraint, forced expression, fear, crying, injury, violence, childlike body, flat chest",
+ "comfy_output": "nativestyle\\adult\\room_b/b_adult_01_s822_00001_.png",
+ "style": "anima native illustration (no style block)",
+ "placeholder_cast": "wuthering waves",
+ "generation_date": "2026-07-18",
+ "manual_edits": "none",
+ "review_status": "selected_v01",
+ "selected_from_candidate": "b_adult_01_s822.json"
+}

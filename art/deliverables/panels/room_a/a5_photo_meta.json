@@ -1,0 +1,16 @@
+{
+ "asset_id": "a5_photo",
+ "source": "card-a5_photo_s901_00001_.png",
+ "seed": 901,
+ "steps": 36,
+ "cfg": 4.5,
+ "sampler": "er_sde",
+ "scheduler": "simple",
+ "model_filename": "anima-aesthetic-v1.1.safetensors",
+ "style": "anima native illustration",
+ "placeholder_cast": "wuthering waves",
+ "upscale": "lanczos 1536x864->2560x1440",
+ "size_kb": 203,
+ "note": "",
+ "review_status": "selected_v01"
+}

@@ -1,0 +1,16 @@
+{
+ "asset_id": "char-zhou_yan-sheet",
+ "type": "manual contact sheet (PIL assembly)",
+ "sources": {
+  "front": "char-zhou_yan-ref-front_s101.json",
+  "threequarter": "char-zhou_yan-ref-threequarter_s102.json",
+  "side": "char-zhou_yan-ref-side_s101.json",
+  "back": "char-zhou_yan-ref-back_s102.json"
+ },
+ "busts": [
+  "neutral s201",
+  "tense s201"
+ ],
+ "review_status": "selected_v01",
+ "note": "labels (name/age/height/ADULT) added in assembly per spec 02 section 6"
+}

@@ -1,0 +1,20 @@
+{
+ "asset_id": "a_adult_06",
+ "seed": 822,
+ "steps": 36,
+ "cfg": 4.5,
+ "sampler": "er_sde",
+ "scheduler": "simple",
+ "width": 1536,
+ "height": 864,
+ "model_filename": "anima-aesthetic-v1.1.safetensors",
+ "workflow_filename": "native_batch.py",
+ "positive_prompt": "explicit, nude, 1girl, 1boy, hetero couple.\n\n1girl segment: changli (wuthering waves), wuthering waves, long hair, multicolored hair, red hair, pink hair, ponytail, feather hair ornament, hair intakes, amber eyes.\n\n1boy segment: rover (wuthering waves), wuthering waves, male focus, black hair, crossed bangs, long braid, yellow eyes.\n\nInside a modern apartment living room at night during a blackout: entrance door on the left, window in the center, an electrical panel on the right wall, warm candlelight.\n\nThe motion has slowed into a tight embrace: Lin still on Chen's lap, foreheads pressed together, both nude, breathing calmly, candlelight fading soft. Tender afterglow mood.\n\nno text.",
+ "negative_prompt": "worst quality, low quality, score_1, score_2, score_3, blurry, jpeg artifacts, sepia, artist name, text, watermark, extra fingers, missing fingers, fused hands, duplicate person, extra person, split screen, comic panels, multiple panels, child, unconscious, sleeping, intoxicated, coercion, restraint, forced expression, fear, crying, injury, violence, childlike body, flat chest",
+ "comfy_output": "nativestyle\\adult\\room_a/a_adult_06_s822_00001_.png",
+ "style": "anima native illustration (no style block)",
+ "placeholder_cast": "wuthering waves",
+ "generation_date": "2026-07-18",
+ "manual_edits": "none",
+ "review_status": "pending"
+}

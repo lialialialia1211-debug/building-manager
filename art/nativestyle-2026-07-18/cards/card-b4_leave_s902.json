@@ -1,0 +1,19 @@
+{
+ "asset_id": "card-b4_leave",
+ "seed": 902,
+ "steps": 36,
+ "cfg": 4.5,
+ "sampler": "er_sde",
+ "scheduler": "simple",
+ "width": 1536,
+ "height": 864,
+ "model_filename": "anima-aesthetic-v1.1.safetensors",
+ "workflow_filename": "final_batch.py",
+ "positive_prompt": "safe, 1girl, 1boy.\n\n1girl segment: sanhua (wuthering waves), wuthering waves, grey hair, medium hair, single braid, red eyes, mismatched pupils, mole under mouth. She wears a dark green light jacket over a black top and dark trousers.\n\n1boy segment: rover (wuthering waves), wuthering waves, male focus, black hair, crossed bangs, long braid, yellow eyes, stubble. He wears a graphite grey high-collar jacket and dark trousers.\n\nIn a modern apartment building hallway at night, two apartment doors facing an unnaturally wide blank wall between them, cold emergency lighting.\n\nLong-perspective hallway shot. Xu locks the apartment and applies tamper tape while Zhou records the time on a device with no readable screen. Their equipment is packed; the abnormal wall remains visible only through a narrowing doorway shadow.\n\nOne single continuous scene in one unified room. no text.",
+ "negative_prompt": "worst quality, low quality, score_1, score_2, score_3, blurry, jpeg artifacts, sepia, artist name, text, watermark, extra fingers, missing fingers, fused hands, duplicate person, extra person, split screen, comic panels, multiple panels, child, nsfw, explicit, nudity, exposed genitals, sexual intercourse",
+ "style": "anima native illustration",
+ "placeholder_cast": "wuthering waves",
+ "generation_date": "2026-07-18",
+ "manual_edits": "none",
+ "review_status": "pending"
+}

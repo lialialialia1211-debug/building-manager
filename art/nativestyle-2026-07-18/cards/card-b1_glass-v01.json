@@ -1,0 +1,14 @@
+{
+ "asset_id": "card-b1_glass",
+ "seed": 443,
+ "steps": 36,
+ "cfg": 4.5,
+ "sampler": "er_sde",
+ "scheduler": "simple",
+ "width": 1536,
+ "height": 864,
+ "model_filename": "anima-aesthetic-v1.1.safetensors",
+ "style": "anima native illustration",
+ "note": "v3 retry: normal-size glass fix",
+ "review_status": "selected_v01"
+}

@@ -1,0 +1,16 @@
+{
+ "asset_id": "char-lin_yuwei-sheet",
+ "type": "manual contact sheet (PIL assembly)",
+ "sources": {
+  "front": "char-lin_yuwei-ref-front_s101.json",
+  "threequarter": "char-lin_yuwei-ref-threequarter_s102.json",
+  "side": "char-lin_yuwei-ref-side_s102.json",
+  "back": "char-lin_yuwei-ref-back_s101.json"
+ },
+ "busts": [
+  "neutral s201",
+  "tense s201"
+ ],
+ "review_status": "selected_v01",
+ "note": "labels (name/age/height/ADULT) added in assembly per spec 02 section 6"
+}

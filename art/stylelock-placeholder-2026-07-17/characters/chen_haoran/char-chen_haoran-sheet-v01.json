@@ -1,0 +1,16 @@
+{
+ "asset_id": "char-chen_haoran-sheet",
+ "type": "manual contact sheet (PIL assembly)",
+ "sources": {
+  "front": "char-chen_haoran-ref-front_s101.json",
+  "threequarter": "char-chen_haoran-ref-threequarter_s102.json",
+  "side": "char-chen_haoran-ref-side_s102.json",
+  "back": "char-chen_haoran-ref-back_s102.json"
+ },
+ "busts": [
+  "neutral s201",
+  "tense s201"
+ ],
+ "review_status": "selected_v01",
+ "note": "labels (name/age/height/ADULT) added in assembly per spec 02 section 6"
+}

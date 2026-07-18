@@ -1,0 +1,16 @@
+{
+ "asset_id": "b_open_01",
+ "source": "b_open_01_s902_00001_.png",
+ "seed": 902,
+ "steps": 36,
+ "cfg": 4.5,
+ "sampler": "er_sde",
+ "scheduler": "simple",
+ "model_filename": "anima-aesthetic-v1.1.safetensors",
+ "style": "anima native illustration",
+ "placeholder_cast": "wuthering waves",
+ "upscale": "lanczos 1536x864->2560x1440",
+ "size_kb": 134,
+ "note": "",
+ "review_status": "selected_v01"
+}
