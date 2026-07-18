@@ -16,6 +16,35 @@ export interface PageFailureRecorder {
   assertNoFailures(): Promise<void>
 }
 
+export async function waitForRenderedImages(page: Page): Promise<void> {
+  await expect.poll(async () => page.evaluate(() => {
+    const pending: string[] = []
+    const broken: string[] = []
+
+    for (const image of document.querySelectorAll('img')) {
+      const label = image.currentSrc || image.getAttribute('src') || image.alt
+      if (!image.complete) {
+        pending.push(label)
+      } else if (image.naturalWidth <= 0 || image.naturalHeight <= 0) {
+        broken.push(label)
+      }
+    }
+
+    const runtimeErrors = Array.from(
+      document.querySelectorAll('.runtime-image-error'),
+      (element) => element.textContent?.trim() || 'runtime image error',
+    )
+
+    return { pending, broken, runtimeErrors }
+  }), {
+    message: 'all rendered runtime images should finish loading successfully',
+  }).toEqual({
+    pending: [],
+    broken: [],
+    runtimeErrors: [],
+  })
+}
+
 export function recordPageFailures(page: Page): PageFailureRecorder {
   const pageErrors: string[] = []
   const consoleErrors: string[] = []
@@ -48,7 +77,7 @@ export function recordPageFailures(page: Page): PageFailureRecorder {
 
   return {
     async assertNoFailures() {
-      await page.waitForLoadState('networkidle')
+      await waitForRenderedImages(page)
       expect(pageErrors, 'unexpected page errors').toEqual([])
       expect(consoleErrors, 'unexpected console errors').toEqual([])
       expect(failedRequests, 'unexpected failed requests').toEqual([])
@@ -163,6 +192,5 @@ export async function playRoute(
     await options.onResult?.(page)
   }
 
-  await failures.assertNoFailures()
   return failures
 }

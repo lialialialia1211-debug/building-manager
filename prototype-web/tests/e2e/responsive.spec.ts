@@ -83,7 +83,7 @@ test.describe('reduced motion', () => {
     page,
   }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' })
-    await playRoute(
+    const failures = await playRoute(
       page,
       route.roomName,
       [...route.panels],
@@ -91,6 +91,7 @@ test.describe('reduced motion', () => {
     )
 
     const player = page.locator('.cinematic-player')
+    await player.getByRole('button', { name: '重播' }).click()
     await player.getByRole('button', { name: '暫停' }).click()
     const stage = page.getByTestId('cinematic-stage')
     const before = await stage.getAttribute('data-asset-id')
@@ -115,5 +116,6 @@ test.describe('reduced motion', () => {
       expect(style.animationName).toBe('none')
       expect(style.transform).toBe('none')
     }
+    await failures.assertNoFailures()
   })
 })

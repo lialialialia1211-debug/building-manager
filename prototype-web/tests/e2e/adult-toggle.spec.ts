@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { endingRoutes, roomARoutes } from './ending-routes'
-import { playRoute } from './helpers'
+import { playRoute, waitForRenderedImages } from './helpers'
 
 function isAdultRequest(url: string): boolean {
   return url.includes('adult-asset-manifest.json')
@@ -47,6 +47,7 @@ for (const route of endingRoutes) {
               'data-asset-id',
               `${prefix}_safe_0${frame}`,
             )
+          await waitForRenderedImages(page)
           if (frame < 6) {
             await player.getByRole('button', { name: '下一格' }).click()
           }
@@ -87,11 +88,25 @@ test('adult-on Room A intimacy loads adult assets and completes the player', asy
     },
   )
 
+  const player = page.locator('.cinematic-player')
+  const stage = page.getByTestId('cinematic-stage')
+  await player.getByRole('button', { name: '重播' }).click()
+  await player.getByRole('button', { name: '暫停' }).click()
+
+  for (let frame = 1; frame <= 6; frame += 1) {
+    const assetId = `a_intimacy_0${frame}`
+    await expect(stage).toHaveAttribute('data-asset-id', assetId)
+    await waitForRenderedImages(page)
+    expect(requests.some((url) => url.includes(
+      `/assets/adult/${assetId}_master.webp`,
+    ))).toBe(true)
+    if (frame < 6) {
+      await player.getByRole('button', { name: '下一格' }).click()
+    }
+  }
+
   expect(requests.some((url) => (
     url.includes('adult-asset-manifest.json')
   ))).toBe(true)
-  expect(requests.some((url) => url.includes('/assets/adult/'))).toBe(true)
-  await expect(page.getByTestId('cinematic-stage'))
-    .toHaveAttribute('data-asset-id', /^a_intimacy_0[1-6]$/)
   await failures.assertNoFailures()
 })
