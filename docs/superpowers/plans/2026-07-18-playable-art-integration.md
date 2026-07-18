@@ -18,6 +18,7 @@
 - 保留既有 `formal` 美術門檻；本次新增 `playable` 模式，不降低正式發行標準。
 - 新增行為先寫失敗測試，再寫最小實作，最後重構。
 - 每個 task 只提交該 task 檔案；提交前用 `git status --short` 排除使用者既有變更。
+- 使用者已核准 `art/` 完全不修改、不 stage；playable 整合狀態只寫入已追蹤的 README 與 QA 報告。
 - 最後必須執行 `npm --prefix prototype-web run check`。通過後才可部署精確提交到 GitHub Pages 並交付人工 QA。
 - 人工 QA 只使用已成功開啟的 GitHub-hosted preview URL；報告記錄 URL 與 deployed commit。
 
@@ -465,7 +466,6 @@ git diff --check
 - Create: `.github/workflows/deploy-pages.yml`
 - Modify: `prototype-web/README.md`
 - Modify: `content/README.md`
-- Modify: `art/deliverables/HANDOFF.md`
 - Create: `docs/qa/2026-07-18-playable-art-integration.md`
 - Modify: `prototype-web/tests/unit/documentation.test.ts`
 - Modify: `prototype-web/tests/unit/playwright-config.test.ts`
@@ -488,7 +488,7 @@ git diff --check
 
 - [ ] prototype README 記載本機只供自動驗證，人工 QA 必須用 Pages URL。
 - [ ] content README 記載 assets:sync/check、common/adult manifests、canonical rename。
-- [ ] HANDOFF 記載素材已進 playable placeholder；8 支影片、16 UI、16 props、6 lights 仍是正式發行缺口。
+- [ ] content README 與 QA 報告記載素材已進 playable placeholder；8 支影片、16 UI、16 props、6 lights 仍是正式發行缺口，`art/deliverables/HANDOFF.md` 保持原樣。
 - [ ] QA 報告包含 automated check、commit、workflow run、preview URL、URL open result、manual routes、known gaps。
 
 ### 8.4 在精確提交上跑完整閘門
