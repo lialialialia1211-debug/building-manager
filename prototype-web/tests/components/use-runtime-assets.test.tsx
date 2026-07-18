@@ -20,6 +20,14 @@ function jsonResponse(value: unknown, ok = true): Response {
   } as Response
 }
 
+function deferred<T>() {
+  let resolve!: (value: T) => void
+  const promise = new Promise<T>((completion) => {
+    resolve = completion
+  })
+  return { promise, resolve }
+}
+
 async function loadHook() {
   return import(hookModulePath).catch(() => null)
 }
@@ -95,6 +103,46 @@ test('preserves the common catalog when the adult request fails and retries it',
     expect(result.current.adultStatus).toBe('ready')
   })
   expect(adultAttempts).toBe(2)
+})
+
+test('ignores an adult response that resolves after adult content is disabled', async () => {
+  const runtimeAssets = await loadHook()
+  const adultResponse = deferred<Response>()
+  const fetch = vi.fn((url: string) => {
+    if (url.endsWith('adult-asset-manifest.json')) {
+      return adultResponse.promise
+    }
+    return Promise.resolve(jsonResponse(commonManifest))
+  })
+  vi.stubGlobal('fetch', fetch)
+
+  expect(runtimeAssets).not.toBeNull()
+  const { result, rerender } = renderHook(
+    ({ adultContent }) => runtimeAssets!.useRuntimeAssets(adultContent),
+    { initialProps: { adultContent: false } },
+  )
+  await waitFor(() => {
+    expect(result.current.commonStatus).toBe('ready')
+  })
+
+  rerender({ adultContent: true })
+  await waitFor(() => {
+    expect(fetch).toHaveBeenCalledWith('/adult-asset-manifest.json')
+  })
+  expect(result.current.adultStatus).toBe('loading')
+
+  rerender({ adultContent: false })
+  await waitFor(() => {
+    expect(result.current.adultStatus).toBe('disabled')
+  })
+
+  await act(async () => {
+    adultResponse.resolve(jsonResponse(adultManifest))
+    await Promise.resolve()
+  })
+
+  expect(result.current.adultStatus).toBe('disabled')
+  expect(result.current.catalog?.adult).toBeNull()
 })
 
 test('reports a blocking common error and retries it', async () => {
