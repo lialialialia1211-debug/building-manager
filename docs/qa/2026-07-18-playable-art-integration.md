@@ -5,9 +5,10 @@
 
 ## 自動驗證
 
-- Tested game commit：`3fe0b92b391b59da15d776ad1266f3f9dc84ddfb`，已通過完整 `npm --prefix prototype-web run check`。
+- Tested game commit：`b067373fd816e089dd351756e96c07a1e3d20342`，已通過完整 `npm --prefix prototype-web run check`。
 - Evidence commit：本 QA 證據以獨立報告提交保存，並與 tested game commit 分開記錄；它不改變已測遊戲提交。
-- 驗證結果：content/assets validators 通過；Vitest 39 files、307 tests 通過；production build 通過；三個 Playwright viewport 共 48 tests 通過，adult-off 路線不請求成人 manifest 或成人圖片。
+- 驗證結果：content/assets validators 通過；Vitest 39 files、324 tests 通過；production build 與 Pages build 通過；三個 Playwright viewport 共 51 tests 通過。fresh profile 與 adult-off 路線不請求成人 manifest 或成人圖片，明確開啟的 adult-on 路線仍載入六張成人回想。
+- Runtime gate：完整來源存在時通過 metadata 三件組、source/target byte parity 與 lock hash 驗證；模擬乾淨 checkout、整個來源根不存在時，committed runtime lock 驗證同樣通過。
 
 ## 部署狀態
 
