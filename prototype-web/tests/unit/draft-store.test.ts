@@ -3,7 +3,11 @@ import {
   createAppStore,
   type AppStoreDependencies,
 } from '@/app/store'
-import type { PlaytestRecorder } from '@/analytics/playtest-log'
+import type {
+  PlaytestEventType,
+  PlaytestPayloadMap,
+  PlaytestRecorder,
+} from '@/analytics/playtest-log'
 import { DraftStoryEngine } from '@/domain/draft-story-engine'
 import {
   PROGRESS_KEY,
@@ -12,7 +16,12 @@ import {
 } from '@/domain/progress'
 import type { PanelDefinition, RoomDefinition } from '@/domain/types'
 
-const recorder: PlaytestRecorder = { record() {} }
+const noOpRecorder: PlaytestRecorder = { record() {} }
+
+interface RecordedCall {
+  type: PlaytestEventType
+  payload: PlaytestPayloadMap[PlaytestEventType]
+}
 
 function createStorage(): StorageAdapter {
   const values = new Map<string, string>()
@@ -20,6 +29,45 @@ function createStorage(): StorageAdapter {
     getItem: (key) => values.get(key) ?? null,
     setItem: (key, value) => {
       values.set(key, value)
+    },
+  }
+}
+
+function createFailingStorage(): {
+  storage: StorageAdapter
+  failPrimaryWrites: { current: boolean }
+} {
+  const values = new Map<string, string>()
+  const failPrimaryWrites = { current: false }
+
+  return {
+    failPrimaryWrites,
+    storage: {
+      getItem: (key) => values.get(key) ?? null,
+      setItem: (key, value) => {
+        if (key === PROGRESS_KEY && failPrimaryWrites.current) {
+          throw new DOMException('quota exceeded', 'QuotaExceededError')
+        }
+        values.set(key, value)
+      },
+    },
+  }
+}
+
+function createRecorder(): {
+  calls: RecordedCall[]
+  recorder: PlaytestRecorder
+} {
+  const calls: RecordedCall[] = []
+  return {
+    calls,
+    recorder: {
+      record(type, payload) {
+        calls.push({
+          type,
+          payload: payload as PlaytestPayloadMap[PlaytestEventType],
+        })
+      },
     },
   }
 }
@@ -100,6 +148,7 @@ function createRoom(): RoomDefinition {
 function createStore(
   storage: StorageAdapter,
   room: RoomDefinition,
+  recorder: PlaytestRecorder = noOpRecorder,
 ) {
   const dependencies: AppStoreDependencies = {
     storage,
@@ -192,6 +241,90 @@ describe('drafting store flow', () => {
         main: ['p1', 'p2', 'p3', 'p4', 'p5', 'p6'],
       },
     })
+  })
+
+  test('retries a failed drafting settlement without mutating state or analytics', async () => {
+    const failing = createFailingStorage()
+    const { calls, recorder } = createRecorder()
+    const room = createRoom()
+    const store = createStore(failing.storage, room, recorder)
+    await store.getState().startRoom(room.id)
+
+    for (let index = 0; index < 6; index += 1) {
+      store.getState().placePanel(`p${index + 1}`, index)
+    }
+    store.getState().confirmArrangement()
+    for (let index = 0; index < 5; index += 1) {
+      store.getState().finishReveal()
+    }
+
+    const beforeFailure = store.getState()
+    const beforeProgress = structuredClone(beforeFailure.progress)
+    const beforeEngine = beforeFailure.engine
+    const beforeEngineSnapshot = structuredClone(
+      (beforeEngine as DraftStoryEngine).snapshot,
+    )
+    const beforeEvents = structuredClone(calls)
+    failing.failPrimaryWrites.current = true
+
+    store.getState().finishReveal()
+
+    expect(store.getState()).toMatchObject({
+      screen: 'comic',
+      engine: beforeEngine,
+      settledResult: null,
+      choiceLocked: true,
+      revealedPanelId: 'p6',
+      error: { actionLabel: '重新保存結局' },
+    })
+    expect(store.getState().progress).toEqual(beforeProgress)
+    expect(store.getState().progress.completedEndings).toEqual({})
+    expect(store.getState().progress.clues).toEqual([])
+    expect(store.getState().progress.galleryUnlocks).toEqual([])
+    expect(store.getState().progress.currentRun).toEqual(
+      beforeProgress.currentRun,
+    )
+    expect(store.getState().progress.endingRecaps).toEqual({})
+    expect((store.getState().engine as DraftStoryEngine).snapshot)
+      .toEqual(beforeEngineSnapshot)
+    expect(calls).toEqual(beforeEvents)
+    expect(calls.filter(({ type }) => type === 'ending_reached'))
+      .toHaveLength(0)
+
+    failing.failPrimaryWrites.current = false
+    store.getState().retryError()
+
+    expect(store.getState()).toMatchObject({
+      screen: 'result',
+      settledResult: { roomId: room.id, endingId: 'main' },
+      choiceLocked: false,
+      revealedPanelId: null,
+      error: null,
+    })
+    expect(store.getState().progress).toMatchObject({
+      completedEndings: { [room.id]: ['main'] },
+      clues: ['main_clue'],
+      galleryUnlocks: ['main_gallery'],
+      currentRun: null,
+      endingRecaps: {
+        [room.id]: {
+          main: ['p1', 'p2', 'p3', 'p4', 'p5', 'p6'],
+        },
+      },
+    })
+    expect(JSON.parse(
+      failing.storage.getItem(PROGRESS_KEY) ?? '{}',
+    ).endingRecaps).toEqual({
+      [room.id]: {
+        main: ['p1', 'p2', 'p3', 'p4', 'p5', 'p6'],
+      },
+    })
+    expect(calls.filter(({ type }) => type === 'ending_reached')).toEqual([
+      {
+        type: 'ending_reached',
+        payload: { roomId: room.id, endingId: 'main', choiceCount: 6 },
+      },
+    ])
   })
 
   test('resumes an unconfirmed arrangement without rerolling the deal', async () => {

@@ -8,6 +8,7 @@ import type { PlaytestRecorder } from '@/analytics/playtest-log'
 import {
   PROGRESS_KEY,
   createEmptyProgress,
+  loadProgress,
   saveProgress,
   type StorageAdapter,
 } from '@/domain/progress'
@@ -961,9 +962,13 @@ test('settles the priority ending only after the sixth reveal finishes', async (
   const storage = createStorage()
   const progress = createEmptyProgress()
   progress.completedEndings[settlementRoom.id] = ['main', 'intimacy']
+  const siblingRecap = ['same-room-main']
+  const otherRoomRecap = ['other-room-normal']
   progress.endingRecaps[settlementRoom.id] = {
+    main: siblingRecap,
     intimacy: ['outdated-panel'],
   }
+  progress.endingRecaps.other_room = { normal: otherRoomRecap }
   progress.clues = ['existing-clue']
   progress.galleryUnlocks = ['existing-gallery']
   saveProgress(storage, progress)
@@ -1013,8 +1018,10 @@ test('settles the priority ending only after the sixth reveal finishes', async (
     },
     endingRecaps: {
       [settlementRoom.id]: {
+        main: siblingRecap,
         intimacy: ['p1', 'p4', 'p7', 'p10', 'p13', 'p16'],
       },
+      other_room: { normal: otherRoomRecap },
     },
     clues: ['existing-clue', 'new-clue'],
     galleryUnlocks: ['existing-gallery', 'new-gallery'],
@@ -1028,11 +1035,20 @@ test('settles the priority ending only after the sixth reveal finishes', async (
     },
     endingRecaps: {
       [settlementRoom.id]: {
+        main: siblingRecap,
         intimacy: ['p1', 'p4', 'p7', 'p10', 'p13', 'p16'],
       },
+      other_room: { normal: otherRoomRecap },
     },
     clues: ['existing-clue', 'new-clue'],
     galleryUnlocks: ['existing-gallery', 'new-gallery'],
+  })
+  expect(loadProgress(storage).endingRecaps).toEqual({
+    [settlementRoom.id]: {
+      main: siblingRecap,
+      intimacy: ['p1', 'p4', 'p7', 'p10', 'p13', 'p16'],
+    },
+    other_room: { normal: otherRoomRecap },
   })
 })
 
