@@ -53,17 +53,20 @@ ComfyUI/models/vae/qwen_image_vae.safetensors
 
 ## 3. Prompt 組裝順序
 
+> **2026-07-18 改版（Zhi 拍板，取代原 QUALITY/STYLE BLOCK 制）**：實測證明原 STYLE BLOCK（anime screenshot/cel tags）與角色 block 的年齡/身高/mature 語言會把畫面推向 TV 截圖感與寫實感。新制如下：
+
 ```text
-QUALITY / SAFETY
-STYLE BLOCK
-CHARACTER A BLOCK
-CHARACTER B BLOCK（若有）
-ROOM BLOCK
-SCENE BLOCK
-CONTINUITY BLOCK
+SAFETY + 人數 tag（safe / sensitive / nsfw / explicit, 1girl, 1boy...）
+CHARACTER BLOCK（danbooru tag 開頭 + 服裝短句；禁age/height/mature字眼）
+ROOM BLOCK（只寫幾何格局與光源，不掛色彩腳本 tag）
+SCENE BLOCK（姿勢與構圖，維持不變）
+單場景鎖詞：One single continuous scene in one unified room.（雙人必加，防分格）
+no text
 ```
 
-完整 prompt 使用英文自然語言搭配少量 Anima tags。官方建議純自然語言至少寫兩句，雙人圖必須逐一描述每名角色；Aesthetic 版本不需 `score_*`，本包一律不加入 artist tags。
+- **不掛任何 quality/style tag**，風格交給 Anima Aesthetic 預設。
+- Negative 統一用：`worst quality, low quality, score_1, score_2, score_3, blurry, jpeg artifacts, sepia, artist name, text, watermark, extra fingers, missing fingers, fused hands, duplicate person, extra person, split screen, comic panels, multiple panels, child`（安全版另加 nsfw/explicit/nudity 系；成人版另加無強迫/無醉態/無幼態系；**禁用 `young-looking face`**）。
+- 官方建議純自然語言至少兩句、雙人圖逐一描述每名角色——維持。
 
 ### 3.1 Safe Quality Block
 
