@@ -38,3 +38,9 @@
 ## 重生成方式
 
 任何一張不滿意：讀該圖 `_meta.json` 的 prompt/seed → 改 seed 重跑（workflow 見 `docs/art/.../06`，腳本範本 `D:/AI/workflows/saved/anima_t2i/anima_queue.py`）。候選對比圖全部在 `../nativestyle-2026-07-18/_review/`。
+
+## Runtime 落地狀態（2026-07-19 接線完成）
+
+- 87 張 panel + 2 張背景已由 `prototype-web/scripts/sync-runtime-assets.ts` 接進遊戲，成為 **playable placeholder** 美術：75 張共用 + 2 背景 → `content/asset-manifest.json`（schema 2、`playable`），12 張成人 → `content/adult-asset-manifest.json`。玩家可見畫面已無 greybox。
+- 現行交付檔名已是 canonical（`a_intimacy_*`、`a_ending_*`、`a_open_*`），本文件表格中的 `a_adult_*`／`{room}_poster_*` 命名為早期規格，同步腳本仍保留正規化對照。
+- 仍是正式發行缺口（不在本次 playable 範圍）：8 支 12 秒結局影片（目前以 runtime 動態回顧的六張選擇＋poster 取代）、16 張 UI、16 張道具透明圖、6 張光效覆蓋，以及原創角色重產（現為鳴潮 placeholder）。

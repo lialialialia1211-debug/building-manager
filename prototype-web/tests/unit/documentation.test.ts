@@ -36,3 +36,15 @@ test('root README documents the implemented prototype workflow and gates', () =>
   expect(readme).toMatch(/playtest export[\s\S]*僅限本機/i)
   expect(readme).toMatch(/Godot[\s\S]*仍受阻擋/i)
 })
+
+test('root README documents the playable art pipeline and isolation', () => {
+  expect(readme).toContain('art/deliverables/')
+  expect(readme).toContain('assets:sync')
+  expect(readme).toContain('assets:check-runtime')
+  expect(readme).toContain('playable')
+  expect(readme).toContain('formal')
+  expect(readme).toMatch(/成人設定關閉[\s\S]*\/adult\//)
+  expect(readme).toContain('12 秒動態回想')
+  expect(readme).toMatch(/8 支[\s\S]*影片[\s\S]*缺口/)
+  expect(readme).toContain('build:pages')
+})
