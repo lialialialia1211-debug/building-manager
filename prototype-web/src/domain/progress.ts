@@ -14,6 +14,15 @@ export interface ProgressSettings {
   autoFastForward: boolean
 }
 
+export type EndingId = 'main' | 'normal' | 'intimacy'
+
+// Per-room, per-ending record of the last completed six-panel selection so the
+// result screen and gallery can replay a deterministic cinematic recap.
+export type EndingRecaps = Record<
+  string,
+  Partial<Record<EndingId, string[]>>
+>
+
 export interface ProgressData {
   version: 1
   currentRun: null | {
@@ -26,6 +35,7 @@ export interface ProgressData {
   galleryUnlocks: string[]
   crossRoomFlags: Record<string, boolean>
   readHistory: Record<string, true>
+  endingRecaps: EndingRecaps
   settings: ProgressSettings
 }
 
@@ -183,8 +193,41 @@ const progressV1Schema = z.object({
     z.string(),
     z.literal(true),
   ).optional(),
+  endingRecaps: z.record(
+    z.string(),
+    z.partialRecord(
+      endingIdSchema,
+      z.array(z.string().trim().min(1)),
+    ),
+  ).optional(),
   settings: settingsSchema.optional(),
 }).strict()
+
+function sanitizeEndingRecaps(
+  value: Record<string, Partial<Record<EndingId, string[]>>> | undefined,
+): EndingRecaps {
+  const result: EndingRecaps = {}
+  if (!value) return result
+  for (const [roomId, endings] of Object.entries(value)) {
+    const roomRecaps: Partial<Record<EndingId, string[]>> = {}
+    for (const [endingId, panelIds] of Object.entries(endings ?? {})) {
+      if (!Array.isArray(panelIds)) continue
+      const unique = [...new Set(
+        panelIds.filter(
+          (panelId) => typeof panelId === 'string'
+            && panelId.trim().length > 0,
+        ),
+      )]
+      if (unique.length >= 1 && unique.length <= 6) {
+        roomRecaps[endingId as EndingId] = unique.slice(0, 6)
+      }
+    }
+    if (Object.keys(roomRecaps).length > 0) {
+      result[roomId] = roomRecaps
+    }
+  }
+  return result
+}
 
 interface ParsedProgressValue {
   progress: ProgressData
@@ -200,6 +243,7 @@ export function createEmptyProgress(): ProgressData {
     galleryUnlocks: [],
     crossRoomFlags: {},
     readHistory: {},
+    endingRecaps: {},
     settings: {
       adultContent: true,
       exactStats: false,
@@ -246,6 +290,7 @@ function parseProgressValue(
       readHistory: {
         ...(parsed.data.readHistory ?? defaults.readHistory),
       },
+      endingRecaps: sanitizeEndingRecaps(parsed.data.endingRecaps),
       settings: {
         ...defaults.settings,
         ...parsed.data.settings,

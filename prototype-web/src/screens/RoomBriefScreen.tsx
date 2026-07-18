@@ -1,5 +1,8 @@
+import { RuntimeImage } from '@/components/RuntimeImage'
 import { clueLabel } from '@/domain/clue-labels'
 import type { ProgressData } from '@/domain/progress'
+import type { AssetCatalog } from '@/domain/runtime-assets'
+import { backgroundUrl } from '@/domain/runtime-assets'
 import type {
   CharacterDefinition,
   EndingId,
@@ -10,8 +13,21 @@ interface RoomBriefScreenProps {
   room: RoomDefinition
   characters: CharacterDefinition[]
   progress: ProgressData
+  catalog?: AssetCatalog
   onStart(): void
   onBack(): void
+}
+
+function safeBackgroundUrl(
+  catalog: AssetCatalog | undefined,
+  backgroundId: string | undefined,
+): string | null {
+  if (!catalog || !backgroundId) return null
+  try {
+    return backgroundUrl(catalog, backgroundId)
+  } catch {
+    return null
+  }
 }
 
 const roomSynopses: Record<string, string> = {
@@ -31,9 +47,17 @@ export function RoomBriefScreen({
   room,
   characters,
   progress,
+  catalog,
   onStart,
   onBack,
 }: RoomBriefScreenProps) {
+  const briefBackground = safeBackgroundUrl(
+    catalog,
+    room.backgroundAsset,
+  )
+  const openingThumbnails = catalog
+    ? room.openingAssets ?? []
+    : []
   const roomCharacters = characters.filter(
     (character) => character.roomId === room.id,
   )
@@ -68,6 +92,36 @@ export function RoomBriefScreen({
         <p>住戶事件</p>
         <h1 id="room-title">{room.title}</h1>
       </header>
+
+      {(briefBackground || openingThumbnails.length > 0) && catalog && (
+        <div className="brief-preview" aria-label="房間預覽">
+          {briefBackground && (
+            <img
+              className="brief-background"
+              src={briefBackground}
+              alt=""
+              draggable={false}
+            />
+          )}
+          {openingThumbnails.length > 0 && (
+            <div
+              className="brief-opening-thumbs"
+              aria-label="開場分鏡預覽"
+            >
+              {openingThumbnails.map((assetId, index) => (
+                <RuntimeImage
+                  key={assetId}
+                  catalog={catalog}
+                  assetId={assetId}
+                  variant="preview"
+                  alt={`開場分鏡 ${index + 1}`}
+                  className="brief-opening-thumb"
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="brief-grid">
         <section aria-labelledby="resident-title">

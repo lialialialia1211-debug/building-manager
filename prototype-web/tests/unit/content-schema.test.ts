@@ -56,6 +56,8 @@ const baseRoom = {
 
 function draftingRoom() {
   const room = structuredClone(baseRoom) as Record<string, any>
+  room.backgroundAsset = 'bg_room_a'
+  room.openingAssets = ['a_open_01', 'a_open_02', 'a_open_03']
   room.drafting = {
     dealSize: 12 as const,
     selectionSize: 6 as const,

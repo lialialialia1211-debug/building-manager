@@ -52,9 +52,11 @@ export interface AppStore {
   engine: StoryEngine | DraftStoryEngine | null
   settledResult: SettledResult | null
   choiceLocked: boolean
+  openingPending: boolean
   revealedPanelId: string | null
   error: AppError | null
   goTo(screen: ScreenId): void
+  finishOpening(): void
   selectRoom(roomId: string): void
   startRoom(roomId: string): Promise<void>
   resumeCurrentRun(): Promise<void>
@@ -97,6 +99,30 @@ function resolveDependencies(
     loadRoom: dependencies.loadRoom ?? loadRoomFromRepository,
     recorder: dependencies.recorder ?? defaultPlaytestRecorder,
     createRunSeed: dependencies.createRunSeed ?? defaultRunSeed,
+  }
+}
+
+function recapPanelIds(panelIds: readonly (string | null)[]): string[] {
+  return [...new Set(
+    panelIds.filter(
+      (panelId): panelId is string =>
+        typeof panelId === 'string' && panelId.length > 0,
+    ),
+  )].slice(0, 6)
+}
+
+function writeEndingRecap(
+  progress: ProgressData,
+  roomId: string,
+  endingId: EndingId,
+  panelIds: readonly (string | null)[],
+): void {
+  const recap = recapPanelIds(panelIds)
+  if (recap.length === 0) return
+  if (!progress.endingRecaps) progress.endingRecaps = {}
+  progress.endingRecaps[roomId] = {
+    ...progress.endingRecaps[roomId],
+    [endingId]: recap,
   }
 }
 
@@ -187,6 +213,7 @@ function createState(
     engine: null,
     settledResult: null,
     choiceLocked: false,
+    openingPending: false,
     revealedPanelId: null,
     error: null,
     goTo(screen) {
@@ -201,6 +228,10 @@ function createState(
         : undefined
       set({ screen })
       if (screen !== previousScreen) recordScreen(screen, roomId)
+    },
+    finishOpening() {
+      if (!get().openingPending) return
+      set({ openingPending: false })
     },
     selectRoom(roomId) {
       invalidateRoomLoads()
@@ -273,6 +304,7 @@ function createState(
         engine,
         settledResult: null,
         choiceLocked: false,
+        openingPending: true,
         revealedPanelId: null,
         error: null,
       })
@@ -379,6 +411,7 @@ function createState(
         choiceLocked: engine instanceof DraftStoryEngine
           ? engine.snapshot.confirmed
           : lockedPanelId !== null,
+        openingPending: false,
         revealedPanelId: lockedPanelId,
         error: null,
       })
@@ -685,6 +718,12 @@ function createState(
           }
           nextProgress.clues.push(...newClues)
           nextProgress.galleryUnlocks.push(...newGalleryUnlocks)
+          writeEndingRecap(
+            nextProgress,
+            room.id,
+            endingId,
+            snapshot.slots,
+          )
           if (
             room.id === 'room_a_blackout'
             && endingId === 'main'
@@ -808,6 +847,12 @@ function createState(
         }
         nextProgress.clues.push(...newClues)
         nextProgress.galleryUnlocks.push(...newGalleryUnlocks)
+        writeEndingRecap(
+          nextProgress,
+          room.id,
+          endingId,
+          snapshot.chosenPanels,
+        )
         if (
           room.id === 'room_a_blackout'
           && endingId === 'main'

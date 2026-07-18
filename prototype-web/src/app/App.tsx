@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useAppStore } from './store'
+import { OpeningSequence } from '@/components/OpeningSequence'
 import {
   loadCharacters,
   loadGallery,
   loadRoom,
 } from '@/domain/repository'
+import { useRuntimeAssets } from '@/hooks/use-runtime-assets'
+import type { AssetCatalog } from '@/domain/runtime-assets'
 import type {
   CharacterDefinition,
   GalleryEntry,
@@ -20,6 +23,7 @@ import '@/styles/building.css'
 
 interface RoomBriefRouteProps {
   roomId: string
+  catalog: AssetCatalog | null
   onBack(): void
   onStart(roomId: string): void
 }
@@ -31,6 +35,7 @@ interface BriefContent {
 
 function RoomBriefRoute({
   roomId,
+  catalog,
   onBack,
   onStart,
 }: RoomBriefRouteProps) {
@@ -92,6 +97,7 @@ function RoomBriefRoute({
       room={content.room}
       characters={content.characters}
       progress={progress}
+      catalog={catalog ?? undefined}
       onStart={() => onStart(roomId)}
       onBack={onBack}
     />
@@ -99,8 +105,10 @@ function RoomBriefRoute({
 }
 
 function GalleryRoute({
+  catalog,
   onBack,
 }: {
+  catalog: AssetCatalog | null
   onBack(): void
 }) {
   const progress = useAppStore((state) => state.progress)
@@ -137,7 +145,7 @@ function GalleryRoute({
     )
   }
 
-  if (!entries) {
+  if (!entries || !catalog) {
     return (
       <section
         className="gallery-screen"
@@ -153,8 +161,22 @@ function GalleryRoute({
     <GalleryScreen
       entries={entries}
       progress={progress}
+      catalog={catalog}
       onBack={onBack}
     />
+  )
+}
+
+function ArtLoading({ label }: { label: string }) {
+  return (
+    <section
+      className="art-loading"
+      data-testid="art-loading"
+      role="status"
+      aria-label={label}
+    >
+      {label}
+    </section>
   )
 }
 
@@ -177,8 +199,18 @@ export function App() {
   const resumeCurrentRun = useAppStore(
     (state) => state.resumeCurrentRun,
   )
+  const openingPending = useAppStore((state) => state.openingPending)
+  const finishOpening = useAppStore((state) => state.finishOpening)
   const error = useAppStore((state) => state.error)
   const retryError = useAppStore((state) => state.retryError)
+
+  const {
+    catalog,
+    commonStatus,
+    adultStatus,
+    retryCommon,
+    retryAdult,
+  } = useRuntimeAssets(progress.settings.adultContent)
 
   useEffect(() => {
     if (progress.currentRun && !engine) {
@@ -186,76 +218,82 @@ export function App() {
     }
   }, [engine, progress.currentRun, resumeCurrentRun])
 
+  const buildingScreen = (
+    <BuildingScreen
+      progress={progress}
+      catalog={catalog ?? undefined}
+      onOpenRoom={selectRoom}
+      onOpenGallery={() => goTo('gallery')}
+      onOpenSettings={() => goTo('settings')}
+    />
+  )
+
   let content
   switch (screen) {
     case 'building':
-      content = (
-        <BuildingScreen
-          progress={progress}
-          onOpenRoom={selectRoom}
-          onOpenGallery={() => goTo('gallery')}
-          onOpenSettings={() => goTo('settings')}
-        />
-      )
+      content = buildingScreen
       break
     case 'roomBrief':
       content = selectedRoomId
         ? (
             <RoomBriefRoute
               roomId={selectedRoomId}
+              catalog={catalog}
               onBack={() => goTo('building')}
               onStart={(roomId) => {
                 void startRoom(roomId)
               }}
             />
           )
-        : (
-            <BuildingScreen
-              progress={progress}
-              onOpenRoom={selectRoom}
-              onOpenGallery={() => goTo('gallery')}
-              onOpenSettings={() => goTo('settings')}
-            />
-          )
+        : buildingScreen
       break
     case 'comic':
-      content = selectedRoomId
-        ? <ComicScreen roomId={selectedRoomId} />
-        : (
-            <BuildingScreen
-              progress={progress}
-              onOpenRoom={selectRoom}
-              onOpenGallery={() => goTo('gallery')}
-              onOpenSettings={() => goTo('settings')}
-            />
-          )
+      if (!selectedRoomId) {
+        content = buildingScreen
+      } else if (!catalog) {
+        content = <ArtLoading label="正在載入房間美術" />
+      } else if (
+        openingPending
+        && engine
+        && (engine.room.openingAssets?.length ?? 0) > 0
+      ) {
+        content = (
+          <OpeningSequence
+            title={engine.room.title}
+            assetIds={engine.room.openingAssets ?? []}
+            dialogue={engine.room.openingDialogue ?? []}
+            catalog={catalog}
+            onComplete={finishOpening}
+          />
+        )
+      } else {
+        content = <ComicScreen roomId={selectedRoomId} catalog={catalog} />
+      }
       break
     case 'result':
       content = engine && settledResult
-        ? (
-            <ResultScreen
-              room={engine.room}
-              result={settledResult}
-              stats={engine.snapshot.stats}
-              progress={progress}
-              onReplay={() => {
-                void startRoom(settledResult.roomId)
-              }}
-              onReturn={() => goTo('building')}
-            />
-          )
-        : (
-            <BuildingScreen
-              progress={progress}
-              onOpenRoom={selectRoom}
-              onOpenGallery={() => goTo('gallery')}
-              onOpenSettings={() => goTo('settings')}
-            />
-          )
+        ? catalog
+          ? (
+              <ResultScreen
+                room={engine.room}
+                result={settledResult}
+                stats={engine.snapshot.stats}
+                progress={progress}
+                catalog={catalog}
+                adultStatus={adultStatus}
+                onReplay={() => {
+                  void startRoom(settledResult.roomId)
+                }}
+                onReturn={() => goTo('building')}
+              />
+            )
+          : <ArtLoading label="正在載入結局美術" />
+        : buildingScreen
       break
     case 'gallery':
       content = (
         <GalleryRoute
+          catalog={catalog}
           onBack={() => goTo('building')}
         />
       )
@@ -273,6 +311,22 @@ export function App() {
 
   return (
     <main className="app-shell">
+      {commonStatus === 'error' && (
+        <aside className="app-error" role="alert">
+          <p>美術資源載入失敗，暫時無法開始遊戲。</p>
+          <button type="button" onClick={retryCommon}>
+            重新載入美術
+          </button>
+        </aside>
+      )}
+      {adultStatus === 'error' && (
+        <aside className="app-notice" role="status">
+          <p>成人美術暫時無法載入，已改用安全版。</p>
+          <button type="button" onClick={retryAdult}>
+            重試載入成人美術
+          </button>
+        </aside>
+      )}
       {error && (
         <aside className="app-error" role="alert">
           <p>{error.message}</p>

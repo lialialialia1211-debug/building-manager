@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import { afterEach, beforeEach } from 'vitest'
 import {
   act,
@@ -14,6 +16,40 @@ import {
 } from '@/domain/story-engine'
 import type { RoomDefinition } from '@/domain/types'
 
+const commonManifest = JSON.parse(readFileSync(
+  resolve(process.cwd(), '../content/asset-manifest.json'),
+  'utf8',
+))
+const adultManifest = JSON.parse(readFileSync(
+  resolve(process.cwd(), '../content/adult-asset-manifest.json'),
+  'utf8',
+))
+
+type FetchResult = { ok: boolean; json(): Promise<unknown> }
+
+// Serve the runtime manifests so the catalog is ready; delegate everything
+// else to the provided handler.
+function manifestAwareFetch(
+  handler: (url: string) => Promise<FetchResult>,
+) {
+  return vi.fn((input: string) => {
+    const url = String(input)
+    if (url.includes('adult-asset-manifest.json')) {
+      return Promise.resolve({
+        ok: true,
+        json: async () => adultManifest,
+      })
+    }
+    if (url.includes('asset-manifest.json')) {
+      return Promise.resolve({
+        ok: true,
+        json: async () => commonManifest,
+      })
+    }
+    return handler(url)
+  })
+}
+
 const emptyEnding = {
   title: 'Fixture ending',
   asset: 'ending-fixture',
@@ -25,6 +61,8 @@ const room: RoomDefinition = {
   schemaVersion: 1,
   id: 'room_a_blackout',
   title: '停電之夜',
+  backgroundAsset: 'bg_room_a',
+  openingAssets: ['a_open_01', 'a_open_02', 'a_open_03'],
   startNode: 'n1',
   safeNode: 'n1',
   endingAnchor: 'ending',
@@ -199,7 +237,7 @@ test('automatically resumes a saved current run on the comic screen', async () =
     choiceLocked: false,
     revealedPanelId: null,
   })
-  vi.stubGlobal('fetch', vi.fn(async () => ({
+  vi.stubGlobal('fetch', manifestAwareFetch(async () => ({
     ok: true,
     json: async () => room,
   })))
@@ -232,7 +270,7 @@ test('shows a resume load error, preserves the run, and retries successfully', a
     engine: null,
   })
   let shouldFail = true
-  vi.stubGlobal('fetch', vi.fn(async () => {
+  vi.stubGlobal('fetch', manifestAwareFetch(async () => {
     if (shouldFail) throw new Error('temporary network failure')
     return {
       ok: true,
@@ -260,7 +298,11 @@ test('shows a resume load error, preserves the run, and retries successfully', a
   expect(useAppStore.getState().error).toBeNull()
 })
 
-test('uses the formal result route after an ending settles', () => {
+test('uses the formal result route after an ending settles', async () => {
+  vi.stubGlobal('fetch', manifestAwareFetch(async () => ({
+    ok: false,
+    json: async () => ({}),
+  })))
   const engine = new StoryEngine(room)
   engine.choose('a1_door')
   useAppStore.setState({
@@ -281,7 +323,7 @@ test('uses the formal result route after an ending settles', () => {
   render(<App />)
 
   expect(
-    screen.getByRole('heading', { name: 'Fixture ending' }),
+    await screen.findByRole('heading', { name: 'Fixture ending' }),
   ).toBeInTheDocument()
   expect(
     screen.getByRole('button', { name: '重新遊玩' }),
@@ -292,7 +334,7 @@ test('uses the formal result route after an ending settles', () => {
 })
 
 test('uses the formal gallery and settings routes', async () => {
-  vi.stubGlobal('fetch', vi.fn(async () => ({
+  vi.stubGlobal('fetch', manifestAwareFetch(async () => ({
     ok: true,
     json: async () => [
       {
