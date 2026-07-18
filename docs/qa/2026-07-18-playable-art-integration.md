@@ -5,9 +5,9 @@
 
 ## 自動驗證
 
-- Tested game commit：`e6e0dbc794ab52484a4c072f7f7df58bb343388d`，已通過完整 `npm --prefix prototype-web run check`。
-- Evidence commit：本 QA 證據會以獨立報告提交保存；它不改變已測遊戲提交。
-- 驗證結果：content/assets validators 通過；Vitest 39 files、306 tests 通過；production build 通過；三個 Playwright viewport 共 48 tests 通過，adult-off 路線不請求成人 manifest 或成人圖片。
+- Tested game commit：`3fe0b92b391b59da15d776ad1266f3f9dc84ddfb`，已通過完整 `npm --prefix prototype-web run check`。
+- Evidence commit：本 QA 證據以獨立報告提交保存，並與 tested game commit 分開記錄；它不改變已測遊戲提交。
+- 驗證結果：content/assets validators 通過；Vitest 39 files、307 tests 通過；production build 通過；三個 Playwright viewport 共 48 tests 通過，adult-off 路線不請求成人 manifest 或成人圖片。
 
 ## 部署狀態
 
