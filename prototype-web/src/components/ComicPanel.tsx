@@ -1,9 +1,12 @@
 import { PanelMotion } from './PanelMotion'
+import { RuntimeImage } from './RuntimeImage'
+import { assetUrl, type AssetCatalog } from '@/domain/runtime-assets'
 
 interface ComicPanelProps {
   testId: 'comic-opening' | 'comic-choice-slot' | 'comic-ending'
   label: string
-  imageSrc?: string
+  assetId?: string
+  catalog: AssetCatalog
   focused?: boolean
   revealed?: boolean
   revealDurationMs?: number
@@ -13,7 +16,8 @@ interface ComicPanelProps {
 export function ComicPanel({
   testId,
   label,
-  imageSrc,
+  assetId,
+  catalog,
   focused = false,
   revealed = false,
   revealDurationMs,
@@ -24,6 +28,9 @@ export function ComicPanel({
     'comic-choice-slot': 'comic-panel-choice-slot',
     'comic-ending': 'comic-panel-ending',
   }[testId]
+  const fullImageUrl = assetId
+    ? assetUrl(catalog, assetId, 'full')
+    : ''
 
   return (
     <article
@@ -32,12 +39,12 @@ export function ComicPanel({
         modifierClass,
         focused ? 'comic-panel-focused' : '',
         revealed ? 'comic-panel-revealed' : '',
-        imageSrc ? 'comic-panel-filled' : 'comic-panel-empty',
+        assetId ? 'comic-panel-filled' : 'comic-panel-empty',
       ].filter(Boolean).join(' ')}
       data-testid={testId}
       aria-label={label}
     >
-      {imageSrc
+      {assetId
         ? (
             revealed
             && revealDurationMs !== undefined
@@ -45,13 +52,29 @@ export function ComicPanel({
           )
           ? (
               <PanelMotion
-                key={imageSrc}
-                layers={{ background: imageSrc }}
+                key={assetId}
+                layers={{ background: fullImageUrl }}
                 durationMs={revealDurationMs}
                 onFinished={onRevealFinished}
+                background={
+                  <RuntimeImage
+                    assetId={assetId}
+                    variant="full"
+                    catalog={catalog}
+                    alt={label}
+                    className="layer layer-bg"
+                  />
+                }
               />
             )
-          : <img src={imageSrc} alt="" draggable={false} />
+          : (
+              <RuntimeImage
+                assetId={assetId}
+                variant="full"
+                catalog={catalog}
+                alt={label}
+              />
+            )
         : <span className="empty-panel-mark" aria-hidden="true" />}
     </article>
   )

@@ -1,4 +1,4 @@
-import { useRef, type CSSProperties } from 'react'
+import { useRef, type CSSProperties, type ReactNode } from 'react'
 
 export interface PanelLayers {
   background: string
@@ -11,12 +11,14 @@ interface PanelMotionProps {
   layers: PanelLayers
   durationMs: number
   onFinished(): void
+  background?: ReactNode
 }
 
 export function PanelMotion({
   layers,
   durationMs,
   onFinished,
+  background,
 }: PanelMotionProps) {
   const didFinish = useRef(false)
 
@@ -40,13 +42,15 @@ export function PanelMotion({
         onFinished()
       }}
     >
-      <img
-        className="layer layer-bg"
-        src={layers.background}
-        alt=""
-        role="presentation"
-        draggable={false}
-      />
+      {background ?? (
+        <img
+          className="layer layer-bg"
+          src={layers.background}
+          alt=""
+          role="presentation"
+          draggable={false}
+        />
+      )}
       {layers.characterA && (
         <img
           className="layer layer-a"

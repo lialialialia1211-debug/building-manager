@@ -280,7 +280,7 @@ export function App() {
                 onComplete={finishOpening}
               />
             )
-          : <ComicScreen roomId={selectedRoomId} />
+          : <ComicScreen roomId={selectedRoomId} catalog={catalog} />
         : (
             <BuildingScreen
               progress={progress}

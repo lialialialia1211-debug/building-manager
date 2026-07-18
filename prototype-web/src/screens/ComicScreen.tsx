@@ -3,10 +3,7 @@ import { ComicPanel } from '@/components/ComicPanel'
 import { StatusStrip } from '@/components/StatusStrip'
 import { useAppStore } from '@/app/store'
 import { DraftStoryEngine } from '@/domain/draft-story-engine'
-import {
-  greyboxAnchor,
-  greyboxPanel,
-} from '@/domain/greybox-assets'
+import type { AssetCatalog } from '@/domain/runtime-assets'
 import { wasRead } from '@/domain/read-history'
 import { revealDuration } from '@/domain/read-speed'
 import { resolveRoomPresentation } from '@/domain/room-presentation'
@@ -17,6 +14,7 @@ import type {
 } from '@/domain/story-engine'
 import type {
   PanelDefinition,
+  RoomDefinition,
   StatName,
 } from '@/domain/types'
 import { DraftComicScreen } from '@/screens/DraftComicScreen'
@@ -24,6 +22,32 @@ import '@/styles/comic.css'
 
 interface ComicScreenProps {
   roomId: string
+  catalog?: AssetCatalog
+}
+
+function fallbackCatalog(room: RoomDefinition | undefined): AssetCatalog {
+  const assetIds = new Set([
+    ...(room?.openingAssets ?? []),
+    ...Object.values(room?.panels ?? {}).flatMap((panel) => [
+      panel.previewAsset,
+      panel.fullAsset,
+    ]),
+    ...Object.values(room?.endingContent ?? {}).map(
+      (ending) => ending.asset,
+    ),
+  ].filter((assetId): assetId is string => Boolean(assetId)))
+
+  return {
+    common: Object.fromEntries([...assetIds].map((assetId) => [
+      assetId,
+      {
+        preview: `/assets/${assetId}-preview.webp`,
+        full: `/assets/${assetId}-full.webp`,
+      },
+    ])),
+    adult: null,
+    backgrounds: {},
+  }
 }
 
 const choiceSlots = [0, 1, 2, 3, 4, 5] as const
@@ -91,17 +115,27 @@ function visibleCandidates(
   return engine.getCandidates()
 }
 
-export function ComicScreen({ roomId }: ComicScreenProps) {
+export function ComicScreen({ roomId, catalog }: ComicScreenProps) {
   const engine = useAppStore((state) => state.engine)
+  const resolvedCatalog = catalog ?? fallbackCatalog(engine?.room)
 
   if (engine instanceof DraftStoryEngine) {
-    return <DraftComicScreen roomId={roomId} engine={engine} />
+    return <DraftComicScreen
+      roomId={roomId}
+      engine={engine}
+      catalog={resolvedCatalog}
+    />
   }
 
-  return <LegacyComicScreen roomId={roomId} />
+  return <LegacyComicScreen roomId={roomId} catalog={resolvedCatalog} />
 }
 
-function LegacyComicScreen({ roomId }: ComicScreenProps) {
+interface LegacyComicScreenProps {
+  roomId: string
+  catalog: AssetCatalog
+}
+
+function LegacyComicScreen({ roomId, catalog }: LegacyComicScreenProps) {
   const engine = useAppStore((state) => state.engine)
   const choiceLocked = useAppStore((state) => state.choiceLocked)
   const revealedPanelId = useAppStore(
@@ -129,9 +163,6 @@ function LegacyComicScreen({ roomId }: ComicScreenProps) {
 
   const { choiceCount, chosenPanels, stats } = engine.snapshot
   const candidates = visibleCandidates(engine, revealedPanelId)
-  const showPanelIds = (
-    import.meta.env.VITE_GREYBOX_SHOW_IDS === 'true'
-  )
   const currentStep = Math.min(
     6,
     Math.max(1, choiceCount + (choiceLocked ? 0 : 1)),
@@ -194,8 +225,9 @@ function LegacyComicScreen({ roomId }: ComicScreenProps) {
         <div className="comic-page" aria-label="漫畫頁">
           <ComicPanel
             testId="comic-opening"
+            assetId={engine.room.openingAssets[0]}
+            catalog={catalog}
             label="固定開場"
-            imageSrc={greyboxAnchor('固定開場')}
           />
 
           <div className="comic-choice-grid">
@@ -206,19 +238,19 @@ function LegacyComicScreen({ roomId }: ComicScreenProps) {
                 <ComicPanel
                   key={slotIndex}
                   testId="comic-choice-slot"
-                  label={
+                  assetId={
                     panelId
-                      ? `已選分鏡 ${slotIndex + 1}`
-                      : `空白分鏡 ${slotIndex + 1}`
-                  }
-                  imageSrc={
-                    panelId
-                      ? greyboxPanel(
-                          panelId,
-                          slotIndex,
-                          showPanelIds,
+                      ? (
+                          engine.room.panels[panelId]?.fullAsset
+                          ?? engine.room.panels[panelId]?.previewAsset
                         )
                       : undefined
+                  }
+                  catalog={catalog}
+                  label={
+                    panelId
+                      ? `已選行動：${engine.room.panels[panelId]?.actionLabel ?? panelId}，第 ${slotIndex + 1} 格`
+                      : `空白分鏡 ${slotIndex + 1}`
                   }
                   focused={slotIndex === focusedSlot}
                   revealed={panelId === revealedPanelId}
@@ -239,8 +271,9 @@ function LegacyComicScreen({ roomId }: ComicScreenProps) {
 
           <ComicPanel
             testId="comic-ending"
+            assetId={engine.room.endingContent.normal.asset}
+            catalog={catalog}
             label="固定結尾錨點"
-            imageSrc={greyboxAnchor('結尾錨點', true)}
           />
         </div>
 
@@ -303,16 +336,13 @@ function LegacyComicScreen({ roomId }: ComicScreenProps) {
           <p>選定後將立即保存，無法撤回。</p>
         </div>
         <div className="candidate-grid">
-          {candidates.map((candidate, index) => (
+          {candidates.map((candidate) => (
             <CandidateCard
               key={candidate.id}
               panelId={candidate.id}
               actionLabel={candidate.actionLabel}
-              previewSrc={greyboxPanel(
-                candidate.id,
-                index,
-                showPanelIds,
-              )}
+              catalog={catalog}
+              variant="preview"
               disabled={candidatesDisabled}
               onChoose={choosePanel}
             />

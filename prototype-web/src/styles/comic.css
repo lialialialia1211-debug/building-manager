@@ -202,7 +202,7 @@
   width: 100%;
   height: 100%;
   display: block;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .panel-motion {
@@ -217,7 +217,7 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .panel-motion .layer-bg {
@@ -397,6 +397,18 @@
   cursor: pointer;
 }
 
+.candidate-card-select {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: inherit;
+}
+
 .candidate-card[draggable="true"] {
   cursor: grab;
 }
@@ -461,17 +473,24 @@
   object-fit: cover;
 }
 
-.candidate-card:hover:not(:disabled),
-.candidate-card:focus-visible {
+.candidate-card:hover .candidate-card-select:not(:disabled),
+.candidate-card:focus-within {
   border-color: #d8bd79;
   outline: none;
   box-shadow: 0 0 0 3px rgb(216 189 121 / 18%);
 }
 
-.candidate-card:disabled {
+.candidate-card:has(.candidate-card-select:disabled) {
   cursor: wait;
   filter: saturate(.45);
   opacity: .6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel-motion,
+  .panel-motion .layer {
+    animation-duration: 1ms;
+  }
 }
 
 @media (min-width: 1280px) {

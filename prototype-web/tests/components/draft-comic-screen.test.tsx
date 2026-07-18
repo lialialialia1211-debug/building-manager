@@ -243,3 +243,27 @@ test('supports dragging a placed slot onto another slot to swap them', async () 
       .snapshot.slots.slice(0, 2),
   ).toEqual([before[1], before[0]])
 })
+
+test('renders drafting cards with preview then full runtime artwork', async () => {
+  const user = userEvent.setup()
+  const { container } = render(<ComicScreen roomId={room.id} />)
+  const candidate = container.querySelector('.candidate-card')!
+  const panelId = candidate.getAttribute('data-panel-id')!
+
+  expect(candidate.querySelector('img')).toHaveAttribute(
+    'src',
+    `/assets/${panelId}-preview.webp`,
+  )
+  await user.click(candidate.querySelector('button')!)
+  expect(screen.getAllByTestId('comic-choice-slot')[0]
+    ?.querySelector('img')).toHaveAttribute(
+      'src',
+      `/assets/${panelId}-full.webp`,
+    )
+
+  for (const image of container.querySelectorAll('img')) {
+    expect(image.getAttribute('src')).not.toMatch(
+      /data:image\/svg\+xml|greybox|\/adult\//,
+    )
+  }
+})
