@@ -13,7 +13,7 @@ import { StoryEngine } from '@/domain/story-engine'
 import { useRuntimeAssets as useRuntimeAssetsHook } from '@/hooks/use-runtime-assets'
 import type { AssetCatalog } from '@/domain/runtime-assets'
 import type { RoomDefinition } from '@/domain/types'
-import { ComicScreen } from '@/screens/ComicScreen'
+import { ComicScreen as ComicScreenComponent } from '@/screens/ComicScreen'
 
 vi.mock('@/hooks/use-runtime-assets', () => ({
   useRuntimeAssets: vi.fn(),
@@ -142,6 +142,10 @@ function createCatalog(...rooms: RoomDefinition[]): AssetCatalog {
 }
 
 const catalog = createCatalog(room, roomB)
+
+function ComicScreen({ roomId }: { roomId: string }) {
+  return <ComicScreenComponent roomId={roomId} catalog={catalog} />
+}
 
 beforeEach(() => {
   localStorage.clear()
@@ -451,9 +455,7 @@ test('uses the formal comic screen for the comic app route', () => {
 
 test('renders gameplay panels without greybox image sources', async () => {
   const user = userEvent.setup()
-  const { container } = render(
-    <ComicScreen roomId={room.id} catalog={catalog} />,
-  )
+  const { container } = render(<ComicScreen roomId={room.id} />)
 
   const candidate = container.querySelector('[data-panel-id="a1_door"]')!
   expect(candidate.querySelector('img')).toHaveAttribute(
@@ -474,6 +476,25 @@ test('renders gameplay panels without greybox image sources', async () => {
       /data:image\/svg\+xml|greybox|\/adult\//,
     )
   }
+})
+
+test('retries a failed legacy candidate preview without locking a choice', async () => {
+  const user = userEvent.setup()
+  const { container } = render(<ComicScreen roomId={room.id} />)
+  const candidate = container.querySelector('[data-panel-id="a1_door"]')!
+  const image = candidate.querySelector('img')!
+
+  fireEvent.error(image)
+  await user.click(screen.getByRole('button', { name: '重試' }))
+
+  expect(candidate.querySelector('img')).toHaveAttribute(
+    'src',
+    '/assets/a1_door-preview.webp?runtimeRetry=1',
+  )
+  expect(useAppStore.getState()).toMatchObject({
+    choiceLocked: false,
+    revealedPanelId: null,
+  })
 })
 
 test('keeps panel ids out of playtest greyboxes', () => {

@@ -14,7 +14,6 @@ import type {
 } from '@/domain/story-engine'
 import type {
   PanelDefinition,
-  RoomDefinition,
   StatName,
 } from '@/domain/types'
 import { DraftComicScreen } from '@/screens/DraftComicScreen'
@@ -22,32 +21,7 @@ import '@/styles/comic.css'
 
 interface ComicScreenProps {
   roomId: string
-  catalog?: AssetCatalog
-}
-
-function fallbackCatalog(room: RoomDefinition | undefined): AssetCatalog {
-  const assetIds = new Set([
-    ...(room?.openingAssets ?? []),
-    ...Object.values(room?.panels ?? {}).flatMap((panel) => [
-      panel.previewAsset,
-      panel.fullAsset,
-    ]),
-    ...Object.values(room?.endingContent ?? {}).map(
-      (ending) => ending.asset,
-    ),
-  ].filter((assetId): assetId is string => Boolean(assetId)))
-
-  return {
-    common: Object.fromEntries([...assetIds].map((assetId) => [
-      assetId,
-      {
-        preview: `/assets/${assetId}-preview.webp`,
-        full: `/assets/${assetId}-full.webp`,
-      },
-    ])),
-    adult: null,
-    backgrounds: {},
-  }
+  catalog: AssetCatalog
 }
 
 const choiceSlots = [0, 1, 2, 3, 4, 5] as const
@@ -117,17 +91,16 @@ function visibleCandidates(
 
 export function ComicScreen({ roomId, catalog }: ComicScreenProps) {
   const engine = useAppStore((state) => state.engine)
-  const resolvedCatalog = catalog ?? fallbackCatalog(engine?.room)
 
   if (engine instanceof DraftStoryEngine) {
     return <DraftComicScreen
       roomId={roomId}
       engine={engine}
-      catalog={resolvedCatalog}
+      catalog={catalog}
     />
   }
 
-  return <LegacyComicScreen roomId={roomId} catalog={resolvedCatalog} />
+  return <LegacyComicScreen roomId={roomId} catalog={catalog} />
 }
 
 interface LegacyComicScreenProps {
@@ -340,6 +313,7 @@ function LegacyComicScreen({ roomId, catalog }: LegacyComicScreenProps) {
             <CandidateCard
               key={candidate.id}
               panelId={candidate.id}
+              previewAsset={candidate.previewAsset}
               actionLabel={candidate.actionLabel}
               catalog={catalog}
               variant="preview"

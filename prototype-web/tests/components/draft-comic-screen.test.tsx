@@ -5,7 +5,8 @@ import { useAppStore } from '@/app/store'
 import { DraftStoryEngine } from '@/domain/draft-story-engine'
 import { createEmptyProgress } from '@/domain/progress'
 import type { PanelDefinition, RoomDefinition } from '@/domain/types'
-import { ComicScreen } from '@/screens/ComicScreen'
+import type { AssetCatalog } from '@/domain/runtime-assets'
+import { ComicScreen as ComicScreenComponent } from '@/screens/ComicScreen'
 
 const approvedPanelIds = [
   'a1_door',
@@ -100,6 +101,26 @@ function createRoom(): RoomDefinition {
 }
 
 const room = createRoom()
+
+const catalog: AssetCatalog = {
+  common: Object.fromEntries([
+    ...approvedPanelIds,
+    ...room.openingAssets,
+    ...Object.values(room.endingContent).map((ending) => ending.asset),
+  ].map((assetId) => [
+    assetId,
+    {
+      preview: `/assets/${assetId}-preview.webp`,
+      full: `/assets/${assetId}-full.webp`,
+    },
+  ])),
+  adult: null,
+  backgrounds: {},
+}
+
+function ComicScreen({ roomId }: { roomId: string }) {
+  return <ComicScreenComponent roomId={roomId} catalog={catalog} />
+}
 
 beforeEach(() => {
   localStorage.clear()
@@ -266,4 +287,47 @@ test('renders drafting cards with preview then full runtime artwork', async () =
       /data:image\/svg\+xml|greybox|\/adult\//,
     )
   }
+})
+
+test('retries a failed drafting preview without changing slots', async () => {
+  const user = userEvent.setup()
+  const { container } = render(<ComicScreen roomId={room.id} />)
+  const candidate = container.querySelector('.candidate-card')!
+  const panelId = candidate.getAttribute('data-panel-id')!
+
+  fireEvent.error(candidate.querySelector('img')!)
+  await user.click(screen.getByRole('button', { name: '重試' }))
+
+  expect(candidate.querySelector('img')).toHaveAttribute(
+    'src',
+    `/assets/${panelId}-preview.webp?runtimeRetry=1`,
+  )
+  expect((useAppStore.getState().engine as DraftStoryEngine)
+    .snapshot.slots).toEqual([null, null, null, null, null, null])
+  expect(useAppStore.getState().choiceLocked).toBe(false)
+})
+
+test('drags a tray candidate from its visible image into an empty slot', () => {
+  const { container } = render(<ComicScreen roomId={room.id} />)
+  const candidate = container.querySelector('.candidate-card')!
+  const panelId = candidate.getAttribute('data-panel-id')!
+  const values = new Map<string, string>()
+  const dataTransfer = {
+    effectAllowed: 'move',
+    dropEffect: 'move',
+    setData(type: string, value: string) {
+      values.set(type, value)
+    },
+    getData(type: string) {
+      return values.get(type) ?? ''
+    },
+  }
+  const slot = container.querySelector('[data-slot-index="0"]')!
+
+  fireEvent.dragStart(candidate.querySelector('img')!, { dataTransfer })
+  fireEvent.dragOver(slot, { dataTransfer })
+  fireEvent.drop(slot, { dataTransfer })
+
+  expect((useAppStore.getState().engine as DraftStoryEngine)
+    .snapshot.slots[0]).toBe(panelId)
 })

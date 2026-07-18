@@ -4,6 +4,7 @@ import type { AssetCatalog, RuntimeAssetKind } from '@/domain/runtime-assets'
 
 interface CandidateCardProps {
   panelId: string
+  previewAsset: string
   actionLabel: string
   catalog: AssetCatalog
   variant: Extract<RuntimeAssetKind, 'preview'>
@@ -17,6 +18,7 @@ interface CandidateCardProps {
 
 export function CandidateCard({
   panelId,
+  previewAsset,
   actionLabel,
   catalog,
   variant,
@@ -38,7 +40,7 @@ export function CandidateCard({
       onDragStart={onDragStart}
     >
       <RuntimeImage
-        assetId={panelId}
+        assetId={previewAsset}
         variant={variant}
         catalog={catalog}
         alt={actionLabel}

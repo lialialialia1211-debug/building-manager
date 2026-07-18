@@ -390,6 +390,7 @@ export function DraftComicScreen({
                 <CandidateCard
                   key={candidate.id}
                   panelId={candidate.id}
+                  previewAsset={candidate.previewAsset}
                   actionLabel={candidate.actionLabel}
                   selectionLabel={`加入編排：${candidate.actionLabel}`}
                   catalog={catalog}
