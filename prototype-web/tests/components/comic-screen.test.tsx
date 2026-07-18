@@ -10,8 +10,15 @@ import { greyboxPanel } from '@/domain/greybox-assets'
 import { createEmptyProgress } from '@/domain/progress'
 import { markRead, wasRead } from '@/domain/read-history'
 import { StoryEngine } from '@/domain/story-engine'
+import { useRuntimeAssets as useRuntimeAssetsHook } from '@/hooks/use-runtime-assets'
 import type { RoomDefinition } from '@/domain/types'
 import { ComicScreen } from '@/screens/ComicScreen'
+
+vi.mock('@/hooks/use-runtime-assets', () => ({
+  useRuntimeAssets: vi.fn(),
+}))
+
+const useRuntimeAssets = vi.mocked(useRuntimeAssetsHook)
 
 const comicCss = readFileSync(
   resolve(process.cwd(), 'src/styles/comic.css'),
@@ -47,6 +54,8 @@ const room = {
   schemaVersion: 1,
   id: 'room_a_blackout',
   title: '停電之夜',
+  backgroundAsset: 'building_a',
+  openingAssets: ['a_open_01', 'a_open_02', 'a_open_03'],
   startNode: 'n1',
   safeNode: 'n1',
   endingAnchor: 'ending',
@@ -108,6 +117,13 @@ const room = {
 
 beforeEach(() => {
   localStorage.clear()
+  useRuntimeAssets.mockReturnValue({
+    catalog: { common: {}, adult: null, backgrounds: {} },
+    commonStatus: 'ready',
+    adultStatus: 'disabled',
+    retryCommon: vi.fn(),
+    retryAdult: vi.fn(),
+  })
   useAppStore.setState({
     screen: 'comic',
     selectedRoomId: room.id,
@@ -115,6 +131,7 @@ beforeEach(() => {
     engine: new StoryEngine(room),
     choiceLocked: false,
     revealedPanelId: null,
+    openingPending: false,
   })
 })
 
@@ -126,6 +143,7 @@ afterEach(() => {
     engine: null,
     choiceLocked: false,
     revealedPanelId: null,
+    openingPending: false,
   })
 })
 

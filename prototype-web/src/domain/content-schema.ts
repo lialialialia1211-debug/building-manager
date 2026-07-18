@@ -49,6 +49,12 @@ const roomSchema = z.object({
   schemaVersion: z.literal(1),
   id: z.string().min(1),
   title: z.string().min(1),
+  backgroundAsset: z.string().trim().min(1),
+  openingAssets: z.tuple([
+    z.string().trim().min(1),
+    z.string().trim().min(1),
+    z.string().trim().min(1),
+  ]),
   startNode: z.string().min(1),
   alternateStartNodes: z.record(z.string(), z.string()).optional(),
   safeNode: z.string().min(1),

@@ -15,6 +15,8 @@ const room: RoomDefinition = {
   schemaVersion: 1,
   id: 'room_a_blackout',
   title: '停電之夜',
+  backgroundAsset: 'building_a',
+  openingAssets: ['a_open_01', 'a_open_02', 'a_open_03'],
   startNode: 'n1',
   safeNode: 'n1',
   endingAnchor: 'ending',

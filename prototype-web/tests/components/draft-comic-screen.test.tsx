@@ -52,6 +52,8 @@ function createRoom(): RoomDefinition {
     schemaVersion: 1,
     id: 'room_a_blackout',
     title: '編排測試',
+    backgroundAsset: 'building_a',
+    openingAssets: ['a_open_01', 'a_open_02', 'a_open_03'],
     startNode: 'legacy',
     safeNode: 'legacy',
     endingAnchor: 'ending',

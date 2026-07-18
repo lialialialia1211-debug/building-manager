@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useAppStore } from './store'
+import { OpeningSequence } from '@/components/OpeningSequence'
 import {
   loadCharacters,
   loadGallery,
@@ -10,6 +11,8 @@ import type {
   GalleryEntry,
   RoomDefinition,
 } from '@/domain/types'
+import type { AssetCatalog } from '@/domain/runtime-assets'
+import { useRuntimeAssets } from '@/hooks/use-runtime-assets'
 import { BuildingScreen } from '@/screens/BuildingScreen'
 import { ComicScreen } from '@/screens/ComicScreen'
 import { GalleryScreen } from '@/screens/GalleryScreen'
@@ -20,6 +23,7 @@ import '@/styles/building.css'
 
 interface RoomBriefRouteProps {
   roomId: string
+  catalog: AssetCatalog
   onBack(): void
   onStart(roomId: string): void
 }
@@ -31,6 +35,7 @@ interface BriefContent {
 
 function RoomBriefRoute({
   roomId,
+  catalog,
   onBack,
   onStart,
 }: RoomBriefRouteProps) {
@@ -90,6 +95,7 @@ function RoomBriefRoute({
   return (
     <RoomBriefScreen
       room={content.room}
+      catalog={catalog}
       characters={content.characters}
       progress={progress}
       onStart={() => onStart(roomId)}
@@ -179,6 +185,15 @@ export function App() {
   )
   const error = useAppStore((state) => state.error)
   const retryError = useAppStore((state) => state.retryError)
+  const openingPending = useAppStore(
+    (state) => state.openingPending,
+  )
+  const finishOpening = useAppStore(
+    (state) => state.finishOpening,
+  )
+  const runtimeAssets = useRuntimeAssets(
+    progress.settings.adultContent,
+  )
 
   useEffect(() => {
     if (progress.currentRun && !engine) {
@@ -186,12 +201,45 @@ export function App() {
     }
   }, [engine, progress.currentRun, resumeCurrentRun])
 
+  if (runtimeAssets.commonStatus === 'loading') {
+    return (
+      <main className="app-shell">
+        <section
+          className="runtime-assets-loading"
+          role="status"
+          aria-label="載入美術資源"
+        >
+          美術資源載入中
+        </section>
+      </main>
+    )
+  }
+
+  if (
+    runtimeAssets.commonStatus === 'error'
+    || !runtimeAssets.catalog
+  ) {
+    return (
+      <main className="app-shell">
+        <section className="runtime-assets-error" role="alert">
+          <p>美術資源載入失敗，暫時無法開始遊戲。</p>
+          <button type="button" onClick={runtimeAssets.retryCommon}>
+            重新載入美術
+          </button>
+        </section>
+      </main>
+    )
+  }
+
+  const catalog = runtimeAssets.catalog
+
   let content
   switch (screen) {
     case 'building':
       content = (
         <BuildingScreen
           progress={progress}
+          catalog={catalog}
           onOpenRoom={selectRoom}
           onOpenGallery={() => goTo('gallery')}
           onOpenSettings={() => goTo('settings')}
@@ -203,6 +251,7 @@ export function App() {
         ? (
             <RoomBriefRoute
               roomId={selectedRoomId}
+              catalog={catalog}
               onBack={() => goTo('building')}
               onStart={(roomId) => {
                 void startRoom(roomId)
@@ -212,6 +261,7 @@ export function App() {
         : (
             <BuildingScreen
               progress={progress}
+              catalog={catalog}
               onOpenRoom={selectRoom}
               onOpenGallery={() => goTo('gallery')}
               onOpenSettings={() => goTo('settings')}
@@ -220,10 +270,21 @@ export function App() {
       break
     case 'comic':
       content = selectedRoomId
-        ? <ComicScreen roomId={selectedRoomId} />
+        ? openingPending && engine
+          ? (
+              <OpeningSequence
+                title={engine.room.title}
+                assetIds={engine.room.openingAssets}
+                dialogue={engine.room.openingDialogue ?? []}
+                catalog={catalog}
+                onComplete={finishOpening}
+              />
+            )
+          : <ComicScreen roomId={selectedRoomId} />
         : (
             <BuildingScreen
               progress={progress}
+              catalog={catalog}
               onOpenRoom={selectRoom}
               onOpenGallery={() => goTo('gallery')}
               onOpenSettings={() => goTo('settings')}
@@ -247,6 +308,7 @@ export function App() {
         : (
             <BuildingScreen
               progress={progress}
+              catalog={catalog}
               onOpenRoom={selectRoom}
               onOpenGallery={() => goTo('gallery')}
               onOpenSettings={() => goTo('settings')}
@@ -273,6 +335,11 @@ export function App() {
 
   return (
     <main className="app-shell">
+      {runtimeAssets.adultStatus === 'error' && (
+        <aside className="adult-assets-warning" role="status">
+          成人美術暫時無法載入，已改用安全版
+        </aside>
+      )}
       {error && (
         <aside className="app-error" role="alert">
           <p>{error.message}</p>

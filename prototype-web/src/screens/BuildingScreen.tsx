@@ -1,22 +1,35 @@
+import { RuntimeImage } from '@/components/RuntimeImage'
 import type { ProgressData } from '@/domain/progress'
+import { contentUrl } from '@/domain/repository'
+import type { AssetCatalog } from '@/domain/runtime-assets'
 import { shouldShowSixthRoom } from '@/domain/unlocks'
 
 interface BuildingScreenProps {
   progress?: ProgressData
+  catalog: AssetCatalog
   onOpenRoom(roomId: string): void
   onOpenGallery(): void
   onOpenSettings(): void
 }
 
 const openRooms = [
-  { id: 'room_a_blackout', title: '停電之夜' },
-  { id: 'room_b_wall', title: '牆後的聲音' },
+  {
+    id: 'room_a_blackout',
+    title: '停電之夜',
+    backgroundAsset: 'building_a',
+  },
+  {
+    id: 'room_b_wall',
+    title: '牆後的聲音',
+    backgroundAsset: 'building_b',
+  },
 ] as const
 
 const futureRooms = [1, 2, 3, 4] as const
 
 export function BuildingScreen({
   progress,
+  catalog,
   onOpenRoom,
   onOpenGallery,
   onOpenSettings,
@@ -35,6 +48,9 @@ export function BuildingScreen({
         <div>
           <p className="building-kicker">夜班管理室</p>
           <h1 id="building-title">大樓管理員</h1>
+          <p className="playable-badge">
+            可玩測試版／placeholder art
+          </p>
         </div>
         <nav className="building-nav" aria-label="大樓功能">
           <button
@@ -67,9 +83,19 @@ export function BuildingScreen({
               key={room.id}
               onClick={() => onOpenRoom(room.id)}
             >
-              <span className="room-status">可進入</span>
-              <strong>{room.title}</strong>
-              <span>{completedCount} / 3 結局</span>
+              <img
+                className="room-window-art"
+                src={contentUrl(
+                  catalog.backgrounds[room.backgroundAsset] ?? '',
+                )}
+                alt={`${room.title}房間背景`}
+              />
+              <span className="room-window-gradient" aria-hidden="true" />
+              <span className="room-window-content">
+                <span className="room-status">可進入</span>
+                <strong>{room.title}</strong>
+                <span>{completedCount} / 3 結局</span>
+              </span>
             </button>
           )
         })}
@@ -92,7 +118,19 @@ export function BuildingScreen({
           <div
             className="sixth-room-tease"
             aria-label="不存在的第六房間"
-          />
+          >
+            {(['sixth_01', 'sixth_02', 'sixth_03'] as const).map(
+              (assetId, index) => (
+                <RuntimeImage
+                  key={assetId}
+                  assetId={assetId}
+                  variant="preview"
+                  catalog={catalog}
+                  alt={`不存在的第六房間異象 ${index + 1}`}
+                />
+              ),
+            )}
+          </div>
         )}
       </div>
     </section>

@@ -5,6 +5,7 @@ import {
   screen,
 } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { useRuntimeAssets as useRuntimeAssetsHook } from '@/hooks/use-runtime-assets'
 import { App } from '@/app/App'
 import { useAppStore } from '@/app/store'
 import { createEmptyProgress } from '@/domain/progress'
@@ -13,6 +14,34 @@ import {
   type StorySnapshot,
 } from '@/domain/story-engine'
 import type { RoomDefinition } from '@/domain/types'
+
+vi.mock('@/hooks/use-runtime-assets', () => ({
+  useRuntimeAssets: vi.fn(),
+}))
+
+const catalog = {
+  common: {
+    a_open_01: {
+      preview: '/art/a-open-01-preview.webp',
+      full: '/art/a-open-01-full.webp',
+    },
+    a_open_02: {
+      preview: '/art/a-open-02-preview.webp',
+      full: '/art/a-open-02-full.webp',
+    },
+    a_open_03: {
+      preview: '/art/a-open-03-preview.webp',
+      full: '/art/a-open-03-full.webp',
+    },
+  },
+  adult: null,
+  backgrounds: {
+    building_a: '/art/building-a.webp',
+    building_b: '/art/building-b.webp',
+  },
+}
+
+const useRuntimeAssets = vi.mocked(useRuntimeAssetsHook)
 
 const emptyEnding = {
   title: 'Fixture ending',
@@ -25,6 +54,9 @@ const room: RoomDefinition = {
   schemaVersion: 1,
   id: 'room_a_blackout',
   title: '停電之夜',
+  backgroundAsset: 'building_a',
+  openingAssets: ['a_open_01', 'a_open_02', 'a_open_03'],
+  openingDialogue: ['第一段開場', '第二段開場', '第三段開場'],
   startNode: 'n1',
   safeNode: 'n1',
   endingAnchor: 'ending',
@@ -68,6 +100,13 @@ const room: RoomDefinition = {
 const defaultRetryError = useAppStore.getState().retryError
 
 beforeEach(() => {
+  useRuntimeAssets.mockReturnValue({
+    catalog,
+    commonStatus: 'ready',
+    adultStatus: 'disabled',
+    retryCommon: vi.fn(),
+    retryAdult: vi.fn(),
+  })
   useAppStore.setState({
     screen: 'building',
     selectedRoomId: null,
@@ -76,9 +115,80 @@ beforeEach(() => {
     settledResult: null,
     choiceLocked: false,
     revealedPanelId: null,
+    openingPending: false,
     error: null,
     retryError: defaultRetryError,
   })
+})
+
+test('blocks the app while common art loads and offers a retry on failure', async () => {
+  const user = userEvent.setup()
+  const retryCommon = vi.fn()
+  useRuntimeAssets.mockReturnValue({
+    catalog: null,
+    commonStatus: 'loading',
+    adultStatus: 'disabled',
+    retryCommon,
+    retryAdult: vi.fn(),
+  })
+  const { rerender } = render(<App />)
+
+  expect(screen.getByLabelText('載入美術資源')).toHaveTextContent('載入中')
+  expect(screen.queryByTestId('building-screen')).not.toBeInTheDocument()
+
+  useRuntimeAssets.mockReturnValue({
+    catalog: null,
+    commonStatus: 'error',
+    adultStatus: 'disabled',
+    retryCommon,
+    retryAdult: vi.fn(),
+  })
+  rerender(<App />)
+
+  expect(screen.getByRole('alert')).toHaveTextContent('美術資源載入失敗')
+  await user.click(screen.getByRole('button', { name: '重新載入美術' }))
+  expect(retryCommon).toHaveBeenCalledOnce()
+})
+
+test('keeps safe gameplay available when adult art fails', () => {
+  useRuntimeAssets.mockReturnValue({
+    catalog,
+    commonStatus: 'ready',
+    adultStatus: 'error',
+    retryCommon: vi.fn(),
+    retryAdult: vi.fn(),
+  })
+
+  render(<App />)
+
+  expect(screen.getByRole('status')).toHaveTextContent(
+    '成人美術暫時無法載入，已改用安全版',
+  )
+  expect(screen.getByTestId('building-screen')).toBeInTheDocument()
+})
+
+test('shows the opening before comic cards and continues after skip', async () => {
+  const user = userEvent.setup()
+  useAppStore.setState({
+    screen: 'comic',
+    selectedRoomId: room.id,
+    engine: new StoryEngine(room),
+    openingPending: true,
+  })
+
+  render(<App />)
+
+  expect(screen.getByText('1 / 3')).toBeInTheDocument()
+  expect(screen.getByRole('img', { name: '停電之夜開場 1' }))
+    .toHaveAttribute('src', '/art/a-open-01-full.webp')
+  expect(screen.queryByRole('button', { name: /查看門口/ }))
+    .not.toBeInTheDocument()
+
+  await user.click(screen.getByRole('button', { name: '跳過開場' }))
+
+  expect(useAppStore.getState().openingPending).toBe(false)
+  expect(screen.getByRole('button', { name: /查看門口/ }))
+    .toBeInTheDocument()
 })
 
 afterEach(() => {

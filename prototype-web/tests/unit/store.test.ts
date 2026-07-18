@@ -59,6 +59,8 @@ const room: RoomDefinition = {
   schemaVersion: 1,
   id: 'fixture',
   title: 'Fixture',
+  backgroundAsset: 'building_fixture',
+  openingAssets: ['fixture_open_01', 'fixture_open_02', 'fixture_open_03'],
   startNode: 'n1',
   safeNode: 'n1',
   endingAnchor: 'ending',
@@ -112,6 +114,35 @@ const room: RoomDefinition = {
     normal: emptyEnding,
   },
 }
+
+test('shows a fresh opening once and skips it when resuming a saved run', async () => {
+  const storage = createStorage()
+  const firstStore = createAppStore({
+    storage,
+    loadRoom: async () => room,
+  })
+
+  expect(firstStore.getState().openingPending).toBe(false)
+  await firstStore.getState().startRoom(room.id)
+  expect(firstStore.getState().openingPending).toBe(true)
+
+  firstStore.getState().finishOpening()
+  expect(firstStore.getState().openingPending).toBe(false)
+
+  firstStore.getState().choosePanel('p1')
+  const resumedStore = createAppStore({
+    storage,
+    loadRoom: async () => room,
+  })
+  expect(resumedStore.getState().openingPending).toBe(false)
+
+  await resumedStore.getState().resumeCurrentRun()
+
+  expect(resumedStore.getState()).toMatchObject({
+    screen: 'comic',
+    openingPending: false,
+  })
+})
 
 const settlementRoom: RoomDefinition = {
   ...room,

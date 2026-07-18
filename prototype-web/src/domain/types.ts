@@ -52,6 +52,8 @@ export interface RoomDefinition {
   schemaVersion: 1
   id: string
   title: string
+  backgroundAsset: string
+  openingAssets: [string, string, string]
   startNode: string
   alternateStartNodes?: Record<string, string>
   safeNode: string

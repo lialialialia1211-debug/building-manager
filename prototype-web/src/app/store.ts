@@ -53,10 +53,12 @@ export interface AppStore {
   settledResult: SettledResult | null
   choiceLocked: boolean
   revealedPanelId: string | null
+  openingPending: boolean
   error: AppError | null
   goTo(screen: ScreenId): void
   selectRoom(roomId: string): void
   startRoom(roomId: string): Promise<void>
+  finishOpening(): void
   resumeCurrentRun(): Promise<void>
   choosePanel(panelId: string): void
   placePanel(panelId: string, slotIndex?: number): void
@@ -188,6 +190,7 @@ function createState(
     settledResult: null,
     choiceLocked: false,
     revealedPanelId: null,
+    openingPending: false,
     error: null,
     goTo(screen) {
       invalidateRoomLoads()
@@ -274,6 +277,7 @@ function createState(
         settledResult: null,
         choiceLocked: false,
         revealedPanelId: null,
+        openingPending: true,
         error: null,
       })
       retryOperation = null
@@ -284,6 +288,9 @@ function createState(
       }
       recordScreen('comic', roomId)
       recordCandidates(engine)
+    },
+    finishOpening() {
+      set({ openingPending: false })
     },
     async resumeCurrentRun() {
       const progress = get().progress
@@ -380,6 +387,7 @@ function createState(
           ? engine.snapshot.confirmed
           : lockedPanelId !== null,
         revealedPanelId: lockedPanelId,
+        openingPending: false,
         error: null,
       })
       retryOperation = null

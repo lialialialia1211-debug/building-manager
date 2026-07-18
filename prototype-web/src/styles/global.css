@@ -51,6 +51,45 @@ button {
   cursor: pointer;
 }
 
+.adult-assets-warning {
+  padding: 10px 18px;
+  border-bottom: 1px solid #8e7848;
+  color: #fff3cd;
+  background: #4d4026;
+  text-align: center;
+}
+
+.runtime-assets-loading,
+.runtime-assets-error {
+  display: grid;
+  min-height: 100vh;
+  place-content: center;
+  justify-items: center;
+  gap: 16px;
+  padding: 24px;
+  text-align: center;
+}
+
+.runtime-assets-error button,
+.runtime-image-error button {
+  padding: 9px 14px;
+  border: 1px solid #8390a8;
+  border-radius: 999px;
+  color: inherit;
+  background: #171d29;
+  cursor: pointer;
+}
+
+.runtime-image-error {
+  display: grid;
+  min-height: 140px;
+  place-content: center;
+  justify-items: center;
+  gap: 12px;
+  color: #f0c4bd;
+  background: #2a191d;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;

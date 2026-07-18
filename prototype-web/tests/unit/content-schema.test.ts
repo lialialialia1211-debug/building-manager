@@ -18,6 +18,8 @@ const baseRoom = {
   schemaVersion: 1,
   id: 'fixture',
   title: 'Fixture',
+  backgroundAsset: 'building_fixture',
+  openingAssets: ['fixture_open_01', 'fixture_open_02', 'fixture_open_03'],
   startNode: 'n1',
   safeNode: 'n5',
   endingAnchor: 'ending',
@@ -100,6 +102,26 @@ describe('content schema', () => {
 
   test('accepts exactly three candidates', () => {
     expect(parseRoom(baseRoom).id).toBe('fixture')
+  })
+
+  test('requires a background and exactly three opening assets', () => {
+    const parsed = parseRoom(baseRoom)
+    const missingBackground = structuredClone(baseRoom) as Record<
+      string,
+      unknown
+    >
+    delete missingBackground.backgroundAsset
+    const shortOpening = structuredClone(baseRoom)
+    shortOpening.openingAssets = ['fixture_open_01', 'fixture_open_02']
+
+    expect(parsed.backgroundAsset).toBe('building_fixture')
+    expect(parsed.openingAssets).toEqual([
+      'fixture_open_01',
+      'fixture_open_02',
+      'fixture_open_03',
+    ])
+    expect(() => parseRoom(missingBackground)).toThrow()
+    expect(() => parseRoom(shortOpening)).toThrow()
   })
 
   test('rejects two candidates', () => {

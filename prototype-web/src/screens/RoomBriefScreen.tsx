@@ -1,5 +1,8 @@
+import { RuntimeImage } from '@/components/RuntimeImage'
 import { clueLabel } from '@/domain/clue-labels'
 import type { ProgressData } from '@/domain/progress'
+import { contentUrl } from '@/domain/repository'
+import type { AssetCatalog } from '@/domain/runtime-assets'
 import type {
   CharacterDefinition,
   EndingId,
@@ -8,6 +11,7 @@ import type {
 
 interface RoomBriefScreenProps {
   room: RoomDefinition
+  catalog: AssetCatalog
   characters: CharacterDefinition[]
   progress: ProgressData
   onStart(): void
@@ -29,6 +33,7 @@ const endingIds: EndingId[] = [
 
 export function RoomBriefScreen({
   room,
+  catalog,
   characters,
   progress,
   onStart,
@@ -64,10 +69,28 @@ export function RoomBriefScreen({
         返回大樓
       </button>
 
-      <header className="brief-header">
-        <p>住戶事件</p>
-        <h1 id="room-title">{room.title}</h1>
-      </header>
+      <div className="brief-hero">
+        <img
+          src={contentUrl(catalog.backgrounds[room.backgroundAsset] ?? '')}
+          alt={`${room.title}房間背景`}
+        />
+        <header className="brief-header">
+          <p>住戶事件</p>
+          <h1 id="room-title">{room.title}</h1>
+        </header>
+      </div>
+
+      <div className="brief-opening-preview" aria-label="開場預覽">
+        {room.openingAssets.map((assetId, index) => (
+          <RuntimeImage
+            key={assetId}
+            assetId={assetId}
+            variant="preview"
+            catalog={catalog}
+            alt={`${room.title}開場預覽 ${index + 1}`}
+          />
+        ))}
+      </div>
 
       <div className="brief-grid">
         <section aria-labelledby="resident-title">
