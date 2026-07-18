@@ -123,7 +123,7 @@ const requiredEndingPanelIds = [
   'b_ending_intimacy',
 ] as const
 
-const requiredAdultPanelIds = ['a', 'b'].flatMap((room) =>
+export const requiredAdultPanelIds = ['a', 'b'].flatMap((room) =>
   Array.from(
     { length: 6 },
     (_, index) => `${room}_intimacy_0${index + 1}`,
@@ -213,6 +213,24 @@ export function buildRequiredPanelIds(
     ...requiredSixthRoomPanelIds,
   ]
 }
+
+// Common (non-adult) playable ids: everything except the 12 intimacy panels.
+export function buildRequiredCommonPanelIds(
+  choicePanelIds: readonly string[],
+): string[] {
+  return [
+    ...new Set(choicePanelIds),
+    ...requiredOpeningPanelIds,
+    ...requiredEndingPanelIds,
+    ...requiredSafePanelIds,
+    ...requiredSixthRoomPanelIds,
+  ]
+}
+
+export const requiredBackgroundIds = [
+  'bg_room_a',
+  'bg_room_b',
+] as const
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object'
@@ -555,4 +573,175 @@ export function validateAssetManifest(
   )
 
   return { mode, errors }
+}
+
+// --- Schema v2 playable manifest + isolated adult manifest ---------------
+
+export interface RuntimePlayableEntry {
+  preview: string
+  full: string
+}
+
+export interface PlayableAssetManifest {
+  schemaVersion: 2
+  mode: 'playable'
+  backgrounds: Record<string, string>
+  assets: Record<string, RuntimePlayableEntry>
+}
+
+export interface AdultAssetManifest {
+  schemaVersion: 1
+  assets: Record<string, RuntimePlayableEntry>
+}
+
+function readRuntimeEntries(
+  value: unknown,
+  errors: string[],
+  urlPrefix: string,
+  { forbidAdult }: { forbidAdult: boolean },
+): Record<string, RuntimePlayableEntry> {
+  if (!isRecord(value)) {
+    errors.push('assets must be an object')
+    return {}
+  }
+
+  const entries: Record<string, RuntimePlayableEntry> = {}
+  for (const [id, entry] of Object.entries(value)) {
+    if (
+      !isRecord(entry)
+      || !hasExactKeys(entry, ['preview', 'full'])
+      || typeof entry.preview !== 'string'
+      || typeof entry.full !== 'string'
+      || entry.preview.trim().length === 0
+      || entry.full.trim().length === 0
+    ) {
+      errors.push(`asset ${id} must be { preview, full }`)
+      continue
+    }
+    for (const url of [entry.preview, entry.full]) {
+      if (forbidAdult && url.includes('/adult/')) {
+        errors.push(`asset ${id} common url must not contain /adult/`)
+      }
+      if (!url.startsWith(urlPrefix)) {
+        errors.push(`asset ${id} url must start with ${urlPrefix}`)
+      }
+    }
+    if (!entry.preview.includes('_preview.')) {
+      errors.push(`asset ${id} preview url must reference a preview file`)
+    }
+    if (!entry.full.includes('_master.')) {
+      errors.push(`asset ${id} full url must reference a master file`)
+    }
+    entries[id] = { preview: entry.preview, full: entry.full }
+  }
+  return entries
+}
+
+function validateExactStringIds(
+  errors: string[],
+  label: string,
+  actualIds: readonly string[],
+  requiredIds: readonly string[],
+): void {
+  const actual = new Set(actualIds)
+  const required = new Set(requiredIds)
+  for (const id of required) {
+    if (!actual.has(id)) errors.push(`missing ${label} ${id}`)
+  }
+  for (const id of actual) {
+    if (!required.has(id)) errors.push(`unexpected ${label} ${id}`)
+  }
+}
+
+export function validatePlayableManifest(
+  value: unknown,
+  requiredCommonIds: readonly string[],
+  options: AssetValidationOptions = {},
+): { errors: string[] } {
+  const errors: string[] = []
+  if (!isRecord(value)) {
+    return { errors: ['playable manifest must be an object'] }
+  }
+  if (value.schemaVersion !== 2) {
+    errors.push('playable manifest schemaVersion must be 2')
+  }
+  if (value.mode !== 'playable') {
+    errors.push('playable manifest mode must be playable')
+  }
+
+  if (!isRecord(value.backgrounds)) {
+    errors.push('backgrounds must be an object')
+  } else {
+    validateExactStringIds(
+      errors,
+      'background',
+      Object.keys(value.backgrounds),
+      requiredBackgroundIds,
+    )
+    for (const [id, url] of Object.entries(value.backgrounds)) {
+      if (typeof url !== 'string' || url.trim().length === 0) {
+        errors.push(`background ${id} must be a url string`)
+        continue
+      }
+      if (url.includes('/adult/')) {
+        errors.push(`background ${id} must not contain /adult/`)
+      }
+      if (!url.startsWith('/assets/common/backgrounds/')) {
+        errors.push(
+          `background ${id} url must be under /assets/common/backgrounds/`,
+        )
+      }
+    }
+  }
+
+  const assets = readRuntimeEntries(
+    value.assets,
+    errors,
+    '/assets/common/',
+    { forbidAdult: true },
+  )
+  validateExactStringIds(
+    errors,
+    'common asset',
+    Object.keys(assets),
+    [...new Set(requiredCommonIds)],
+  )
+
+  validateContentReferences(
+    errors,
+    new Set([
+      ...Object.keys(assets),
+      ...requiredAdultPanelIds,
+    ]),
+    options,
+  )
+
+  return { errors }
+}
+
+export function validateAdultManifest(
+  value: unknown,
+): { errors: string[] } {
+  const errors: string[] = []
+  if (!isRecord(value)) {
+    return { errors: ['adult manifest must be an object'] }
+  }
+  if (value.schemaVersion !== 1) {
+    errors.push('adult manifest schemaVersion must be 1')
+  }
+
+  const assets = readRuntimeEntries(
+    value.assets,
+    errors,
+    '/assets/adult/',
+    { forbidAdult: false },
+  )
+  validateExactStringIds(
+    errors,
+    'adult asset',
+    Object.keys(assets),
+    requiredAdultPanelIds,
+  )
+
+  return { errors }
 }
