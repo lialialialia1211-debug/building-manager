@@ -406,7 +406,7 @@ test('formal validation rejects an invalid gallery sequence reference', () => {
   )
 })
 
-test('asset CLI uses greybox manifest mode as its only mode source', () => {
+test('asset CLI validates the generated playable runtime catalogs', () => {
   const result = spawnSync(
     process.execPath,
     ['--import', 'tsx', 'scripts/validate-assets.ts'],
@@ -422,6 +422,6 @@ test('asset CLI uses greybox manifest mode as its only mode source', () => {
 
   expect(result.status).toBe(0)
   expect(result.stdout).toContain(
-    'asset-manifest: greybox mode, formal art files are not required',
+    'asset-manifest: playable runtime catalogs valid, 75 common assets, 12 adult assets, 2 backgrounds',
   )
 })

@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import {
+  validateAdultAssetManifest,
   validateAssetManifest,
 } from '../src/domain/asset-manifest'
 import {
@@ -43,15 +44,23 @@ const result = validateAssetManifest(
       existsSync(resolve(repositoryRoot, path)),
   },
 )
+const adultErrors = validateAdultAssetManifest(
+  readJson('adult-asset-manifest.json'),
+)
 
-if (result.errors.length > 0) {
-  for (const error of result.errors) {
+const errors = [...result.errors, ...adultErrors]
+if (errors.length > 0) {
+  for (const error of errors) {
     console.error(error)
   }
   process.exitCode = 1
 } else if (result.mode === 'greybox') {
   console.log(
     'asset-manifest: greybox mode, formal art files are not required',
+  )
+} else if (result.mode === 'playable') {
+  console.log(
+    'asset-manifest: playable runtime catalogs valid, 75 common assets, 12 adult assets, 2 backgrounds',
   )
 } else {
   console.log(

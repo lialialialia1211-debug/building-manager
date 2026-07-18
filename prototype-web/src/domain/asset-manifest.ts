@@ -186,8 +186,24 @@ export interface AssetManifest {
 }
 
 export interface AssetManifestValidation {
-  mode: AssetManifestMode | 'invalid'
+  mode: AssetManifestMode | 'playable' | 'invalid'
   errors: string[]
+}
+
+export const requiredPlayableBackgroundIds = [
+  'building_a',
+  'building_b',
+] as const
+
+export const requiredAdultAssetIds = ['a', 'b'].flatMap((room) =>
+  Array.from(
+    { length: 6 },
+    (_, index) => `${room}_intimacy_0${index + 1}`,
+  ))
+
+interface RuntimeAssetEntry {
+  preview: string
+  full: string
 }
 
 export interface AssetValidationOptions {
@@ -418,6 +434,152 @@ function validateContentReferences(
   }
 }
 
+function validateExactRecordKeys(
+  errors: string[],
+  label: string,
+  actualKeys: readonly string[],
+  expectedKeys: readonly string[],
+): void {
+  const actual = new Set(actualKeys)
+  const expected = new Set(expectedKeys)
+  for (const id of expected) {
+    if (!actual.has(id)) errors.push(`missing ${label} id ${id}`)
+  }
+  for (const id of actual) {
+    if (!expected.has(id)) errors.push(`unexpected ${label} id ${id}`)
+  }
+}
+
+function readRuntimeAssets(
+  value: unknown,
+  label: string,
+  errors: string[],
+): Record<string, RuntimeAssetEntry> {
+  if (!isRecord(value)) {
+    errors.push(`${label} must be an object`)
+    return {}
+  }
+
+  const entries: Record<string, RuntimeAssetEntry> = {}
+  for (const [id, entry] of Object.entries(value)) {
+    if (
+      !isRecord(entry)
+      || !hasExactKeys(entry, ['preview', 'full'])
+      || typeof entry.preview !== 'string'
+      || entry.preview.trim().length === 0
+      || typeof entry.full !== 'string'
+      || entry.full.trim().length === 0
+    ) {
+      errors.push(`${label} ${id} must be { preview, full }`)
+      continue
+    }
+    entries[id] = { preview: entry.preview, full: entry.full }
+  }
+  return entries
+}
+
+function validateRuntimeUrls(
+  errors: string[],
+  label: string,
+  entries: Record<string, RuntimeAssetEntry>,
+  requiredRoot: string,
+): void {
+  for (const [id, entry] of Object.entries(entries)) {
+    for (const [kind, url] of Object.entries(entry)) {
+      if (
+        !url.startsWith(requiredRoot)
+        || url.includes('/adult/') !== (requiredRoot === '/assets/adult/')
+      ) {
+        errors.push(`${label} ${id} ${kind} must use ${requiredRoot}`)
+      }
+    }
+  }
+}
+
+function validatePlayableAssetManifest(
+  manifest: Record<string, unknown>,
+  choicePanelIds: readonly string[],
+): AssetManifestValidation {
+  const errors: string[] = []
+  if (!hasExactKeys(manifest, [
+    'schemaVersion',
+    'mode',
+    'backgrounds',
+    'assets',
+  ])) {
+    errors.push('playable asset manifest must only contain runtime fields')
+  }
+  if (manifest.mode !== 'playable') {
+    errors.push('playable asset manifest mode must be playable')
+  }
+
+  if (!isRecord(manifest.backgrounds)) {
+    errors.push('backgrounds must be an object')
+  } else {
+    const backgrounds = manifest.backgrounds
+    validateExactRecordKeys(
+      errors,
+      'background',
+      Object.keys(backgrounds),
+      requiredPlayableBackgroundIds,
+    )
+    for (const [id, url] of Object.entries(backgrounds)) {
+      if (
+        typeof url !== 'string'
+        || !url.startsWith('/assets/common/backgrounds/')
+        || url.includes('/adult/')
+      ) {
+        errors.push(`background ${id} must use /assets/common/backgrounds/`)
+      }
+    }
+  }
+
+  const assets = readRuntimeAssets(manifest.assets, 'common asset', errors)
+  const requiredIds = buildRequiredPanelIds(
+    [...new Set(choicePanelIds)],
+  ).filter((id) => !requiredAdultAssetIds.includes(id))
+  validateCount(
+    errors,
+    'playable common asset count',
+    Object.keys(assets).length,
+    75,
+  )
+  validateExactRecordKeys(
+    errors,
+    'common asset',
+    Object.keys(assets),
+    requiredIds,
+  )
+  validateRuntimeUrls(errors, 'common asset', assets, '/assets/common/')
+
+  return { mode: 'playable', errors }
+}
+
+export function validateAdultAssetManifest(value: unknown): string[] {
+  const errors: string[] = []
+  if (!isRecord(value)) return ['adult asset manifest must be an object']
+
+  if (!hasExactKeys(value, ['schemaVersion', 'assets'])) {
+    errors.push(
+      'adult asset manifest must only contain schemaVersion and assets',
+    )
+  }
+  if (value.schemaVersion !== 1) {
+    errors.push('adult asset manifest schemaVersion must be 1')
+  }
+
+  const assets = readRuntimeAssets(value.assets, 'adult asset', errors)
+  validateCount(errors, 'adult asset count', Object.keys(assets).length, 12)
+  validateExactRecordKeys(
+    errors,
+    'adult asset',
+    Object.keys(assets),
+    requiredAdultAssetIds,
+  )
+  validateRuntimeUrls(errors, 'adult asset', assets, '/assets/adult/')
+  return errors
+}
+
 export function validateAssetManifest(
   value: unknown,
   choicePanelIds: readonly string[],
@@ -429,6 +591,10 @@ export function validateAssetManifest(
       mode: 'invalid',
       errors: ['asset manifest must be an object'],
     }
+  }
+
+  if (value.schemaVersion === 2) {
+    return validatePlayableAssetManifest(value, choicePanelIds)
   }
 
   const mode = value.mode === 'greybox' || value.mode === 'formal'
