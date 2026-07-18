@@ -1,0 +1,15 @@
+{
+ "asset_id": "b_intimacy_03",
+ "source": "b_adult_03_s42_00001_.png",
+ "seed": 42,
+ "steps": 36,
+ "cfg": 4.5,
+ "sampler": "er_sde",
+ "scheduler": "simple",
+ "model_filename": "anima-aesthetic-v1.1.safetensors",
+ "style": "anima native illustration",
+ "cast": "wuwa cartethyia/cantarella/brant/rover canonical outfits",
+ "size_kb": 118,
+ "note": "maps to runtime intimacy id",
+ "review_status": "selected_v2"
+}

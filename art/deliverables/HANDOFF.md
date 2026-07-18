@@ -3,7 +3,8 @@
 - 定稿日期：2026-07-18
 - 產線：本地 ComfyUI 0.26.0 + Anima Aesthetic v1.1（2B / CircleStone Labs）
 - 風格：**Anima 原生插畫風**（Zhi 2026-07-18 拍板，取代原賽璐璐規格；風格決策已回寫 `docs/art/2026-07-17-anima-production-package/01、06`）
-- 角色：**鳴潮 placeholder**（林雨薇=長離、許安寧=散華、陳皓然/周衍=男漂泊者，服裝按角色 Bible）——正式角色設計定案後需整批換角重產
+- 角色：**鳴潮 placeholder v2**（2026-07-19 換角）：林雨薇=卡提希婭 Cartethyia、陳皓然=布蘭特 Brant、許安寧=坎特蕾拉 Cantarella、周衍=男漂泊者 Male Rover。**全部穿鳴潮原版服裝**（非規格服裝，Zhi 指定）——注意：canonical 幻想服裝在現代公寓場景屬刻意的 cosplay 感。正式角色設計定案後需整批換角重產
+- NSFW：成人序列為直接性愛場面（a/b_intimacy_04–05 明確插入構圖），安全版一對一對位於 panels/safe/
 
 ## 交付清單（87 張主構圖契約：齊）
 

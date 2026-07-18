@@ -1,0 +1,17 @@
+{
+ "asset_id": "card-b4_comfort",
+ "seed": 31,
+ "steps": 36,
+ "cfg": 4.5,
+ "sampler": "er_sde",
+ "scheduler": "simple",
+ "width": 1536,
+ "height": 864,
+ "model_filename": "anima-aesthetic-v1.1.safetensors",
+ "positive_prompt": "safe, 1girl, 1boy.\n\n1girl segment: cantarella (wuthering waves), wuthering waves, long purple hair, purple eyes, wearing her canonical elegant dark purple aristocratic gown.\n\n1boy segment: rover (wuthering waves), wuthering waves, male focus, black hair, low ponytail, antenna hair, yellow eyes, wearing his canonical black and white collared jacket over a turtleneck.\n\nInside a modern apartment at night: entrance on the left, a sound-editing desk and sofa in the center, the shared wall on the right, moonlight through the window and small green recorder lights.\n\nMedium two-character sofa shot. Xu removes her headphones and sits at the sofa edge after hearing an alien memory. Zhou first pauses beside a separate chair with an open asking gesture, then begins moving closer only after her visible consent. The abnormal wall and exit remain visible.\n\nOne single continuous scene in one unified room. no text.",
+ "negative_prompt": "worst quality, low quality, score_1, score_2, score_3, blurry, jpeg artifacts, sepia, artist name, text, watermark, extra fingers, missing fingers, fused hands, duplicate person, extra person, split screen, comic panels, multiple panels, child, nsfw, explicit, nudity, exposed genitals, sexual intercourse",
+ "style": "anima native illustration",
+ "cast": "wuwa cartethyia/cantarella/brant/rover canonical outfits",
+ "generation_date": "2026-07-19",
+ "review_status": "pending"
+}

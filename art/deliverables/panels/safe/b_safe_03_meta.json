@@ -1,16 +1,15 @@
 {
  "asset_id": "b_safe_03",
- "source": "b_safe_03_s902_00001_.png",
- "seed": 902,
+ "source": "b_safe_03_s52_00001_.png",
+ "seed": 52,
  "steps": 36,
  "cfg": 4.5,
  "sampler": "er_sde",
  "scheduler": "simple",
  "model_filename": "anima-aesthetic-v1.1.safetensors",
  "style": "anima native illustration",
- "placeholder_cast": "wuthering waves",
- "upscale": "lanczos 1536x864->2560x1440",
- "size_kb": 141,
+ "cast": "wuwa cartethyia/cantarella/brant/rover canonical outfits",
+ "size_kb": 166,
  "note": "",
- "review_status": "selected_v01"
+ "review_status": "selected_v2"
 }

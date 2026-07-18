@@ -1,16 +1,6 @@
 {
  "asset_id": "char-zhou_yan-sheet",
+ "cast": "ROVER (placeholder: Male Rover/WuWa) ADULT",
  "style": "anima native illustration",
- "sources_refs": {
-  "front": "s121",
-  "threequarter": "s122",
-  "side": "s122",
-  "back": "s121"
- },
- "sources_busts": {
-  "neutral": "s221",
-  "tense": "s221"
- },
- "note": "seeds from corrected tag-first batch (s121/s122/s221); chen tense bust from s211 (s221 had neon rim-light)",
- "review_status": "selected_v01"
+ "review_status": "selected_v2"
 }

@@ -1,0 +1,15 @@
+{
+ "asset_id": "b6",
+ "source": "card-b6_sleep_s31_00001_.png",
+ "seed": 31,
+ "steps": 36,
+ "cfg": 4.5,
+ "sampler": "er_sde",
+ "scheduler": "simple",
+ "model_filename": "anima-aesthetic-v1.1.safetensors",
+ "style": "anima native illustration",
+ "cast": "wuwa cartethyia/cantarella/brant/rover",
+ "size_kb": 73,
+ "note": "",
+ "review_status": "selected_v2"
+}

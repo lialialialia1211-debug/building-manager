@@ -1,19 +1,15 @@
 {
- "asset_id": "card-b6_open",
- "seed": 442,
+ "asset_id": "b6_open",
+ "source": "card-b6_open_s32_00001_.png",
+ "seed": 32,
  "steps": 36,
  "cfg": 4.5,
  "sampler": "er_sde",
  "scheduler": "simple",
- "width": 1536,
- "height": 864,
  "model_filename": "anima-aesthetic-v1.1.safetensors",
  "style": "anima native illustration",
- "note": "v3 retry: opened-panel-as-subject fix",
- "review_status": "selected_v01",
- "export": {
-  "master": "b6_open_master.webp",
-  "size_kb": 156,
-  "upscale": "lanczos 1536x864->2560x1440"
- }
+ "cast": "wuwa cartethyia/cantarella/brant/rover",
+ "size_kb": 152,
+ "note": "",
+ "review_status": "selected_v2"
 }

@@ -1,16 +1,15 @@
 {
  "asset_id": "b_open_03",
- "source": "b_open_03_s901_00001_.png",
- "seed": 901,
+ "source": "b_open_03_s61_00001_.png",
+ "seed": 61,
  "steps": 36,
  "cfg": 4.5,
  "sampler": "er_sde",
  "scheduler": "simple",
  "model_filename": "anima-aesthetic-v1.1.safetensors",
  "style": "anima native illustration",
- "placeholder_cast": "wuthering waves",
- "upscale": "lanczos 1536x864->2560x1440",
- "size_kb": 148,
+ "cast": "wuwa cartethyia/cantarella/brant/rover",
+ "size_kb": 104,
  "note": "",
- "review_status": "selected_v01"
+ "review_status": "selected_v2"
 }
