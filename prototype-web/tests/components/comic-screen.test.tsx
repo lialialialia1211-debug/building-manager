@@ -10,8 +10,16 @@ import { greyboxPanel } from '@/domain/greybox-assets'
 import { createEmptyProgress } from '@/domain/progress'
 import { markRead, wasRead } from '@/domain/read-history'
 import { StoryEngine } from '@/domain/story-engine'
+import { useRuntimeAssets as useRuntimeAssetsHook } from '@/hooks/use-runtime-assets'
+import type { AssetCatalog } from '@/domain/runtime-assets'
 import type { RoomDefinition } from '@/domain/types'
-import { ComicScreen } from '@/screens/ComicScreen'
+import { ComicScreen as ComicScreenComponent } from '@/screens/ComicScreen'
+
+vi.mock('@/hooks/use-runtime-assets', () => ({
+  useRuntimeAssets: vi.fn(),
+}))
+
+const useRuntimeAssets = vi.mocked(useRuntimeAssetsHook)
 
 const comicCss = readFileSync(
   resolve(process.cwd(), 'src/styles/comic.css'),
@@ -47,6 +55,8 @@ const room = {
   schemaVersion: 1,
   id: 'room_a_blackout',
   title: '停電之夜',
+  backgroundAsset: 'building_a',
+  openingAssets: ['a_open_01', 'a_open_02', 'a_open_03'],
   startNode: 'n1',
   safeNode: 'n1',
   endingAnchor: 'ending',
@@ -106,8 +116,46 @@ const room = {
   },
 } as RoomDefinition
 
+function createCatalog(...rooms: RoomDefinition[]): AssetCatalog {
+  const assetIds = new Set(rooms.flatMap((roomDefinition) => [
+    ...roomDefinition.openingAssets,
+    ...Object.values(roomDefinition.panels).flatMap((panel) => [
+      panel.previewAsset,
+      panel.fullAsset,
+    ]),
+    ...Object.values(roomDefinition.endingContent).map(
+      (ending) => ending.asset,
+    ),
+  ]).filter((assetId): assetId is string => Boolean(assetId)))
+
+  return {
+    common: Object.fromEntries([...assetIds].map((assetId) => [
+      assetId,
+      {
+        preview: `/assets/${assetId}-preview.webp`,
+        full: `/assets/${assetId}-full.webp`,
+      },
+    ])),
+    adult: null,
+    backgrounds: {},
+  }
+}
+
+const catalog = createCatalog(room, roomB)
+
+function ComicScreen({ roomId }: { roomId: string }) {
+  return <ComicScreenComponent roomId={roomId} catalog={catalog} />
+}
+
 beforeEach(() => {
   localStorage.clear()
+  useRuntimeAssets.mockReturnValue({
+    catalog: { common: {}, adult: null, backgrounds: {} },
+    commonStatus: 'ready',
+    adultStatus: 'disabled',
+    retryCommon: vi.fn(),
+    retryAdult: vi.fn(),
+  })
   useAppStore.setState({
     screen: 'comic',
     selectedRoomId: room.id,
@@ -115,6 +163,7 @@ beforeEach(() => {
     engine: new StoryEngine(room),
     choiceLocked: false,
     revealedPanelId: null,
+    openingPending: false,
   })
 })
 
@@ -126,6 +175,7 @@ afterEach(() => {
     engine: null,
     choiceLocked: false,
     revealedPanelId: null,
+    openingPending: false,
   })
 })
 
@@ -150,7 +200,7 @@ test('renders exactly three neutral candidate actions with decorative images', (
   for (const image of container.querySelectorAll(
     '.candidate-card img',
   )) {
-    expect(image).toHaveAttribute('alt', '')
+    expect(image.getAttribute('alt')).not.toBe('')
   }
 })
 
@@ -401,6 +451,50 @@ test('uses the formal comic screen for the comic app route', () => {
   expect(screen.getAllByRole('button', {
     name: /^選擇行動：/,
   })).toHaveLength(3)
+})
+
+test('renders gameplay panels without greybox image sources', async () => {
+  const user = userEvent.setup()
+  const { container } = render(<ComicScreen roomId={room.id} />)
+
+  const candidate = container.querySelector('[data-panel-id="a1_door"]')!
+  expect(candidate.querySelector('img')).toHaveAttribute(
+    'src',
+    '/assets/a1_door-preview.webp',
+  )
+
+  await user.click(candidate.querySelector('button')!)
+
+  expect(screen.getAllByTestId('comic-choice-slot')[0]
+    ?.querySelector('img')).toHaveAttribute(
+      'src',
+      '/assets/a1_door-full.webp',
+    )
+
+  for (const image of container.querySelectorAll('img')) {
+    expect(image.getAttribute('src')).not.toMatch(
+      /data:image\/svg\+xml|greybox|\/adult\//,
+    )
+  }
+})
+
+test('retries a failed legacy candidate preview without locking a choice', async () => {
+  const user = userEvent.setup()
+  const { container } = render(<ComicScreen roomId={room.id} />)
+  const candidate = container.querySelector('[data-panel-id="a1_door"]')!
+  const image = candidate.querySelector('img')!
+
+  fireEvent.error(image)
+  await user.click(screen.getByRole('button', { name: '重試' }))
+
+  expect(candidate.querySelector('img')).toHaveAttribute(
+    'src',
+    '/assets/a1_door-preview.webp?runtimeRetry=1',
+  )
+  expect(useAppStore.getState()).toMatchObject({
+    choiceLocked: false,
+    revealedPanelId: null,
+  })
 })
 
 test('keeps panel ids out of playtest greyboxes', () => {

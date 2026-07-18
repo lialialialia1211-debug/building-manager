@@ -8,6 +8,7 @@ import type { PlaytestRecorder } from '@/analytics/playtest-log'
 import {
   PROGRESS_KEY,
   createEmptyProgress,
+  loadProgress,
   saveProgress,
   type StorageAdapter,
 } from '@/domain/progress'
@@ -59,6 +60,8 @@ const room: RoomDefinition = {
   schemaVersion: 1,
   id: 'fixture',
   title: 'Fixture',
+  backgroundAsset: 'building_fixture',
+  openingAssets: ['fixture_open_01', 'fixture_open_02', 'fixture_open_03'],
   startNode: 'n1',
   safeNode: 'n1',
   endingAnchor: 'ending',
@@ -112,6 +115,35 @@ const room: RoomDefinition = {
     normal: emptyEnding,
   },
 }
+
+test('shows a fresh opening once and skips it when resuming a saved run', async () => {
+  const storage = createStorage()
+  const firstStore = createAppStore({
+    storage,
+    loadRoom: async () => room,
+  })
+
+  expect(firstStore.getState().openingPending).toBe(false)
+  await firstStore.getState().startRoom(room.id)
+  expect(firstStore.getState().openingPending).toBe(true)
+
+  firstStore.getState().finishOpening()
+  expect(firstStore.getState().openingPending).toBe(false)
+
+  firstStore.getState().choosePanel('p1')
+  const resumedStore = createAppStore({
+    storage,
+    loadRoom: async () => room,
+  })
+  expect(resumedStore.getState().openingPending).toBe(false)
+
+  await resumedStore.getState().resumeCurrentRun()
+
+  expect(resumedStore.getState()).toMatchObject({
+    screen: 'comic',
+    openingPending: false,
+  })
+})
 
 const settlementRoom: RoomDefinition = {
   ...room,
@@ -930,6 +962,13 @@ test('settles the priority ending only after the sixth reveal finishes', async (
   const storage = createStorage()
   const progress = createEmptyProgress()
   progress.completedEndings[settlementRoom.id] = ['main', 'intimacy']
+  const siblingRecap = ['same-room-main']
+  const otherRoomRecap = ['other-room-normal']
+  progress.endingRecaps[settlementRoom.id] = {
+    main: siblingRecap,
+    intimacy: ['outdated-panel'],
+  }
+  progress.endingRecaps.other_room = { normal: otherRoomRecap }
   progress.clues = ['existing-clue']
   progress.galleryUnlocks = ['existing-gallery']
   saveProgress(storage, progress)
@@ -977,6 +1016,13 @@ test('settles the priority ending only after the sixth reveal finishes', async (
     completedEndings: {
       [settlementRoom.id]: ['main', 'intimacy'],
     },
+    endingRecaps: {
+      [settlementRoom.id]: {
+        main: siblingRecap,
+        intimacy: ['p1', 'p4', 'p7', 'p10', 'p13', 'p16'],
+      },
+      other_room: { normal: otherRoomRecap },
+    },
     clues: ['existing-clue', 'new-clue'],
     galleryUnlocks: ['existing-gallery', 'new-gallery'],
   })
@@ -987,8 +1033,22 @@ test('settles the priority ending only after the sixth reveal finishes', async (
     completedEndings: {
       [settlementRoom.id]: ['main', 'intimacy'],
     },
+    endingRecaps: {
+      [settlementRoom.id]: {
+        main: siblingRecap,
+        intimacy: ['p1', 'p4', 'p7', 'p10', 'p13', 'p16'],
+      },
+      other_room: { normal: otherRoomRecap },
+    },
     clues: ['existing-clue', 'new-clue'],
     galleryUnlocks: ['existing-gallery', 'new-gallery'],
+  })
+  expect(loadProgress(storage).endingRecaps).toEqual({
+    [settlementRoom.id]: {
+      main: siblingRecap,
+      intimacy: ['p1', 'p4', 'p7', 'p10', 'p13', 'p16'],
+    },
+    other_room: { normal: otherRoomRecap },
   })
 })
 
@@ -1017,6 +1077,7 @@ test('settlement save failure preserves the locked ending choice until retry', a
   expect(store.getState().progress.currentRun).toMatchObject({
     lockedPanelId: 'p16',
   })
+  expect(store.getState().progress.endingRecaps).toEqual({})
 
   failing.failPrimaryWrites.current = false
   store.getState().retryError()
@@ -1028,6 +1089,11 @@ test('settlement save failure preserves the locked ending choice until retry', a
       endingId: 'intimacy',
     },
   })
+  expect(store.getState().progress.endingRecaps).toEqual({
+    [settlementRoom.id]: {
+      intimacy: ['p1', 'p4', 'p7', 'p10', 'p13', 'p16'],
+    },
+  })
 })
 
 test('settings write failure keeps the previous value and offers retry', () => {
@@ -1035,9 +1101,9 @@ test('settings write failure keeps the previous value and offers retry', () => {
   const store = createAppStore({ storage: failing.storage })
   failing.failPrimaryWrites.current = true
 
-  store.getState().updateSetting('adultContent', false)
+  store.getState().updateSetting('adultContent', true)
 
-  expect(store.getState().progress.settings.adultContent).toBe(true)
+  expect(store.getState().progress.settings.adultContent).toBe(false)
   expect(store.getState().error).toMatchObject({
     actionLabel: '重新保存設定',
   })
@@ -1045,7 +1111,7 @@ test('settings write failure keeps the previous value and offers retry', () => {
   failing.failPrimaryWrites.current = false
   store.getState().retryError()
 
-  expect(store.getState().progress.settings.adultContent).toBe(false)
+  expect(store.getState().progress.settings.adultContent).toBe(true)
   expect(store.getState().error).toBeNull()
 })
 

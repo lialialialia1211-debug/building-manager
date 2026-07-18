@@ -53,10 +53,12 @@ export interface AppStore {
   settledResult: SettledResult | null
   choiceLocked: boolean
   revealedPanelId: string | null
+  openingPending: boolean
   error: AppError | null
   goTo(screen: ScreenId): void
   selectRoom(roomId: string): void
   startRoom(roomId: string): Promise<void>
+  finishOpening(): void
   resumeCurrentRun(): Promise<void>
   choosePanel(panelId: string): void
   placePanel(panelId: string, slotIndex?: number): void
@@ -108,6 +110,65 @@ function defaultRunSeed(): string {
     return crypto.randomUUID()
   }
   return `${Date.now()}-${Math.random()}`
+}
+
+function endingRecapPanelIds(
+  engine: StoryEngine | DraftStoryEngine,
+): string[] {
+  const panelIds = engine instanceof DraftStoryEngine
+    ? engine.snapshot.slots.filter(
+        (panelId): panelId is string => panelId !== null,
+      )
+    : engine.snapshot.chosenPanels
+
+  return panelIds.slice(0, 6)
+}
+
+function settleEndingProgress(
+  progress: ProgressData,
+  engine: StoryEngine | DraftStoryEngine,
+): SettledResult {
+  const { room, snapshot } = engine
+  const endingId = resolveEnding(
+    room.endingRules,
+    snapshot.stats,
+    snapshot.flags,
+  )
+  const endingContent = room.endingContent[endingId]
+  const completedEndings = progress.completedEndings[room.id] ?? []
+  const newClues = [...new Set(endingContent.clueIds)].filter(
+    (clueId) => !progress.clues.includes(clueId),
+  )
+  const newGalleryUnlocks = [
+    ...new Set(endingContent.galleryUnlocks),
+  ].filter((unlockId) => !progress.galleryUnlocks.includes(unlockId))
+
+  if (!completedEndings.includes(endingId)) {
+    progress.completedEndings[room.id] = [
+      ...completedEndings,
+      endingId,
+    ]
+  }
+  progress.endingRecaps[room.id] = {
+    ...progress.endingRecaps[room.id],
+    [endingId]: endingRecapPanelIds(engine),
+  }
+  progress.clues.push(...newClues)
+  progress.galleryUnlocks.push(...newGalleryUnlocks)
+  if (room.id === 'room_a_blackout' && endingId === 'main') {
+    progress.crossRoomFlags.a_hidden_circuit = true
+    progress.crossRoomFlags.a_symbol_traced = Boolean(
+      snapshot.flags.a_symbol_traced,
+    )
+  }
+  progress.currentRun = null
+
+  return {
+    roomId: room.id,
+    endingId,
+    newClues,
+    newGalleryUnlocks,
+  }
 }
 
 function createState(
@@ -188,6 +249,7 @@ function createState(
     settledResult: null,
     choiceLocked: false,
     revealedPanelId: null,
+    openingPending: false,
     error: null,
     goTo(screen) {
       invalidateRoomLoads()
@@ -274,6 +336,7 @@ function createState(
         settledResult: null,
         choiceLocked: false,
         revealedPanelId: null,
+        openingPending: true,
         error: null,
       })
       retryOperation = null
@@ -284,6 +347,9 @@ function createState(
       }
       recordScreen('comic', roomId)
       recordCandidates(engine)
+    },
+    finishOpening() {
+      set({ openingPending: false })
     },
     async resumeCurrentRun() {
       const progress = get().progress
@@ -380,6 +446,7 @@ function createState(
           ? engine.snapshot.confirmed
           : lockedPanelId !== null,
         revealedPanelId: lockedPanelId,
+        openingPending: false,
         error: null,
       })
       retryOperation = null
@@ -657,44 +724,10 @@ function createState(
         )
 
         if (nextEngine.isComplete()) {
-          const { room, snapshot } = nextEngine
-          const endingId = resolveEnding(
-            room.endingRules,
-            snapshot.stats,
-            snapshot.flags,
+          const settledResult = settleEndingProgress(
+            nextProgress,
+            nextEngine,
           )
-          const endingContent = room.endingContent[endingId]
-          const completedEndings = (
-            nextProgress.completedEndings[room.id] ?? []
-          )
-          const newClues = [...new Set(endingContent.clueIds)].filter(
-            (clueId) => !nextProgress.clues.includes(clueId),
-          )
-          const newGalleryUnlocks = [
-            ...new Set(endingContent.galleryUnlocks),
-          ].filter(
-            (unlockId) =>
-              !nextProgress.galleryUnlocks.includes(unlockId),
-          )
-
-          if (!completedEndings.includes(endingId)) {
-            nextProgress.completedEndings[room.id] = [
-              ...completedEndings,
-              endingId,
-            ]
-          }
-          nextProgress.clues.push(...newClues)
-          nextProgress.galleryUnlocks.push(...newGalleryUnlocks)
-          if (
-            room.id === 'room_a_blackout'
-            && endingId === 'main'
-          ) {
-            nextProgress.crossRoomFlags.a_hidden_circuit = true
-            nextProgress.crossRoomFlags.a_symbol_traced = Boolean(
-              snapshot.flags.a_symbol_traced,
-            )
-          }
-          nextProgress.currentRun = null
           try {
             saveProgress(dependencies.storage, nextProgress)
           } catch {
@@ -711,25 +744,20 @@ function createState(
 
           retryOperation = null
           dependencies.recorder.record('ending_reached', {
-            roomId: room.id,
-            endingId,
-            choiceCount: snapshot.revealCount,
+            roomId: settledResult.roomId,
+            endingId: settledResult.endingId,
+            choiceCount: nextEngine.snapshot.revealCount,
           })
           set({
             screen: 'result',
             progress: nextProgress,
             engine: nextEngine,
-            settledResult: {
-              roomId: room.id,
-              endingId,
-              newClues,
-              newGalleryUnlocks,
-            },
+            settledResult,
             choiceLocked: false,
             revealedPanelId: null,
             error: null,
           })
-          recordScreen('result', room.id)
+          recordScreen('result', settledResult.roomId)
           return
         }
 
@@ -781,43 +809,10 @@ function createState(
       )
 
       if (state.engine.atEndingAnchor()) {
-        const { room, snapshot } = state.engine
-        const endingId = resolveEnding(
-          room.endingRules,
-          snapshot.stats,
-          snapshot.flags,
+        const settledResult = settleEndingProgress(
+          nextProgress,
+          state.engine,
         )
-        const endingContent = room.endingContent[endingId]
-        const completedEndings = (
-          nextProgress.completedEndings[room.id] ?? []
-        )
-        const newClues = [...new Set(endingContent.clueIds)].filter(
-          (clueId) => !nextProgress.clues.includes(clueId),
-        )
-        const newGalleryUnlocks = [
-          ...new Set(endingContent.galleryUnlocks),
-        ].filter(
-          (unlockId) => !nextProgress.galleryUnlocks.includes(unlockId),
-        )
-
-        if (!completedEndings.includes(endingId)) {
-          nextProgress.completedEndings[room.id] = [
-            ...completedEndings,
-            endingId,
-          ]
-        }
-        nextProgress.clues.push(...newClues)
-        nextProgress.galleryUnlocks.push(...newGalleryUnlocks)
-        if (
-          room.id === 'room_a_blackout'
-          && endingId === 'main'
-        ) {
-          nextProgress.crossRoomFlags.a_hidden_circuit = true
-          nextProgress.crossRoomFlags.a_symbol_traced = Boolean(
-            snapshot.flags.a_symbol_traced,
-          )
-        }
-        nextProgress.currentRun = null
         try {
           saveProgress(dependencies.storage, nextProgress)
         } catch {
@@ -834,24 +829,19 @@ function createState(
 
         retryOperation = null
         dependencies.recorder.record('ending_reached', {
-          roomId: room.id,
-          endingId,
-          choiceCount: snapshot.choiceCount,
+          roomId: settledResult.roomId,
+          endingId: settledResult.endingId,
+          choiceCount: state.engine.snapshot.choiceCount,
         })
         set({
           screen: 'result',
           progress: nextProgress,
-          settledResult: {
-            roomId: room.id,
-            endingId,
-            newClues,
-            newGalleryUnlocks,
-          },
+          settledResult,
           choiceLocked: false,
           revealedPanelId: null,
           error: null,
         })
-        recordScreen('result', room.id)
+        recordScreen('result', settledResult.roomId)
         return
       }
 

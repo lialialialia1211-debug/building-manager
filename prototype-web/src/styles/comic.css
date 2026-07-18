@@ -202,7 +202,7 @@
   width: 100%;
   height: 100%;
   display: block;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .panel-motion {
@@ -217,7 +217,7 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .panel-motion .layer-bg {
@@ -394,6 +394,132 @@
   border-radius: 12px;
   color: inherit;
   background: #202735;
+}
+
+.cinematic-player {
+  display: grid;
+  gap: 12px;
+}
+
+.cinematic-stage {
+  position: relative;
+  display: grid;
+  min-height: clamp(220px, 46vw, 520px);
+  overflow: hidden;
+  place-items: center;
+  border-radius: 16px;
+  background: #080b10;
+}
+
+.cinematic-frame,
+.cinematic-stage .runtime-image-error {
+  width: 100%;
+  height: 100%;
+  min-height: inherit;
+}
+
+.cinematic-current-layer,
+.cinematic-previous-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.cinematic-current-layer {
+  animation: cinematic-crossfade 450ms ease-out both;
+}
+
+.cinematic-frame {
+  display: block;
+  object-fit: contain;
+  animation: cinematic-ken-burns 1.8s ease-out both;
+}
+
+.cinematic-frame-previous {
+  animation: none;
+  transform: none;
+}
+
+.cinematic-stage .runtime-image-error,
+.cinematic-empty {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 12px;
+  margin: 0;
+  color: #c7cfdb;
+  background: #101620;
+}
+
+.cinematic-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0 10px 12px;
+}
+
+.cinematic-counter {
+  min-width: 64px;
+  color: #d8bd79;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.cinematic-controls button {
+  min-height: 42px;
+  padding: 8px 14px;
+  border: 1px solid #718096;
+  border-radius: 999px;
+  color: #eef2f7;
+  background: #171d29;
+  cursor: pointer;
+}
+
+.cinematic-controls button:disabled {
+  cursor: not-allowed;
+  opacity: .42;
+}
+
+.ending-safe-fallback {
+  margin: 12px 0 0;
+  padding: 10px 14px;
+  border: 1px solid #756748;
+  border-radius: 10px;
+  color: #e2cc90;
+  background: #211d15;
+}
+
+@keyframes cinematic-crossfade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes cinematic-ken-burns {
+  from {
+    transform: scale(1.035);
+  }
+
+  to {
+    transform: scale(1);
+  }
+}
+
+.candidate-card-select {
+  min-height: 44px;
+  width: 100%;
+  padding: 8px 12px;
+  border: 0;
+  border-top: 1px solid #455168;
+  color: inherit;
+  background: #1a202b;
   cursor: pointer;
 }
 
@@ -461,17 +587,34 @@
   object-fit: cover;
 }
 
-.candidate-card:hover:not(:disabled),
-.candidate-card:focus-visible {
+.candidate-card:has(.candidate-card-select:hover:not(:disabled)),
+.candidate-card:focus-within {
   border-color: #d8bd79;
   outline: none;
   box-shadow: 0 0 0 3px rgb(216 189 121 / 18%);
 }
 
-.candidate-card:disabled {
-  cursor: wait;
+.candidate-card:has(.candidate-card-select:disabled) {
   filter: saturate(.45);
   opacity: .6;
+}
+
+.candidate-card-select:disabled {
+  cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel-motion,
+  .panel-motion .layer {
+    animation-duration: 1ms;
+  }
+
+  .cinematic-current-layer,
+  .cinematic-frame {
+    animation: none;
+    transform: none;
+    transition: none;
+  }
 }
 
 @media (min-width: 1280px) {

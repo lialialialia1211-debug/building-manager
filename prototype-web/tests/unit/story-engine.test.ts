@@ -6,6 +6,8 @@ const room: RoomDefinition = {
   schemaVersion: 1,
   id: 'fixture',
   title: 'Fixture',
+  backgroundAsset: 'building_fixture',
+  openingAssets: ['fixture_open_01', 'fixture_open_02', 'fixture_open_03'],
   startNode: 'n1',
   safeNode: 'n1',
   endingAnchor: 'ending',

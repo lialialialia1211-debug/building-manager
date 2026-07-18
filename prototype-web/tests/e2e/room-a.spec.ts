@@ -4,7 +4,7 @@ import { playRoute } from './helpers'
 
 for (const route of roomARoutes) {
   test(`Room A reaches its ${route.endingId} ending`, async ({ page }) => {
-    await playRoute(
+    const failures = await playRoute(
       page,
       route.roomName,
       [...route.panels],
@@ -17,5 +17,6 @@ for (const route of roomARoutes) {
         name: route.heading,
       }),
     ).toBeVisible()
+    await failures.assertNoFailures()
   })
 }

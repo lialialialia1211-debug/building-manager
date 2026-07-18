@@ -64,13 +64,78 @@ function progressWithCurrentRun(currentRun: unknown) {
   }
 }
 
-test('adult content defaults to enabled', () => {
-  expect(createEmptyProgress().settings.adultContent).toBe(true)
+test('adult content defaults to disabled for a fresh profile', () => {
+  expect(createEmptyProgress().settings.adultContent).toBe(false)
+})
+
+test('preserves an explicitly enabled adult-content setting', () => {
+  const storage = createStorage()
+  storage.setItem(PROGRESS_KEY, JSON.stringify({
+    ...createEmptyProgress(),
+    settings: {
+      ...createEmptyProgress().settings,
+      adultContent: true,
+    },
+  }))
+
+  expect(loadProgress(storage).settings.adultContent).toBe(true)
+})
+
+test('preserves valid ending recaps while discarding malformed entries', () => {
+  const storage = createStorage()
+  storage.setItem(PROGRESS_KEY, JSON.stringify({
+    ...createEmptyProgress(),
+    clues: ['kept-clue'],
+    endingRecaps: {
+      room_a_blackout: {
+        main: ['a1_fuse', 'a2_key'],
+        normal: [],
+      },
+      room_b_wall: {
+        intimacy: ['b1_door', 'b1_door'],
+      },
+      invalid_room: 'not-a-recap',
+    },
+  }))
+
+  const loaded = loadProgress(storage)
+
+  expect(loaded.clues).toEqual(['kept-clue'])
+  expect(loaded.endingRecaps).toEqual({
+    room_a_blackout: {
+      main: ['a1_fuse', 'a2_key'],
+    },
+  })
+  expect(JSON.parse(storage.getItem(PROGRESS_KEY) ?? '{}').endingRecaps)
+    .toEqual(loaded.endingRecaps)
+})
+
+test('round-trips a six-panel ending recap', () => {
+  const storage = createStorage()
+  const progress = createEmptyProgress()
+  progress.endingRecaps = {
+    room_a_blackout: {
+      intimacy: [
+        'a1_fuse',
+        'a2_key',
+        'a3_door',
+        'a4_signal',
+        'a5_trace',
+        'a6_exit',
+      ],
+    },
+  }
+
+  saveProgress(storage, progress)
+
+  expect(loadProgress(storage).endingRecaps).toEqual(
+    progress.endingRecaps,
+  )
 })
 
 test('progress defaults use the approved settings contract', () => {
   expect(createEmptyProgress().settings).toEqual({
-    adultContent: true,
+    adultContent: false,
     exactStats: false,
     autoFastForward: true,
   })

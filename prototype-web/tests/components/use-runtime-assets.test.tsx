@@ -1,0 +1,240 @@
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
+import { act, renderHook, waitFor } from '@testing-library/react'
+import { afterEach, expect, test, vi } from 'vitest'
+
+const commonManifest = JSON.parse(readFileSync(
+  resolve(process.cwd(), '../content/asset-manifest.json'),
+  'utf8',
+))
+const adultManifest = JSON.parse(readFileSync(
+  resolve(process.cwd(), '../content/adult-asset-manifest.json'),
+  'utf8',
+))
+const hookModulePath = '../../src/hooks/use-runtime-assets'
+
+function jsonResponse(value: unknown, ok = true): Response {
+  return {
+    ok,
+    json: async () => value,
+  } as Response
+}
+
+function deferred<T>() {
+  let resolve!: (value: T) => void
+  const promise = new Promise<T>((completion) => {
+    resolve = completion
+  })
+  return { promise, resolve }
+}
+
+async function loadHook() {
+  return import(hookModulePath).catch(() => null)
+}
+
+afterEach(() => {
+  vi.unstubAllGlobals()
+})
+
+test('loads the common catalog first and lazily loads adult assets', async () => {
+  const runtimeAssets = await loadHook()
+  const fetch = vi.fn((url: string) => Promise.resolve(jsonResponse(
+    url.endsWith('adult-asset-manifest.json')
+      ? adultManifest
+      : commonManifest,
+  )))
+  vi.stubGlobal('fetch', fetch)
+
+  expect(runtimeAssets).not.toBeNull()
+  const { result, rerender } = renderHook(
+    ({ adultContent }) => runtimeAssets!.useRuntimeAssets(adultContent),
+    { initialProps: { adultContent: false } },
+  )
+
+  await waitFor(() => {
+    expect(result.current.commonStatus).toBe('ready')
+  })
+  expect(result.current.adultStatus).toBe('disabled')
+  expect(result.current.catalog?.adult).toBeNull()
+  expect(fetch).toHaveBeenCalledWith('/asset-manifest.json')
+  expect(fetch).not.toHaveBeenCalledWith('/adult-asset-manifest.json')
+
+  rerender({ adultContent: true })
+  await waitFor(() => {
+    expect(result.current.adultStatus).toBe('ready')
+  })
+  expect(fetch).toHaveBeenCalledWith('/adult-asset-manifest.json')
+  expect(Object.keys(result.current.catalog?.adult ?? {})).toHaveLength(12)
+
+  rerender({ adultContent: false })
+  await waitFor(() => {
+    expect(result.current.adultStatus).toBe('disabled')
+  })
+  expect(result.current.catalog?.adult).toBeNull()
+})
+
+test('preserves the common catalog when the adult request fails and retries it', async () => {
+  const runtimeAssets = await loadHook()
+  let adultAttempts = 0
+  const fetch = vi.fn((url: string) => {
+    if (url.endsWith('adult-asset-manifest.json')) {
+      adultAttempts += 1
+      return Promise.resolve(jsonResponse(
+        adultAttempts === 1 ? {} : adultManifest,
+        adultAttempts !== 1,
+      ))
+    }
+    return Promise.resolve(jsonResponse(commonManifest))
+  })
+  vi.stubGlobal('fetch', fetch)
+
+  expect(runtimeAssets).not.toBeNull()
+  const { result } = renderHook(() =>
+    runtimeAssets!.useRuntimeAssets(true))
+
+  await waitFor(() => {
+    expect(result.current.adultStatus).toBe('error')
+  })
+  expect(result.current.commonStatus).toBe('ready')
+  expect(result.current.catalog?.adult).toBeNull()
+
+  act(() => result.current.retryAdult())
+  await waitFor(() => {
+    expect(result.current.adultStatus).toBe('ready')
+  })
+  expect(adultAttempts).toBe(2)
+})
+
+test('ignores an adult response that resolves after adult content is disabled', async () => {
+  const runtimeAssets = await loadHook()
+  const adultResponse = deferred<Response>()
+  const fetch = vi.fn((url: string) => {
+    if (url.endsWith('adult-asset-manifest.json')) {
+      return adultResponse.promise
+    }
+    return Promise.resolve(jsonResponse(commonManifest))
+  })
+  vi.stubGlobal('fetch', fetch)
+
+  expect(runtimeAssets).not.toBeNull()
+  const { result, rerender } = renderHook(
+    ({ adultContent }) => runtimeAssets!.useRuntimeAssets(adultContent),
+    { initialProps: { adultContent: false } },
+  )
+  await waitFor(() => {
+    expect(result.current.commonStatus).toBe('ready')
+  })
+
+  rerender({ adultContent: true })
+  await waitFor(() => {
+    expect(fetch).toHaveBeenCalledWith('/adult-asset-manifest.json')
+  })
+  expect(result.current.adultStatus).toBe('loading')
+
+  rerender({ adultContent: false })
+  await waitFor(() => {
+    expect(result.current.adultStatus).toBe('disabled')
+  })
+
+  await act(async () => {
+    adultResponse.resolve(jsonResponse(adultManifest))
+    await Promise.resolve()
+  })
+
+  expect(result.current.adultStatus).toBe('disabled')
+  expect(result.current.catalog?.adult).toBeNull()
+})
+
+test('reports a blocking common error and retries it', async () => {
+  const runtimeAssets = await loadHook()
+  let commonAttempts = 0
+  const fetch = vi.fn(() => {
+    commonAttempts += 1
+    return Promise.resolve(jsonResponse(
+      commonAttempts === 1 ? {} : commonManifest,
+      commonAttempts !== 1,
+    ))
+  })
+  vi.stubGlobal('fetch', fetch)
+
+  expect(runtimeAssets).not.toBeNull()
+  const { result } = renderHook(() =>
+    runtimeAssets!.useRuntimeAssets(false))
+
+  await waitFor(() => {
+    expect(result.current.commonStatus).toBe('error')
+  })
+  expect(result.current.catalog).toBeNull()
+
+  act(() => result.current.retryCommon())
+  await waitFor(() => {
+    expect(result.current.commonStatus).toBe('ready')
+  })
+  expect(commonAttempts).toBe(2)
+})
+
+test('treats an invalid common manifest as a blocking error', async () => {
+  const runtimeAssets = await loadHook()
+  vi.stubGlobal('fetch', vi.fn(() => Promise.resolve(jsonResponse({}))))
+
+  expect(runtimeAssets).not.toBeNull()
+  const { result } = renderHook(() =>
+    runtimeAssets!.useRuntimeAssets(false))
+
+  await waitFor(() => {
+    expect(result.current.commonStatus).toBe('error')
+  })
+  expect(result.current.catalog).toBeNull()
+})
+
+test('blocks an incomplete playable common manifest and retries it', async () => {
+  const runtimeAssets = await loadHook()
+  const incomplete = structuredClone(commonManifest)
+  delete incomplete.assets.a1_fuse
+  let attempts = 0
+  vi.stubGlobal('fetch', vi.fn(() => {
+    attempts += 1
+    return Promise.resolve(jsonResponse(
+      attempts === 1 ? incomplete : commonManifest,
+    ))
+  }))
+
+  expect(runtimeAssets).not.toBeNull()
+  const { result } = renderHook(() =>
+    runtimeAssets!.useRuntimeAssets(false))
+
+  await waitFor(() => {
+    expect(result.current.commonStatus).toBe('error')
+  })
+  expect(result.current.catalog).toBeNull()
+
+  act(() => result.current.retryCommon())
+  await waitFor(() => {
+    expect(result.current.commonStatus).toBe('ready')
+  })
+  expect(attempts).toBe(2)
+})
+
+test('uses the safe catalog when the adult manifest is incomplete', async () => {
+  const runtimeAssets = await loadHook()
+  const incompleteAdult = structuredClone(adultManifest)
+  delete incompleteAdult.assets.a_intimacy_01
+  vi.stubGlobal('fetch', vi.fn((url: string) =>
+    Promise.resolve(jsonResponse(
+      url.endsWith('adult-asset-manifest.json')
+        ? incompleteAdult
+        : commonManifest,
+    )),
+  ))
+
+  expect(runtimeAssets).not.toBeNull()
+  const { result } = renderHook(() =>
+    runtimeAssets!.useRuntimeAssets(true))
+
+  await waitFor(() => {
+    expect(result.current.adultStatus).toBe('error')
+  })
+  expect(result.current.commonStatus).toBe('ready')
+  expect(result.current.catalog?.adult).toBeNull()
+  expect(Object.keys(result.current.catalog?.common ?? {})).toHaveLength(75)
+})

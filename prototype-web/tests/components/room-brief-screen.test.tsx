@@ -1,5 +1,7 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { createEmptyProgress } from '@/domain/progress'
+import type { AssetCatalog } from '@/domain/runtime-assets'
 import type {
   CharacterDefinition,
   RoomDefinition,
@@ -17,6 +19,8 @@ const room: RoomDefinition = {
   schemaVersion: 1,
   id: 'room_a_blackout',
   title: '停電之夜',
+  backgroundAsset: 'building_a',
+  openingAssets: ['a_open_01', 'a_open_02', 'a_open_03'],
   startNode: 'n1',
   safeNode: 'n1',
   endingAnchor: 'ending',
@@ -64,6 +68,20 @@ const room: RoomDefinition = {
   },
 }
 
+const catalog: AssetCatalog = {
+  common: Object.fromEntries(
+    room.openingAssets.map((assetId) => [
+      assetId,
+      {
+        preview: `/art/${assetId}-preview.webp`,
+        full: `/art/${assetId}-full.webp`,
+      },
+    ]),
+  ),
+  adult: null,
+  backgrounds: { building_a: '/art/building-a.webp' },
+}
+
 const characters: CharacterDefinition[] = [
   {
     id: 'lin_yuwei',
@@ -101,6 +119,7 @@ test('shows room details, found clues, and three unknown endings', () => {
   render(
     <RoomBriefScreen
       room={room}
+      catalog={catalog}
       characters={characters}
       progress={progress}
       onStart={() => {}}
@@ -129,6 +148,11 @@ test('shows room details, found clues, and three unknown endings', () => {
   expect(
     screen.getByRole('button', { name: '開始' }),
   ).toBeInTheDocument()
+  expect(screen.getByRole('img', { name: '停電之夜房間背景' }))
+    .toHaveAttribute('src', '/art/building-a.webp')
+  expect(screen.getAllByRole('img', { name: /開場預覽/ }))
+    .toHaveLength(3)
+  expect(document.body.innerHTML).not.toContain('data:image/svg+xml')
 })
 
 test('offers replay after the room has a completed ending', () => {
@@ -138,6 +162,7 @@ test('offers replay after the room has a completed ending', () => {
   render(
     <RoomBriefScreen
       room={room}
+      catalog={catalog}
       characters={characters}
       progress={progress}
       onStart={() => {}}
@@ -181,6 +206,13 @@ test('shows Room B clue labels without internal IDs', () => {
   render(
     <RoomBriefScreen
       room={roomB}
+      catalog={{
+        ...catalog,
+        backgrounds: {
+          ...catalog.backgrounds,
+          building_b: '/art/building-b.webp',
+        },
+      }}
       characters={characters}
       progress={progress}
       onStart={() => {}}
@@ -197,4 +229,29 @@ test('shows Room B clue labels without internal IDs', () => {
       /b_hidden_space|b_evidence|b_opened_space|b_consent/,
     ),
   ).not.toBeInTheDocument()
+})
+
+test('retries a failed room briefing background', async () => {
+  const user = userEvent.setup()
+  render(
+    <RoomBriefScreen
+      room={room}
+      catalog={catalog}
+      characters={characters}
+      progress={createEmptyProgress()}
+      onStart={() => {}}
+      onBack={() => {}}
+    />,
+  )
+
+  fireEvent.error(
+    screen.getByRole('img', { name: '停電之夜房間背景' }),
+  )
+
+  await user.click(screen.getByRole('button', { name: '重試' }))
+  expect(screen.getByRole('img', { name: '停電之夜房間背景' }))
+    .toHaveAttribute(
+      'src',
+      '/art/building-a.webp?runtimeRetry=1',
+    )
 })

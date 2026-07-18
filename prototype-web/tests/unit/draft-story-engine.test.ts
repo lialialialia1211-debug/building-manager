@@ -22,6 +22,8 @@ function createRoom(): RoomDefinition {
     schemaVersion: 1,
     id: 'draft-fixture',
     title: 'Draft fixture',
+    backgroundAsset: 'building_fixture',
+    openingAssets: ['fixture_open_01', 'fixture_open_02', 'fixture_open_03'],
     startNode: 'legacy',
     safeNode: 'legacy',
     endingAnchor: 'ending',

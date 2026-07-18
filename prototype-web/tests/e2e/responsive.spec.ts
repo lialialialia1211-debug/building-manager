@@ -1,122 +1,121 @@
-import { expect, test } from '@playwright/test'
+import { expect, test, type Page } from '@playwright/test'
+import { roomARoutes } from './ending-routes'
 import { playRoute } from './helpers'
 
-test('keeps the complete comic choice UI inside the viewport', async ({
-  page,
-}) => {
-  await playRoute(page, /停電之夜/, [])
+const route = roomARoutes[0]!
 
-  const viewport = page.viewportSize()
-  expect(viewport).not.toBeNull()
-
-  const tray = page.locator('.candidate-tray')
-  const trayBox = await tray.boundingBox()
-  expect(trayBox).not.toBeNull()
-  expect(trayBox!.x).toBeGreaterThanOrEqual(0)
-  expect(trayBox!.x + trayBox!.width)
-    .toBeLessThanOrEqual(viewport!.width)
-
-  const candidates = page.locator('.candidate-card')
-  await expect(candidates).toHaveCount(12)
-  for (const candidate of await candidates.all()) {
-    await expect(candidate).toBeVisible()
-    const box = await candidate.boundingBox()
-    expect(box).not.toBeNull()
-    expect(box!.x).toBeGreaterThanOrEqual(0)
-    expect(box!.x + box!.width)
-      .toBeLessThanOrEqual(viewport!.width)
-  }
-
+async function expectNoHorizontalScroll(page: Page) {
   const documentSize = await page.evaluate(() => ({
     clientWidth: document.documentElement.clientWidth,
     scrollWidth: document.documentElement.scrollWidth,
   }))
   expect(documentSize.scrollWidth)
     .toBeLessThanOrEqual(documentSize.clientWidth)
+}
 
-  const comicPageBox = await page.locator('.comic-page').boundingBox()
-  expect(comicPageBox).not.toBeNull()
-  expect(comicPageBox!.width).toBeGreaterThanOrEqual(640)
-  expect(comicPageBox!.height).toBeGreaterThanOrEqual(360)
+test('keeps the complete route and gallery responsive', async ({ page }) => {
+  const viewport = page.viewportSize()
+  expect(viewport).not.toBeNull()
 
-  const statusBox = await page.getByTestId('status-strip').boundingBox()
-  expect(statusBox).not.toBeNull()
-  expect(statusBox!.y + statusBox!.height)
-    .toBeLessThanOrEqual(trayBox!.y)
+  const failures = await playRoute(
+    page,
+    route.roomName,
+    [...route.panels],
+    {
+      dealSeed: route.dealSeed,
+      requireOpening: true,
+      onBuilding: async (currentPage) => {
+        await expect(currentPage.getByTestId('building-screen'))
+          .toBeVisible()
+        await expectNoHorizontalScroll(currentPage)
+      },
+      onOpening: async (currentPage) => {
+        await expect(currentPage.getByRole('region', {
+          name: /停電之夜開場/,
+        })).toBeVisible()
+        await expect(currentPage.getByRole('button', {
+          name: '跳過開場',
+        })).toBeVisible()
+        await expectNoHorizontalScroll(currentPage)
+      },
+      onComic: async (currentPage) => {
+        await expect(currentPage.getByTestId('comic-choice-slot'))
+          .toHaveCount(6)
+        await expect(currentPage.getByRole('button', {
+          name: '確認編排並揭曉',
+        })).toBeVisible()
+        await expectNoHorizontalScroll(currentPage)
+      },
+      onResult: async (currentPage) => {
+        await expect(currentPage.getByTestId('result-screen'))
+          .toBeVisible()
+        await expectNoHorizontalScroll(currentPage)
 
-  const comicFontSizes = await page.locator([
-    '.comic-screen button',
-    '.comic-screen p',
-    '.comic-screen .status-item',
-  ].join(', ')).evaluateAll((elements) =>
-    elements.map((element) =>
-      Number.parseFloat(getComputedStyle(element).fontSize),
-    ),
+        if (viewport?.width === 1280 && viewport.height === 720) {
+          const playerBox = await currentPage
+            .locator('.cinematic-player')
+            .boundingBox()
+          const actionsBox = await currentPage
+            .locator('.result-actions')
+            .boundingBox()
+          expect(playerBox).not.toBeNull()
+          expect(actionsBox).not.toBeNull()
+          expect(actionsBox!.y).toBeGreaterThanOrEqual(
+            playerBox!.y + playerBox!.height,
+          )
+        }
+      },
+    },
   )
-  expect(Math.min(...comicFontSizes)).toBeGreaterThanOrEqual(16)
+
+  await page.getByRole('button', { name: '返回大樓' }).click()
+  await expect(page.getByTestId('building-screen')).toBeVisible()
+  await page.getByRole('button', { name: '圖鑑' }).click()
+  await expect(page.getByTestId('gallery-screen')).toBeVisible()
+  await expect(page.locator('.gallery-replay .cinematic-player'))
+    .toBeVisible()
+  await expectNoHorizontalScroll(page)
+  await failures.assertNoFailures()
 })
 
-test.describe('small viewport comic flow', () => {
-  test.use({ viewport: { width: 600, height: 900 } })
-
-  test('stacks every comic panel before the candidate tray', async ({
+test.describe('reduced motion', () => {
+  test('advances cinematic frames without transform animation', async ({
     page,
   }) => {
-    await playRoute(page, /停電之夜/, [])
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    const failures = await playRoute(
+      page,
+      route.roomName,
+      [...route.panels],
+      { dealSeed: route.dealSeed },
+    )
 
-    const openingBox = await page
-      .getByTestId('comic-opening')
-      .boundingBox()
-    const endingBox = await page
-      .getByTestId('comic-ending')
-      .boundingBox()
-    const comicPageBox = await page.locator('.comic-page').boundingBox()
-    const trayBox = await page.locator('.candidate-tray').boundingBox()
+    const player = page.locator('.cinematic-player')
+    await player.getByRole('button', { name: '重播' }).click()
+    await player.getByRole('button', { name: '暫停' }).click()
+    const stage = page.getByTestId('cinematic-stage')
+    const before = await stage.getAttribute('data-asset-id')
+    await player.getByRole('button', { name: '下一格' }).click()
+    await expect(stage).not.toHaveAttribute('data-asset-id', before ?? '')
+    expect(await page.evaluate(() => matchMedia(
+      '(prefers-reduced-motion: reduce)',
+    ).matches)).toBe(true)
 
-    expect(openingBox).not.toBeNull()
-    expect(endingBox).not.toBeNull()
-    expect(comicPageBox).not.toBeNull()
-    expect(trayBox).not.toBeNull()
-
-    const panelBoxes = await page
-      .locator('.comic-page .comic-panel')
-      .evaluateAll((panels) =>
-        panels.map((panel) => {
-          const box = panel.getBoundingClientRect()
-          return {
-            top: box.top,
-            right: box.right,
-            bottom: box.bottom,
-            left: box.left,
-          }
-        }),
-      )
-
-    expect(panelBoxes).toHaveLength(8)
-    for (const [index, panelBox] of panelBoxes.entries()) {
-      expect(panelBox.left).toBeGreaterThanOrEqual(comicPageBox!.x)
-      expect(panelBox.right)
-        .toBeLessThanOrEqual(comicPageBox!.x + comicPageBox!.width)
-      const previousBox = panelBoxes[index - 1]
-      if (previousBox) {
-        expect(panelBox.top)
-          .toBeGreaterThanOrEqual(previousBox.bottom)
+    const motionStyles = await player.locator([
+      '.cinematic-current-layer',
+      '.cinematic-frame',
+    ].join(', ')).evaluateAll((elements) => elements.map((element) => {
+      const style = getComputedStyle(element)
+      return {
+        animationName: style.animationName,
+        transform: style.transform,
       }
-    }
-
-    expect(openingBox!.y).toBeGreaterThanOrEqual(comicPageBox!.y)
-    expect(endingBox!.y)
-      .toBeGreaterThanOrEqual(openingBox!.y + openingBox!.height)
-    expect(endingBox!.y + endingBox!.height)
-      .toBeLessThanOrEqual(comicPageBox!.y + comicPageBox!.height)
-    expect(trayBox!.y)
-      .toBeGreaterThanOrEqual(comicPageBox!.y + comicPageBox!.height)
-
-    const documentSize = await page.evaluate(() => ({
-      clientWidth: document.documentElement.clientWidth,
-      scrollWidth: document.documentElement.scrollWidth,
     }))
-    expect(documentSize.scrollWidth)
-      .toBeLessThanOrEqual(documentSize.clientWidth)
+    expect(motionStyles.length).toBeGreaterThan(0)
+    for (const style of motionStyles) {
+      expect(style.animationName).toBe('none')
+      expect(style.transform).toBe('none')
+    }
+    await failures.assertNoFailures()
   })
 })

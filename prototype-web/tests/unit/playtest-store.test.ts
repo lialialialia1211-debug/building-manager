@@ -72,6 +72,8 @@ function createRoom(): RoomDefinition {
     schemaVersion: 1,
     id: 'fixture-room',
     title: 'Fixture room',
+    backgroundAsset: 'building_fixture',
+    openingAssets: ['fixture_open_01', 'fixture_open_02', 'fixture_open_03'],
     startNode: 'n1',
     safeNode: 'n1',
     endingAnchor: 'ending',
@@ -184,6 +186,11 @@ test('records the complete play path through the injected recorder boundary', as
   expect(calls).toContainEqual({
     type: 'screen_viewed',
     payload: { screen: 'result', roomId: room.id },
+  })
+  expect(store.getState().progress.endingRecaps).toEqual({
+    [room.id]: {
+      normal: ['p1a', 'p2a', 'p3a', 'p4a', 'p5a', 'p6a'],
+    },
   })
 
   await store.getState().startRoom(room.id)
