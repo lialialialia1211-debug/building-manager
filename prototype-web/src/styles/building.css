@@ -463,20 +463,22 @@
   opacity: 1;
 }
 
+.gallery-entry-selected {
+  border-color: #d8bd79;
+  box-shadow: 0 0 0 2px rgb(216 189 121 / 14%);
+}
+
 .gallery-entry > button:disabled {
   cursor: not-allowed;
 }
 
 .gallery-replay {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-  margin-top: 16px;
+  margin-top: 22px;
 }
 
-.gallery-replay img {
-  width: 100%;
-  border-radius: 10px;
+.gallery-empty {
+  color: #aeb8c8;
+  text-align: center;
 }
 
 .settings-list {

@@ -105,22 +105,36 @@ function RoomBriefRoute({
 }
 
 function GalleryRoute({
+  catalog,
+  adultStatus,
   onBack,
 }: {
+  catalog: AssetCatalog
+  adultStatus: 'disabled' | 'loading' | 'ready' | 'error'
   onBack(): void
 }) {
   const progress = useAppStore((state) => state.progress)
-  const [entries, setEntries] = useState<GalleryEntry[] | null>(null)
+  const [content, setContent] = useState<{
+    entries: GalleryEntry[]
+    rooms: Record<string, RoomDefinition>
+  } | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     let active = true
-    setEntries(null)
+    setContent(null)
     setError(null)
 
-    void loadGallery().then(
-      (galleryEntries) => {
-        if (active) setEntries(galleryEntries)
+    void loadGallery().then(async (entries) => {
+      const roomIds = [...new Set(entries.map((entry) => entry.roomId))]
+      const loadedRooms = await Promise.all(roomIds.map(loadRoom))
+      return {
+        entries,
+        rooms: Object.fromEntries(loadedRooms.map((room) => [room.id, room])),
+      }
+    }).then(
+      (galleryContent) => {
+        if (active) setContent(galleryContent)
       },
       () => {
         if (active) setError('圖鑑資料載入失敗，請返回大樓重試。')
@@ -143,7 +157,7 @@ function GalleryRoute({
     )
   }
 
-  if (!entries) {
+  if (!content) {
     return (
       <section
         className="gallery-screen"
@@ -157,8 +171,11 @@ function GalleryRoute({
 
   return (
     <GalleryScreen
-      entries={entries}
+      entries={content.entries}
+      rooms={content.rooms}
       progress={progress}
+      catalog={catalog}
+      adultStatus={adultStatus}
       onBack={onBack}
     />
   )
@@ -299,6 +316,8 @@ export function App() {
               result={settledResult}
               stats={engine.snapshot.stats}
               progress={progress}
+              catalog={catalog}
+              adultStatus={runtimeAssets.adultStatus}
               onReplay={() => {
                 void startRoom(settledResult.roomId)
               }}
@@ -318,6 +337,8 @@ export function App() {
     case 'gallery':
       content = (
         <GalleryRoute
+          catalog={catalog}
+          adultStatus={runtimeAssets.adultStatus}
           onBack={() => goTo('building')}
         />
       )

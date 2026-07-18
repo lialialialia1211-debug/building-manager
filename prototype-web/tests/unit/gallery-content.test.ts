@@ -79,3 +79,27 @@ test('gallery content defines the six approved ending entries', () => {
     },
   ])
 })
+
+test('adult gallery sequences use isolated IDs with room-matched safe fallbacks', () => {
+  const gallery = JSON.parse(readFileSync(
+    resolve(process.cwd(), '../content/gallery.json'),
+    'utf8',
+  )) as Array<{
+    roomId: string
+    adult: boolean
+    adultSequence?: string[]
+    safeSequence?: string[]
+  }>
+
+  for (const entry of gallery.filter((item) => item.adult)) {
+    const prefix = entry.roomId === 'room_a_blackout' ? 'a' : 'b'
+    expect(entry.adultSequence).toHaveLength(6)
+    expect(entry.safeSequence).toHaveLength(6)
+    expect(entry.adultSequence?.every(
+      (id) => id.startsWith(`${prefix}_intimacy_`) && !id.includes('/'),
+    )).toBe(true)
+    expect(entry.safeSequence?.every(
+      (id) => id.startsWith(`${prefix}_safe_`) && !id.includes('/'),
+    )).toBe(true)
+  }
+})

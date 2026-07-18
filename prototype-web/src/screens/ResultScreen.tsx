@@ -1,10 +1,11 @@
 import type { SettledResult } from '@/app/store'
+import { CinematicPlayer } from '@/components/CinematicPlayer'
 import { StatusStrip } from '@/components/StatusStrip'
-import { resolveAsset } from '@/domain/asset-resolver'
 import { clueLabel } from '@/domain/clue-labels'
+import { buildEndingRecap } from '@/domain/ending-recap'
 import { galleryUnlockLabel } from '@/domain/gallery-labels'
-import { greyboxAnchor } from '@/domain/greybox-assets'
 import type { ProgressData } from '@/domain/progress'
+import type { AssetCatalog } from '@/domain/runtime-assets'
 import type {
   RoomDefinition,
   StatName,
@@ -15,34 +16,10 @@ interface ResultScreenProps {
   result: SettledResult
   stats: Record<StatName, number>
   progress: ProgressData
+  catalog: AssetCatalog
+  adultStatus: 'disabled' | 'loading' | 'ready' | 'error'
   onReplay(): void
   onReturn(): void
-}
-
-function resultAssetId(
-  room: RoomDefinition,
-  result: SettledResult,
-  adultContent: boolean,
-): string {
-  if (result.endingId !== 'intimacy') {
-    return room.endingContent[result.endingId].asset
-  }
-
-  const prefix = room.id === 'room_a_blackout'
-    ? 'a'
-    : room.id === 'room_b_wall'
-      ? 'b'
-      : null
-  if (!prefix) {
-    return resolveAsset({
-      default: room.endingContent[result.endingId].asset,
-    }, adultContent)
-  }
-
-  return resolveAsset({
-    adult: `${prefix}_intimacy_06`,
-    safe: `${prefix}_safe_06`,
-  }, adultContent)
 }
 
 export function ResultScreen({
@@ -50,15 +27,19 @@ export function ResultScreen({
   result,
   stats,
   progress,
+  catalog,
+  adultStatus,
   onReplay,
   onReturn,
 }: ResultScreenProps) {
   const endingContent = room.endingContent[result.endingId]
-  const assetId = resultAssetId(
+  const recap = buildEndingRecap({
     room,
-    result,
-    progress.settings.adultContent,
-  )
+    endingId: result.endingId,
+    savedRecap: progress.endingRecaps[room.id]?.[result.endingId],
+    adultContent: progress.settings.adultContent,
+    adultCatalogReady: adultStatus === 'ready' && catalog.adult !== null,
+  })
 
   return (
     <section
@@ -69,17 +50,24 @@ export function ResultScreen({
       <p className="result-kicker">結局完成</p>
       <h1 id="ending-title">{endingContent.title}</h1>
 
-      <figure
+      <div
         className="result-art"
         data-testid="result-art"
-        data-asset-id={assetId}
       >
-        <img
-          src={greyboxAnchor('結局回想', true)}
-          alt=""
-          draggable={false}
+        <CinematicPlayer
+          assetIds={recap.assetIds}
+          catalog={catalog}
+          title={`${endingContent.title}回想`}
         />
-      </figure>
+      </div>
+
+      {recap.usedSafeFallback
+        && progress.settings.adultContent
+        && (
+          <p className="ending-safe-fallback" role="status">
+            成人美術暫時無法載入，此回想已改用安全版。
+          </p>
+        )}
 
       {endingContent.dialogue && (
         <section

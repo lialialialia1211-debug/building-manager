@@ -402,9 +402,16 @@ test('uses the formal result route after an ending settles', () => {
 })
 
 test('uses the formal gallery and settings routes', async () => {
-  vi.stubGlobal('fetch', vi.fn(async () => ({
+  vi.stubGlobal('fetch', vi.fn(async (input: string) => ({
     ok: true,
-    json: async () => [
+    json: async () => input.includes('/rooms/')
+      ? {
+          ...room,
+          id: input.includes('room_b_wall')
+            ? 'room_b_wall'
+            : room.id,
+        }
+      : [
       {
         id: 'room_a_main',
         roomId: room.id,
@@ -473,7 +480,7 @@ test('uses the formal gallery and settings routes', async () => {
           'b_safe_06',
         ],
       },
-    ],
+        ],
   })))
   const progress = createEmptyProgress()
   progress.galleryUnlocks = ['room_a_main']
