@@ -187,6 +187,11 @@ describe('drafting store flow', () => {
       revealedPanelId: null,
     })
     expect(store.getState().progress.currentRun).toBeNull()
+    expect(store.getState().progress.endingRecaps).toEqual({
+      [room.id]: {
+        main: ['p1', 'p2', 'p3', 'p4', 'p5', 'p6'],
+      },
+    })
   })
 
   test('resumes an unconfirmed arrangement without rerolling the deal', async () => {

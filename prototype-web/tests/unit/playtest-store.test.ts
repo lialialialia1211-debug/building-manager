@@ -187,6 +187,11 @@ test('records the complete play path through the injected recorder boundary', as
     type: 'screen_viewed',
     payload: { screen: 'result', roomId: room.id },
   })
+  expect(store.getState().progress.endingRecaps).toEqual({
+    [room.id]: {
+      normal: ['p1a', 'p2a', 'p3a', 'p4a', 'p5a', 'p6a'],
+    },
+  })
 
   await store.getState().startRoom(room.id)
   expect(calls).toContainEqual({

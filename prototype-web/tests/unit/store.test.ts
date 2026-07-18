@@ -961,6 +961,9 @@ test('settles the priority ending only after the sixth reveal finishes', async (
   const storage = createStorage()
   const progress = createEmptyProgress()
   progress.completedEndings[settlementRoom.id] = ['main', 'intimacy']
+  progress.endingRecaps[settlementRoom.id] = {
+    intimacy: ['outdated-panel'],
+  }
   progress.clues = ['existing-clue']
   progress.galleryUnlocks = ['existing-gallery']
   saveProgress(storage, progress)
@@ -1008,6 +1011,11 @@ test('settles the priority ending only after the sixth reveal finishes', async (
     completedEndings: {
       [settlementRoom.id]: ['main', 'intimacy'],
     },
+    endingRecaps: {
+      [settlementRoom.id]: {
+        intimacy: ['p1', 'p4', 'p7', 'p10', 'p13', 'p16'],
+      },
+    },
     clues: ['existing-clue', 'new-clue'],
     galleryUnlocks: ['existing-gallery', 'new-gallery'],
   })
@@ -1017,6 +1025,11 @@ test('settles the priority ending only after the sixth reveal finishes', async (
     currentRun: null,
     completedEndings: {
       [settlementRoom.id]: ['main', 'intimacy'],
+    },
+    endingRecaps: {
+      [settlementRoom.id]: {
+        intimacy: ['p1', 'p4', 'p7', 'p10', 'p13', 'p16'],
+      },
     },
     clues: ['existing-clue', 'new-clue'],
     galleryUnlocks: ['existing-gallery', 'new-gallery'],
@@ -1048,6 +1061,7 @@ test('settlement save failure preserves the locked ending choice until retry', a
   expect(store.getState().progress.currentRun).toMatchObject({
     lockedPanelId: 'p16',
   })
+  expect(store.getState().progress.endingRecaps).toEqual({})
 
   failing.failPrimaryWrites.current = false
   store.getState().retryError()
@@ -1057,6 +1071,11 @@ test('settlement save failure preserves the locked ending choice until retry', a
     error: null,
     settledResult: {
       endingId: 'intimacy',
+    },
+  })
+  expect(store.getState().progress.endingRecaps).toEqual({
+    [settlementRoom.id]: {
+      intimacy: ['p1', 'p4', 'p7', 'p10', 'p13', 'p16'],
     },
   })
 })

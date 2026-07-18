@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import type { EndingId } from './types'
 
 export const PROGRESS_KEY = 'building-manager-progress-v1'
 export const PROGRESS_BACKUP_1_KEY =
@@ -14,6 +15,11 @@ export interface ProgressSettings {
   autoFastForward: boolean
 }
 
+export type EndingRecaps = Record<
+  string,
+  Partial<Record<EndingId, string[]>>
+>
+
 export interface ProgressData {
   version: 1
   currentRun: null | {
@@ -22,6 +28,7 @@ export interface ProgressData {
     snapshot?: unknown
   }
   completedEndings: Record<string, Array<'main' | 'normal' | 'intimacy'>>
+  endingRecaps: EndingRecaps
   clues: string[]
   galleryUnlocks: string[]
   crossRoomFlags: Record<string, boolean>
@@ -36,6 +43,10 @@ export interface StorageAdapter {
 }
 
 const endingIdSchema = z.enum(['main', 'normal', 'intimacy'])
+const endingRecapSchema = z.array(z.string().trim().min(1)).min(1).max(6)
+  .refine((panelIds) => new Set(panelIds).size === panelIds.length, {
+    message: 'ending recaps must not repeat panel IDs',
+  })
 const statSnapshotSchema = z.object({
   affection: z.number().finite(),
   trust: z.number().finite(),
@@ -173,6 +184,7 @@ const progressV1Schema = z.object({
     z.string(),
     z.array(endingIdSchema),
   ).optional(),
+  endingRecaps: z.unknown().optional(),
   clues: z.array(z.string().trim().min(1)).optional(),
   galleryUnlocks: z.array(z.string().trim().min(1)).optional(),
   crossRoomFlags: z.record(
@@ -188,7 +200,7 @@ const progressV1Schema = z.object({
 
 interface ParsedProgressValue {
   progress: ProgressData
-  sanitizedCurrentRun: boolean
+  sanitized: boolean
 }
 
 export function createEmptyProgress(): ProgressData {
@@ -196,6 +208,7 @@ export function createEmptyProgress(): ProgressData {
     version: 1,
     currentRun: null,
     completedEndings: {},
+    endingRecaps: {},
     clues: [],
     galleryUnlocks: [],
     crossRoomFlags: {},
@@ -206,6 +219,51 @@ export function createEmptyProgress(): ProgressData {
       autoFastForward: true,
     },
   }
+}
+
+function parseEndingRecaps(
+  value: unknown,
+): { endingRecaps: EndingRecaps; sanitized: boolean } {
+  if (value === undefined) {
+    return { endingRecaps: {}, sanitized: false }
+  }
+  if (!isRecord(value)) {
+    return { endingRecaps: {}, sanitized: true }
+  }
+
+  const endingRecaps: EndingRecaps = {}
+  let sanitized = false
+  for (const [roomId, rawRoomRecaps] of Object.entries(value)) {
+    if (!roomId.trim() || !isRecord(rawRoomRecaps)) {
+      sanitized = true
+      continue
+    }
+
+    const roomRecaps: Partial<Record<EndingId, string[]>> = {}
+    for (const [rawEndingId, rawPanelIds] of Object.entries(
+      rawRoomRecaps,
+    )) {
+      const endingId = endingIdSchema.safeParse(rawEndingId)
+      const panelIds = endingRecapSchema.safeParse(rawPanelIds)
+      if (!endingId.success || !panelIds.success) {
+        sanitized = true
+        continue
+      }
+      roomRecaps[endingId.data] = [...panelIds.data]
+    }
+
+    if (Object.keys(roomRecaps).length > 0) {
+      endingRecaps[roomId] = roomRecaps
+    } else if (Object.keys(rawRoomRecaps).length > 0) {
+      sanitized = true
+    }
+  }
+
+  return { endingRecaps, sanitized }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === 'object' && !Array.isArray(value)
 }
 
 function parseProgressValue(
@@ -226,6 +284,7 @@ function parseProgressValue(
     && parsedCurrentRun !== null
     && !parsedCurrentRun.success
   )
+  const parsedEndingRecaps = parseEndingRecaps(parsed.data.endingRecaps)
 
   return {
     progress: {
@@ -236,6 +295,7 @@ function parseProgressValue(
       completedEndings: structuredClone(
         parsed.data.completedEndings ?? defaults.completedEndings,
       ),
+      endingRecaps: parsedEndingRecaps.endingRecaps,
       clues: [...(parsed.data.clues ?? defaults.clues)],
       galleryUnlocks: [
         ...(parsed.data.galleryUnlocks ?? defaults.galleryUnlocks),
@@ -251,7 +311,7 @@ function parseProgressValue(
         ...parsed.data.settings,
       },
     },
-    sanitizedCurrentRun,
+    sanitized: sanitizedCurrentRun || parsedEndingRecaps.sanitized,
   }
 }
 
@@ -296,7 +356,7 @@ export function loadProgress(
 
   const primary = parseProgressRaw(raw)
   if (primary) {
-    if (primary.sanitizedCurrentRun) {
+    if (primary.sanitized) {
       safeSet(storage, PROGRESS_CORRUPT_KEY, raw)
       safeSet(
         storage,
@@ -320,7 +380,7 @@ export function loadProgress(
     safeSet(
       storage,
       PROGRESS_KEY,
-      recovered.sanitizedCurrentRun
+      recovered.sanitized
         ? JSON.stringify(recovered.progress)
         : backupRaw,
     )
