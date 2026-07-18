@@ -1,7 +1,9 @@
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { createEmptyProgress } from '@/domain/progress'
 import type { GalleryEntry } from '@/domain/types'
 import { GalleryScreen } from '@/screens/GalleryScreen'
+import { makeTestCatalog } from '../helpers/catalog'
 
 const entries: GalleryEntry[] = [
   {
@@ -16,12 +18,12 @@ const entries: GalleryEntry[] = [
     endingId: 'intimacy',
     adult: true,
     adultSequence: [
-      '/assets/adult/a01.webp',
-      '/assets/adult/a02.webp',
-      '/assets/adult/a03.webp',
-      '/assets/adult/a04.webp',
-      '/assets/adult/a05.webp',
-      '/assets/adult/a06.webp',
+      'a_intimacy_01',
+      'a_intimacy_02',
+      'a_intimacy_03',
+      'a_intimacy_04',
+      'a_intimacy_05',
+      'a_intimacy_06',
     ],
     safeSequence: [
       'a_safe_01',
@@ -42,6 +44,7 @@ test('only collected gallery entries are enabled', () => {
     <GalleryScreen
       entries={entries}
       progress={progress}
+      catalog={makeTestCatalog()}
       onBack={() => {}}
     />,
   )
@@ -54,7 +57,8 @@ test('only collected gallery entries are enabled', () => {
   ).toBeEnabled()
 })
 
-test('safe mode builds only the safe sequence for an adult entry', () => {
+test('safe mode replays only safe frames for an adult entry', async () => {
+  const user = userEvent.setup()
   const progress = createEmptyProgress()
   progress.settings.adultContent = false
   progress.galleryUnlocks = ['room_a_intimacy']
@@ -63,21 +67,18 @@ test('safe mode builds only the safe sequence for an adult entry', () => {
     <GalleryScreen
       entries={entries}
       progress={progress}
+      catalog={makeTestCatalog({ adult: false })}
       onBack={() => {}}
     />,
   )
 
-  expect(
-    [...container.querySelectorAll('[data-asset-id]')].map(
-      (element) => element.getAttribute('data-asset-id'),
-    ),
-  ).toEqual([
-    'a_safe_01',
-    'a_safe_02',
-    'a_safe_03',
-    'a_safe_04',
-    'a_safe_05',
-    'a_safe_06',
-  ])
+  await user.click(
+    screen.getByRole('button', { name: '停電之夜：親密結局' }),
+  )
+
+  const firstFrame = screen
+    .getByTestId('cinematic-player')
+    .querySelector('[data-asset-id]')
+  expect(firstFrame?.getAttribute('data-asset-id')).toBe('a_safe_01')
   expect(container.innerHTML).not.toContain('/adult/')
 })

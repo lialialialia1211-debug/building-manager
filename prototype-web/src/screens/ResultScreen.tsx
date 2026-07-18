@@ -1,48 +1,26 @@
 import type { SettledResult } from '@/app/store'
+import { CinematicPlayer } from '@/components/CinematicPlayer'
 import { StatusStrip } from '@/components/StatusStrip'
-import { resolveAsset } from '@/domain/asset-resolver'
 import { clueLabel } from '@/domain/clue-labels'
+import { buildEndingSequence } from '@/domain/ending-recap'
 import { galleryUnlockLabel } from '@/domain/gallery-labels'
-import { greyboxAnchor } from '@/domain/greybox-assets'
 import type { ProgressData } from '@/domain/progress'
+import type { AssetCatalog } from '@/domain/runtime-assets'
 import type {
   RoomDefinition,
   StatName,
 } from '@/domain/types'
+import type { AdultStatus } from '@/hooks/use-runtime-assets'
 
 interface ResultScreenProps {
   room: RoomDefinition
   result: SettledResult
   stats: Record<StatName, number>
   progress: ProgressData
+  catalog: AssetCatalog
+  adultStatus?: AdultStatus
   onReplay(): void
   onReturn(): void
-}
-
-function resultAssetId(
-  room: RoomDefinition,
-  result: SettledResult,
-  adultContent: boolean,
-): string {
-  if (result.endingId !== 'intimacy') {
-    return room.endingContent[result.endingId].asset
-  }
-
-  const prefix = room.id === 'room_a_blackout'
-    ? 'a'
-    : room.id === 'room_b_wall'
-      ? 'b'
-      : null
-  if (!prefix) {
-    return resolveAsset({
-      default: room.endingContent[result.endingId].asset,
-    }, adultContent)
-  }
-
-  return resolveAsset({
-    adult: `${prefix}_intimacy_06`,
-    safe: `${prefix}_safe_06`,
-  }, adultContent)
 }
 
 export function ResultScreen({
@@ -50,15 +28,20 @@ export function ResultScreen({
   result,
   stats,
   progress,
+  catalog,
+  adultStatus,
   onReplay,
   onReturn,
 }: ResultScreenProps) {
   const endingContent = room.endingContent[result.endingId]
-  const assetId = resultAssetId(
-    room,
-    result,
-    progress.settings.adultContent,
-  )
+  const recap = progress.endingRecaps[room.id]?.[result.endingId]
+  const sequence = buildEndingSequence({
+    roomId: room.id,
+    endingId: result.endingId,
+    recap,
+    adultEnabled: progress.settings.adultContent,
+    adultReady: catalog.adult !== null,
+  })
 
   return (
     <section
@@ -72,14 +55,22 @@ export function ResultScreen({
       <figure
         className="result-art"
         data-testid="result-art"
-        data-asset-id={assetId}
+        data-ending-asset={endingContent.asset}
       >
-        <img
-          src={greyboxAnchor('結局回想', true)}
-          alt=""
-          draggable={false}
+        <CinematicPlayer
+          assetIds={sequence.assetIds}
+          catalog={catalog}
+          title={endingContent.title}
         />
       </figure>
+
+      {sequence.usedSafeFallback && result.endingId === 'intimacy' && (
+        <p className="result-safe-note" role="note">
+          {adultStatus === 'error'
+            ? '成人回想暫時無法載入，已改用安全版呈現。'
+            : '目前以安全版呈現親密回想；開啟成人內容可觀看完整版本。'}
+        </p>
+      )}
 
       {endingContent.dialogue && (
         <section

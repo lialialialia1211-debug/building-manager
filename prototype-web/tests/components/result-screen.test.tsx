@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { createEmptyProgress } from '@/domain/progress'
 import type { RoomDefinition } from '@/domain/types'
 import { ResultScreen } from '@/screens/ResultScreen'
+import { makeTestCatalog } from '../helpers/catalog'
 
 const emptyEnding = {
   title: 'Fixture ending',
@@ -15,6 +16,8 @@ const room: RoomDefinition = {
   schemaVersion: 1,
   id: 'room_a_blackout',
   title: '停電之夜',
+  backgroundAsset: 'bg_room_a',
+  openingAssets: ['a_open_01', 'a_open_02', 'a_open_03'],
   startNode: 'n1',
   safeNode: 'n1',
   endingAnchor: 'ending',
@@ -51,7 +54,7 @@ const room: RoomDefinition = {
     normal: emptyEnding,
     intimacy: {
       title: '停電之夜的承諾',
-      asset: 'room_a_intimacy',
+      asset: 'a_ending_intimacy',
       clueIds: ['a_consent'],
       galleryUnlocks: ['room_a_intimacy'],
     },
@@ -76,6 +79,7 @@ test('shows the settled ending, final stats, new rewards and actions', async () 
       }}
       stats={{ affection: 2, trust: 4, intimacy: 3 }}
       progress={progress}
+      catalog={makeTestCatalog()}
       onReplay={onReplay}
       onReturn={onReturn}
     />,
@@ -91,6 +95,7 @@ test('shows the settled ending, final stats, new rewards and actions', async () 
   expect(screen.getByTestId('exact-stat-trust')).toHaveTextContent('4')
   expect(screen.getByText('相互同意的承諾')).toBeInTheDocument()
   expect(screen.getByText('停電之夜：親密結局')).toBeInTheDocument()
+  expect(screen.getByTestId('cinematic-player')).toBeInTheDocument()
 
   await user.click(screen.getByRole('button', { name: '重新遊玩' }))
   await user.click(screen.getByRole('button', { name: '返回大樓' }))
@@ -114,17 +119,19 @@ test('safe result presentation does not expose an adult replay asset', () => {
       }}
       stats={{ affection: 0, trust: 4, intimacy: 3 }}
       progress={progress}
+      catalog={makeTestCatalog({ adult: false })}
       onReplay={() => {}}
       onReturn={() => {}}
     />,
   )
 
-  expect(screen.getByTestId('result-art')).toHaveAttribute(
-    'data-asset-id',
-    'a_safe_06',
-  )
-  expect(screen.getByTestId('result-screen').innerHTML)
-    .not.toContain('/adult/')
-  expect(screen.getByTestId('result-screen').innerHTML)
-    .not.toContain('a_intimacy_06')
+  const resultScreen = screen.getByTestId('result-screen')
+  expect(resultScreen.innerHTML).not.toContain('/adult/')
+  expect(resultScreen.innerHTML).not.toContain('a_intimacy_')
+
+  // The cinematic recap starts on the first safe frame.
+  const firstFrame = screen
+    .getByTestId('cinematic-player')
+    .querySelector('[data-asset-id]')
+  expect(firstFrame?.getAttribute('data-asset-id')).toBe('a_safe_01')
 })
