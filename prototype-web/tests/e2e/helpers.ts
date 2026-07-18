@@ -65,6 +65,9 @@ export async function playRoute(
     'button',
     { name: /^(開始|重新遊玩)$/ },
   ).click()
+
+  // The illustrated opening plays before the cards (once art loads); skip it.
+  await page.getByRole('button', { name: '跳過開場' }).click()
   await expect(page.getByTestId('comic-screen')).toBeVisible()
 
   for (const panelId of panelIds) {

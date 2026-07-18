@@ -2,7 +2,7 @@ export type EndingId = 'main' | 'intimacy' | 'normal'
 
 type RoomId = 'room_a_blackout' | 'room_b_wall'
 type RoomLabel = 'Room A' | 'Room B'
-type SafeResultAssetId = 'a_safe_06' | 'b_safe_06'
+type SafeResultAssetId = 'a_safe_01' | 'b_safe_01'
 
 export interface EndingRoute {
   roomId: RoomId
@@ -47,7 +47,7 @@ export const roomARoutes: readonly EndingRoute[] = [
       'a5_ask',
       'a6_consent',
     ],
-    safeResultAssetId: 'a_safe_06',
+    safeResultAssetId: 'a_safe_01',
   },
   {
     roomId: 'room_a_blackout',
@@ -99,7 +99,7 @@ export const roomBRoutes: readonly EndingRoute[] = [
       'b5_ask',
       'b6_consent',
     ],
-    safeResultAssetId: 'b_safe_06',
+    safeResultAssetId: 'b_safe_01',
   },
   {
     roomId: 'room_b_wall',
