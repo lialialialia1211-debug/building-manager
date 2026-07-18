@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "assets": {
+    "a_intimacy_01": {
+      "preview": "/assets/adult/a_intimacy_01_preview.webp",
+      "full": "/assets/adult/a_intimacy_01_master.webp"
+    },
+    "a_intimacy_02": {
+      "preview": "/assets/adult/a_intimacy_02_preview.webp",
+      "full": "/assets/adult/a_intimacy_02_master.webp"
+    },
+    "a_intimacy_03": {
+      "preview": "/assets/adult/a_intimacy_03_preview.webp",
+      "full": "/assets/adult/a_intimacy_03_master.webp"
+    },
+    "a_intimacy_04": {
+      "preview": "/assets/adult/a_intimacy_04_preview.webp",
+      "full": "/assets/adult/a_intimacy_04_master.webp"
+    },
+    "a_intimacy_05": {
+      "preview": "/assets/adult/a_intimacy_05_preview.webp",
+      "full": "/assets/adult/a_intimacy_05_master.webp"
+    },
+    "a_intimacy_06": {
+      "preview": "/assets/adult/a_intimacy_06_preview.webp",
+      "full": "/assets/adult/a_intimacy_06_master.webp"
+    },
+    "b_intimacy_01": {
+      "preview": "/assets/adult/b_intimacy_01_preview.webp",
+      "full": "/assets/adult/b_intimacy_01_master.webp"
+    },
+    "b_intimacy_02": {
+      "preview": "/assets/adult/b_intimacy_02_preview.webp",
+      "full": "/assets/adult/b_intimacy_02_master.webp"
+    },
+    "b_intimacy_03": {
+      "preview": "/assets/adult/b_intimacy_03_preview.webp",
+      "full": "/assets/adult/b_intimacy_03_master.webp"
+    },
+    "b_intimacy_04": {
+      "preview": "/assets/adult/b_intimacy_04_preview.webp",
+      "full": "/assets/adult/b_intimacy_04_master.webp"
+    },
+    "b_intimacy_05": {
+      "preview": "/assets/adult/b_intimacy_05_preview.webp",
+      "full": "/assets/adult/b_intimacy_05_master.webp"
+    },
+    "b_intimacy_06": {
+      "preview": "/assets/adult/b_intimacy_06_preview.webp",
+      "full": "/assets/adult/b_intimacy_06_master.webp"
+    }
+  }
+}
