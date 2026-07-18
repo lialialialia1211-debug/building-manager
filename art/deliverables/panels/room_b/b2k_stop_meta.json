@@ -1,7 +1,7 @@
 {
- "asset_id": "b2k",
- "source": "card-b2k_stop_s31_00001_.png",
- "seed": 31,
+ "asset_id": "b2k_stop",
+ "source": "card-b2k_stop_s32_00001_.png",
+ "seed": 32,
  "steps": 36,
  "cfg": 4.5,
  "sampler": "er_sde",

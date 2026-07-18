@@ -1,6 +1,6 @@
 {
- "asset_id": "a4",
- "source": "card-a4_sleep_s31_00001_.png",
+ "asset_id": "a3_share",
+ "source": "card-a3_share_s31_00001_.png",
  "seed": 31,
  "steps": 36,
  "cfg": 4.5,
@@ -9,7 +9,7 @@
  "model_filename": "anima-aesthetic-v1.1.safetensors",
  "style": "anima native illustration",
  "cast": "wuwa cartethyia/cantarella/brant/rover",
- "size_kb": 110,
+ "size_kb": 168,
  "note": "",
  "review_status": "selected_v2"
 }
