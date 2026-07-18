@@ -188,6 +188,9 @@ test.each(rooms.flatMap((room) => (
 )))('plays the correct %s %s ending recap and poster', (room, endingId) => {
   const prefix = room.id === 'room_a_blackout' ? 'a' : 'b'
   const progress = createEmptyProgress()
+  if (endingId === 'intimacy') {
+    progress.settings.adultContent = true
+  }
   progress.endingRecaps[room.id] = {
     [endingId]: Array.from({ length: 6 }, (_, index) => `${prefix}${index + 1}`),
   }

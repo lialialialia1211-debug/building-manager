@@ -167,6 +167,8 @@ export async function playRoute(
     ).getByRole('button')
 
     await expect(candidate).toBeVisible()
+    await expect(candidate).not.toHaveText('')
+    await expect(candidate).toHaveText(/\S/)
     await expect(candidate).toHaveAccessibleName(
       /^加入編排：\S/,
     )

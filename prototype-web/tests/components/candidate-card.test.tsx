@@ -1,4 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react'
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import userEvent from '@testing-library/user-event'
 import { expect, test, vi } from 'vitest'
 import { CandidateCard } from '@/components/CandidateCard'
@@ -52,5 +54,10 @@ test('uses previewAsset and lets retry recover without choosing', async () => {
   expect(onChoose).not.toHaveBeenCalled()
 
   const select = screen.getByRole('button', { name: '選擇行動：測試行動' })
+  expect(select).toBeVisible()
+  expect(select).toHaveTextContent('測試行動')
   expect(getComputedStyle(select).position).not.toBe('absolute')
+  const css = readFileSync(resolve(process.cwd(), 'src/styles/comic.css'), 'utf8')
+  expect(css).toMatch(/\.candidate-card-select\s*\{[^}]*cursor:\s*pointer/s)
+  expect(css).not.toMatch(/\.candidate-card\s*\{[^}]*cursor:\s*pointer/s)
 })

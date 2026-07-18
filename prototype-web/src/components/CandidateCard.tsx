@@ -53,7 +53,9 @@ export function CandidateCard({
         aria-label={selectionLabel}
         aria-pressed={selected}
         onClick={() => onChoose(panelId)}
-      />
+      >
+        {actionLabel.trim() || '選擇'}
+      </button>
       {selected && (
         <span className="candidate-selected-mark">已選入</span>
       )}

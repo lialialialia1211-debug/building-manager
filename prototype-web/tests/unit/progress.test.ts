@@ -64,8 +64,21 @@ function progressWithCurrentRun(currentRun: unknown) {
   }
 }
 
-test('adult content defaults to enabled', () => {
-  expect(createEmptyProgress().settings.adultContent).toBe(true)
+test('adult content defaults to disabled for a fresh profile', () => {
+  expect(createEmptyProgress().settings.adultContent).toBe(false)
+})
+
+test('preserves an explicitly enabled adult-content setting', () => {
+  const storage = createStorage()
+  storage.setItem(PROGRESS_KEY, JSON.stringify({
+    ...createEmptyProgress(),
+    settings: {
+      ...createEmptyProgress().settings,
+      adultContent: true,
+    },
+  }))
+
+  expect(loadProgress(storage).settings.adultContent).toBe(true)
 })
 
 test('preserves valid ending recaps while discarding malformed entries', () => {
@@ -122,7 +135,7 @@ test('round-trips a six-panel ending recap', () => {
 
 test('progress defaults use the approved settings contract', () => {
   expect(createEmptyProgress().settings).toEqual({
-    adultContent: true,
+    adultContent: false,
     exactStats: false,
     autoFastForward: true,
   })

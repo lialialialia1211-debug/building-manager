@@ -1,4 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react'
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import userEvent from '@testing-library/user-event'
 import { createEmptyProgress } from '@/domain/progress'
 import type { AssetCatalog } from '@/domain/runtime-assets'
@@ -114,6 +116,20 @@ test('does not render the sixth-room tease after one main ending', () => {
   expect(
     screen.queryByLabelText('不存在的第六房間'),
   ).not.toBeInTheDocument()
+})
+
+test('limits room hover and pointer affordances to the room action', () => {
+  const css = readFileSync(resolve(
+    process.cwd(),
+    'src/styles/building.css',
+  ), 'utf8')
+
+  expect(css).not.toMatch(/\.room-window-open\s*\{[^}]*cursor:\s*pointer/s)
+  expect(css).not.toContain('.room-window-open:hover')
+  expect(css).toContain(
+    '.room-window-open:has(.room-window-action:hover)',
+  )
+  expect(css).toMatch(/\.room-window-action\s*\{[^}]*cursor:\s*pointer/s)
 })
 
 test('retries a failed room background without nesting controls', async () => {

@@ -214,7 +214,7 @@ export function createEmptyProgress(): ProgressData {
     crossRoomFlags: {},
     readHistory: {},
     settings: {
-      adultContent: true,
+      adultContent: false,
       exactStats: false,
       autoFastForward: true,
     },

@@ -1,11 +1,32 @@
 import { expect, test } from '@playwright/test'
 import { endingRoutes, roomARoutes } from './ending-routes'
-import { playRoute, waitForRenderedImages } from './helpers'
+import {
+  playRoute,
+  recordPageFailures,
+  waitForRenderedImages,
+} from './helpers'
 
 function isAdultRequest(url: string): boolean {
   return url.includes('adult-asset-manifest.json')
     || url.includes('/assets/adult/')
 }
+
+test('fresh profile defaults adult content off without adult requests', async ({
+  page,
+}) => {
+  const adultRequests: string[] = []
+  const failures = recordPageFailures(page)
+  page.on('request', (request) => {
+    if (isAdultRequest(request.url())) adultRequests.push(request.url())
+  })
+
+  await page.goto('/')
+  await page.getByRole('button', { name: '設定' }).click()
+  await expect(page.getByRole('checkbox', { name: '成人內容' }))
+    .not.toBeChecked()
+  expect(adultRequests).toEqual([])
+  await failures.assertNoFailures()
+})
 
 for (const route of endingRoutes) {
   test(

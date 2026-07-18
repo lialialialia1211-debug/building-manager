@@ -133,6 +133,17 @@ beforeEach(() => {
   })
 })
 
+test('fresh app keeps adult assets disabled and shows an unchecked setting', () => {
+  render(<App />)
+
+  expect(useRuntimeAssets).toHaveBeenCalledWith(false)
+  act(() => {
+    useAppStore.setState({ screen: 'settings' })
+  })
+  expect(screen.getByRole('checkbox', { name: '成人內容' }))
+    .not.toBeChecked()
+})
+
 test('blocks the app while common art loads and offers a retry on failure', async () => {
   const user = userEvent.setup()
   const retryCommon = vi.fn()
@@ -611,7 +622,7 @@ test('uses the formal gallery and settings routes', async () => {
 
   expect(
     screen.getByRole('checkbox', { name: '成人內容' }),
-  ).toBeChecked()
+  ).not.toBeChecked()
   expect(
     screen.getByRole('checkbox', { name: '顯示精確數值' }),
   ).not.toBeChecked()

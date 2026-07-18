@@ -1101,9 +1101,9 @@ test('settings write failure keeps the previous value and offers retry', () => {
   const store = createAppStore({ storage: failing.storage })
   failing.failPrimaryWrites.current = true
 
-  store.getState().updateSetting('adultContent', false)
+  store.getState().updateSetting('adultContent', true)
 
-  expect(store.getState().progress.settings.adultContent).toBe(true)
+  expect(store.getState().progress.settings.adultContent).toBe(false)
   expect(store.getState().error).toMatchObject({
     actionLabel: '重新保存設定',
   })
@@ -1111,7 +1111,7 @@ test('settings write failure keeps the previous value and offers retry', () => {
   failing.failPrimaryWrites.current = false
   store.getState().retryError()
 
-  expect(store.getState().progress.settings.adultContent).toBe(false)
+  expect(store.getState().progress.settings.adultContent).toBe(true)
   expect(store.getState().error).toBeNull()
 })
 

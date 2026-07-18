@@ -42,7 +42,7 @@ test('each setting change is saved immediately', async () => {
 
   await user.click(screen.getByRole('checkbox', { name: '成人內容' }))
   expect(JSON.parse(storage.getItem(PROGRESS_KEY) ?? '{}').settings)
-    .toMatchObject({ adultContent: false })
+    .toMatchObject({ adultContent: true })
 
   await user.click(screen.getByRole('checkbox', { name: '顯示精確數值' }))
   expect(JSON.parse(storage.getItem(PROGRESS_KEY) ?? '{}').settings)
@@ -60,6 +60,10 @@ test('disabling adult content does not remove intimacy completion', async () => 
   store.setState((state) => ({
     progress: {
       ...state.progress,
+      settings: {
+        ...state.progress.settings,
+        adultContent: true,
+      },
       completedEndings: {
         room_a_blackout: ['intimacy'],
       },

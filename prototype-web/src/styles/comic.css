@@ -394,7 +394,6 @@
   border-radius: 12px;
   color: inherit;
   background: #202735;
-  cursor: pointer;
 }
 
 .cinematic-player {
@@ -516,12 +515,12 @@
 .candidate-card-select {
   min-height: 44px;
   width: 100%;
-  padding: 0;
+  padding: 8px 12px;
   border: 0;
   border-top: 1px solid #455168;
   color: inherit;
   background: #1a202b;
-  cursor: inherit;
+  cursor: pointer;
 }
 
 .candidate-card[draggable="true"] {
@@ -588,7 +587,7 @@
   object-fit: cover;
 }
 
-.candidate-card:hover .candidate-card-select:not(:disabled),
+.candidate-card:has(.candidate-card-select:hover:not(:disabled)),
 .candidate-card:focus-within {
   border-color: #d8bd79;
   outline: none;
@@ -596,9 +595,12 @@
 }
 
 .candidate-card:has(.candidate-card-select:disabled) {
-  cursor: wait;
   filter: saturate(.45);
   opacity: .6;
+}
+
+.candidate-card-select:disabled {
+  cursor: not-allowed;
 }
 
 @media (prefers-reduced-motion: reduce) {

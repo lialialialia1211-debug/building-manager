@@ -85,7 +85,6 @@
   gap: 7px;
   text-align: left;
   background: #151b27;
-  cursor: pointer;
 }
 
 .room-window-art,
@@ -132,7 +131,7 @@
   min-height: 74px;
 }
 
-.room-window-open:hover,
+.room-window-open:has(.room-window-action:hover),
 .room-window-open:has(.room-window-action:focus-visible) {
   border-color: #e9c978;
   outline: none;
