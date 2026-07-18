@@ -12,12 +12,22 @@
 
 ## 部署狀態
 
-- Workflow run URL：尚無 workflow run；部署需先完成審查，且不得以未驗證修改混入 tested game commit。
-- GitHub Pages URL：尚未取得；workflow 必須成功後才可記錄。
-- URL open result：尚未執行；尚未有已部署的 Pages URL 可供瀏覽器開啟。
-- Manual QA：blocked。不得以 localhost、本機 dev server、`file://` 或本機 production build 替代 GitHub-hosted preview。
+- Deployed game commit：`b067373fd816e089dd351756e96c07a1e3d20342`。
+- Pages deploy commit：`508646a88a132fec046815f3d73c54684f326991`。
+- Workflow run URL：https://github.com/lialialialia1211-debug/building-manager/actions/runs/29631690155
+- GitHub Pages URL：https://lialialialia1211-debug.github.io/building-manager/
+- URL open result：開啟成功；首頁、`qa-build.json`、common manifest 與 Room A JSON 均為 HTTP 200，瀏覽器互動 smoke 通過。
+- Manual QA：READY。只可使用上述 GitHub-hosted preview；localhost、本機 dev server、`file://` 與本機 production build 都不可替代。
 
-部署控制者必須以通過完整 `check` 的精確遊戲提交執行 Pages workflow。若 workflow 只接受 default branch，須先依核准方式將同一提交整合到 `main`，再由 `main` push 觸發；不得夾帶未測修改。
+GitHub Pages 由既有 `gh-pages` legacy deployment 發佈精確 tested game artifact；公開 `qa-build.json` 的 `sourceCommit` 已核對為 `b067373fd816e089dd351756e96c07a1e3d20342`。
+
+## 線上 smoke 證據
+
+- 大樓首屏與 Room A／Room B 入口可見；兩張房間背景皆完成解碼為 2560×1440，沒有 runtime image error。
+- 設定頁「成人內容」未勾選；目前頁面觀測到 21 張圖片、共 26 個資產，成人 manifest／`/assets/adult/` 圖片為 0。
+- Room A 簡介背景與三張開場預覽完成解碼；進入開場後可跳過至 12 選 6 編排。
+- 12 張候選的按鈕都有可見行動文字；實際點選「查看門口」後成功加入第 1 格。
+- 遊戲畫面 15 張圖片完成載入後，broken images 0、runtime image errors 0、browser console errors 0。
 
 ## 人工 QA 路線（僅限已開啟的 Pages URL）
 
