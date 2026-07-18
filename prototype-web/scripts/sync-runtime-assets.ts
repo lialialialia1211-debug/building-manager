@@ -11,6 +11,7 @@ import {
 import { dirname, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import {
+  assertRuntimeAssetCopyTargets,
   createRuntimeAssetPlan,
   type RuntimeAssetPlan,
 } from './runtime-asset-plan'
@@ -176,6 +177,7 @@ async function main(): Promise<void> {
   }
 
   const plan = createRuntimeAssetPlan(repositoryRoot)
+  assertRuntimeAssetCopyTargets(repositoryRoot, plan.copies)
   await assertSourcesExist(plan)
 
   if (mode === '--write') {

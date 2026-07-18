@@ -1,5 +1,5 @@
 import { readdirSync, readFileSync } from 'node:fs'
-import { resolve } from 'node:path'
+import { isAbsolute, relative, resolve } from 'node:path'
 
 export type AssetVariant = 'preview' | 'full'
 
@@ -21,6 +21,74 @@ export interface RuntimeAssetPlan {
   adult: Record<string, RuntimeAssetEntry>
   backgrounds: Record<string, string>
   copies: PlannedCopy[]
+}
+
+const canonicalAssetIdPattern = /^[a-z][a-z0-9_]*$/
+
+function isWithin(root: string, path: string): boolean {
+  const pathFromRoot = relative(root, path)
+  return pathFromRoot === '' || (
+    !pathFromRoot.startsWith('..') && !isAbsolute(pathFromRoot)
+  )
+}
+
+export function assertRuntimeAssetCopyTargets(
+  repoRoot: string,
+  copies: readonly PlannedCopy[],
+): void {
+  const commonPanelsRoot = resolve(
+    repoRoot,
+    'content/assets/common/panels',
+  )
+  const commonBackgroundsRoot = resolve(
+    repoRoot,
+    'content/assets/common/backgrounds',
+  )
+  const adultRoot = resolve(repoRoot, 'content/assets/adult')
+
+  for (const copy of copies) {
+    if (!canonicalAssetIdPattern.test(copy.id)) {
+      throw new Error(`invalid runtime asset ID ${copy.id}`)
+    }
+
+    const target = copy.scope === 'common'
+      ? {
+          root: commonPanelsRoot,
+          path: `content/assets/common/panels/${copy.id}_${
+            copy.variant === 'full' ? 'master' : 'preview'
+          }.webp`,
+        }
+      : copy.scope === 'background'
+        ? {
+            root: commonBackgroundsRoot,
+            path: `content/assets/common/backgrounds/${copy.id}_master.webp`,
+          }
+        : {
+            root: adultRoot,
+            path: `content/assets/adult/${copy.id}_${
+              copy.variant === 'full' ? 'master' : 'preview'
+            }.webp`,
+          }
+    const resolvedTarget = resolve(repoRoot, copy.targetPath)
+
+    if (!isWithin(target.root, resolvedTarget)) {
+      throw new Error(
+        `runtime copy target escapes ${copy.scope} root: ${copy.targetPath}`,
+      )
+    }
+    if (copy.targetPath !== target.path || resolvedTarget !== resolve(
+      repoRoot,
+      target.path,
+    )) {
+      throw new Error(`invalid runtime copy target ${copy.targetPath}`)
+    }
+    if (
+      (copy.scope === 'background' && copy.variant !== 'background')
+      || (copy.scope !== 'background' && copy.variant === 'background')
+    ) {
+      throw new Error(`invalid runtime asset variant for ${copy.id}`)
+    }
+  }
 }
 
 interface RoomFile {

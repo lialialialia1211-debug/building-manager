@@ -1,12 +1,43 @@
-import { existsSync, readFileSync } from 'node:fs'
+import {
+  copyFileSync,
+  existsSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs'
 import { spawnSync } from 'node:child_process'
 import { resolve } from 'node:path'
 import { expect, test } from 'vitest'
 import {
+  assertRuntimeAssetCopyTargets,
   createRuntimeAssetPlan,
+  type PlannedCopy,
 } from '../../scripts/runtime-asset-plan'
 
 const repositoryRoot = resolve(process.cwd(), '..')
+
+function runRuntimeAssetCommand(mode: '--write' | '--check') {
+  return spawnSync(process.execPath, [
+    '--import',
+    'tsx',
+    'scripts/sync-runtime-assets.ts',
+    mode,
+  ], {
+    cwd: process.cwd(),
+    encoding: 'utf8',
+  })
+}
+
+function assertCheckFailsAfter(mutate: () => void): void {
+  expect(runRuntimeAssetCommand('--write').status).toBe(0)
+  try {
+    mutate()
+    expect(runRuntimeAssetCommand('--check').status).toBe(1)
+  } finally {
+    expect(runRuntimeAssetCommand('--write').status).toBe(0)
+    expect(runRuntimeAssetCommand('--check').status).toBe(0)
+  }
+}
 
 test('builds the complete canonical runtime asset plan', () => {
   const plan = createRuntimeAssetPlan(repositoryRoot)
@@ -82,16 +113,28 @@ test('plans only preview and master copies within the runtime asset roots', () =
     .toHaveLength(24)
 })
 
+test('rejects traversal copy targets before runtime assets can mutate', () => {
+  const plan = createRuntimeAssetPlan(repositoryRoot)
+  const originalTarget = resolve(
+    repositoryRoot,
+    'content/assets/common/panels/a1_fuse_master.webp',
+  )
+  const originalBytes = readFileSync(originalTarget)
+  const traversalCopy: PlannedCopy = {
+    ...plan.copies[0]!,
+    id: 'a1_fuse',
+    targetPath: 'content/assets/common/panels/../a1_fuse_master.webp',
+  }
+
+  expect(() => assertRuntimeAssetCopyTargets(
+    repositoryRoot,
+    [traversalCopy],
+  )).toThrow('runtime copy target escapes common root')
+  expect(readFileSync(originalTarget)).toEqual(originalBytes)
+})
+
 test('synchronizes deterministic runtime assets and manifests', () => {
-  const sync = spawnSync(process.execPath, [
-    '--import',
-    'tsx',
-    'scripts/sync-runtime-assets.ts',
-    '--write',
-  ], {
-    cwd: process.cwd(),
-    encoding: 'utf8',
-  })
+  const sync = runRuntimeAssetCommand('--write')
 
   expect(sync.status).toBe(0)
   expect(sync.stdout).toContain(
@@ -132,15 +175,45 @@ test('synchronizes deterministic runtime assets and manifests', () => {
     },
   })
 
-  const check = spawnSync(process.execPath, [
-    '--import',
-    'tsx',
-    'scripts/sync-runtime-assets.ts',
-    '--check',
-  ], {
-    cwd: process.cwd(),
-    encoding: 'utf8',
-  })
+  const check = runRuntimeAssetCommand('--check')
   expect(check.status).toBe(0)
   expect(check.stdout).toContain('runtime assets are in sync')
+})
+
+test('--check rejects a manifest mismatch and restores the generated tree', () => {
+  assertCheckFailsAfter(() => {
+    writeFileSync(
+      resolve(repositoryRoot, 'content/asset-manifest.json'),
+      '{"outOfSync":true}\n',
+    )
+  })
+})
+
+test('--check rejects a missing runtime target and restores the generated tree', () => {
+  assertCheckFailsAfter(() => {
+    rmSync(resolve(
+      repositoryRoot,
+      'content/assets/common/panels/a1_fuse_master.webp',
+    ))
+  })
+})
+
+test('--check rejects an unexpected runtime target and restores the generated tree', () => {
+  assertCheckFailsAfter(() => {
+    writeFileSync(resolve(
+      repositoryRoot,
+      'content/assets/common/panels/unexpected.webp',
+    ), 'unexpected')
+  })
+})
+
+test('--check rejects a byte-mismatched runtime target and restores the generated tree', () => {
+  assertCheckFailsAfter(() => {
+    copyFileSync(
+      resolve(repositoryRoot,
+        'content/assets/common/panels/a1_door_master.webp'),
+      resolve(repositoryRoot,
+        'content/assets/common/panels/a1_fuse_master.webp'),
+    )
+  })
 })
