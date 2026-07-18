@@ -1,34 +1,32 @@
-# 共用內容與 runtime 資產
+# 共用內容資料
 
-`content/` 是 Web 原型與後續引擎共用的故事資料、資產清單與 runtime 素材來源。Web 原型以此目錄為 Vite public directory；不要從 `art/` 直接載入素材，也不要變更 `art/deliverables/HANDOFF.md`。
+此目錄將保存引擎無關的故事與資源資料：
 
-## 資料與 manifest
+- `characters.json`
+- `rooms/room_a_blackout.json`
+- `rooms/room_b_wall.json`
+- `gallery.json`
+- `asset-manifest.json`（schema 2、`playable` mode 共用 manifest）
+- `adult-asset-manifest.json`（成人專用，僅成人設定開啟後載入）
+- `assets/common/`、`assets/adult/`（由同步腳本產生的 runtime 圖片）
 
-- `characters.json`、`rooms/*.json` 與 `gallery.json` 定義劇情、房間與圖鑑資料。
-- `asset-manifest.json` 是 common runtime manifest，收錄背景、safe panel、結局 poster、縮圖與 placeholder；它不得包含 `/adult/` 路徑或成人 metadata。
-- `adult-asset-manifest.json` 是成人 runtime manifest，只收錄 12 個 `a_intimacy_01` 至 `a_intimacy_06` 與 `b_intimacy_01` 至 `b_intimacy_06` canonical asset IDs。
-- `runtime-assets.lock.json` 記錄 89 組來源三件組、canonical/source/metadata ID 映射、runtime target 與 SHA-256；乾淨 checkout 不含 `art/` 時，CI 仍以這份受版本控制的 inventory 驗證 runtime bytes。
-- `assets/common/` 存放 common runtime 檔案；`assets/adult/` 存放成人 runtime 檔案。成人內容關閉時，應用程式不得請求後者。
+Web 原型與後續正式引擎必須使用相同資料契約。
 
-已交付來源 metadata 的名稱會在同步時改為 repository 的 canonical asset ID；runtime 路徑、manifest 和內容 JSON 都只使用 canonical 名稱，不依賴來源檔案命名。
+## Runtime 資源同步
 
-## 同步與驗證
+`assets/` 與兩份 manifest 都由 `art/deliverables/` 經同步腳本產生，請勿手動編輯：
 
-在 repository 根目錄執行：
+- `npm --prefix prototype-web run assets:sync`：由來源重建 `assets/common`、`assets/adult` 與兩份 manifest。
+- `npm --prefix prototype-web run assets:check-runtime`：位元組比對 runtime 包與來源，差異即失敗並提示重新同步。
+- Canonical rename：來源若使用 `a_adult_*`／`a_poster_*` 會正規化為 `a_intimacy_*`／`a_ending_*`（現行交付已是 canonical）。
+- 共用 manifest 不得包含 `/adult/`；成人 12 張只在 `adult-asset-manifest.json` 且路徑位於 `/assets/adult/`。
 
-```powershell
-npm --prefix prototype-web run assets:sync
-npm --prefix prototype-web run assets:check-runtime
-npm --prefix prototype-web run validate:content
-npm --prefix prototype-web run validate:assets
-```
+正式房間內容目前採 12 選 6 編排契約：
 
-`assets:sync` 必須在完整 `art/deliverables/` 來源存在時執行；它會驗證每組 master、preview、metadata、metadata ID 與輸出映射，再更新 runtime 資產、manifest 和 lock。`assets:check-runtime` 在來源存在時額外驗證 source/target byte parity；來源根完全不存在時仍以 committed lock 驗證所有 runtime target，來源只存在一部分則直接失敗。這些命令以及完整 `npm --prefix prototype-web run check` 都不會修改 `art/deliverables/HANDOFF.md`。
+- `drafting`：每次發 12 張、選 6 張，以及確保三結局可達的少量必發卡。
+- `openingDialogue`：固定開場完整文本。
+- `panels.{id}.dialogue`：確認編排後才揭曉的完整事件文本。
+- `panels.{id}.artBrief`：正式產圖必讀的構圖、人物、道具、光線與連續性規格。
+- `endingContent.{ending}.dialogue`／`artBrief`：三種固定結尾的故事與美術要求。
 
-## playable 與 formal 發行狀態
-
-目前已把可用來源接入 `playable` placeholder runtime：兩房路線、畫廊、成人開關、第六房與可重播的 12 秒 recap 均由自動化驗證覆蓋。`formal` mode 仍是正式發行 gate，尚未達成。
-
-正式發行仍缺少 8 支影片、16 個 UI、16 個 props 與 6 組 lights。這些缺口不會因 placeholder runtime 而消失；`art/deliverables/HANDOFF.md` 保持原樣，作為原始美術交付紀錄。
-
-GitHub Pages 是公開靜態託管。成人關閉保護的是應用程式載入與呈現行為；若需要 URL 層級的權限隔離，正式發行必須改用具備認證與授權的服務。
+舊 `nodes`／`next` 欄位暫時保留作舊存檔與第一版灰盒相容，不是正式玩家流程。

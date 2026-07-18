@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "room_b_wall",
   "title": "牆後的聲音",
-  "backgroundAsset": "building_b",
+  "backgroundAsset": "bg_room_b",
   "openingAssets": ["b_open_01", "b_open_02", "b_open_03"],
   "openingDialogue": [
     "凌晨一點四十二分，許安寧又被牆後的敲擊聲吵醒。她二十九歲，替紀錄片做聲音剪輯，知道水管、樓板熱脹冷縮、鄰居腳步與人為敲擊各有什麼頻率；這個聲音卻每天準時提前四分鐘，像某個看不見的房間正在慢慢靠近。",

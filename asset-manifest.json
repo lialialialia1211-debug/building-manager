@@ -2,58 +2,10 @@
   "schemaVersion": 2,
   "mode": "playable",
   "backgrounds": {
-    "building_a": "/assets/common/backgrounds/building_a_master.webp",
-    "building_b": "/assets/common/backgrounds/building_b_master.webp"
+    "bg_room_a": "/assets/common/backgrounds/bg_room_a_master.webp",
+    "bg_room_b": "/assets/common/backgrounds/bg_room_b_master.webp"
   },
   "assets": {
-    "a_ending_intimacy": {
-      "preview": "/assets/common/panels/a_ending_intimacy_preview.webp",
-      "full": "/assets/common/panels/a_ending_intimacy_master.webp"
-    },
-    "a_ending_main": {
-      "preview": "/assets/common/panels/a_ending_main_preview.webp",
-      "full": "/assets/common/panels/a_ending_main_master.webp"
-    },
-    "a_ending_normal": {
-      "preview": "/assets/common/panels/a_ending_normal_preview.webp",
-      "full": "/assets/common/panels/a_ending_normal_master.webp"
-    },
-    "a_open_01": {
-      "preview": "/assets/common/panels/a_open_01_preview.webp",
-      "full": "/assets/common/panels/a_open_01_master.webp"
-    },
-    "a_open_02": {
-      "preview": "/assets/common/panels/a_open_02_preview.webp",
-      "full": "/assets/common/panels/a_open_02_master.webp"
-    },
-    "a_open_03": {
-      "preview": "/assets/common/panels/a_open_03_preview.webp",
-      "full": "/assets/common/panels/a_open_03_master.webp"
-    },
-    "a_safe_01": {
-      "preview": "/assets/common/panels/a_safe_01_preview.webp",
-      "full": "/assets/common/panels/a_safe_01_master.webp"
-    },
-    "a_safe_02": {
-      "preview": "/assets/common/panels/a_safe_02_preview.webp",
-      "full": "/assets/common/panels/a_safe_02_master.webp"
-    },
-    "a_safe_03": {
-      "preview": "/assets/common/panels/a_safe_03_preview.webp",
-      "full": "/assets/common/panels/a_safe_03_master.webp"
-    },
-    "a_safe_04": {
-      "preview": "/assets/common/panels/a_safe_04_preview.webp",
-      "full": "/assets/common/panels/a_safe_04_master.webp"
-    },
-    "a_safe_05": {
-      "preview": "/assets/common/panels/a_safe_05_preview.webp",
-      "full": "/assets/common/panels/a_safe_05_master.webp"
-    },
-    "a_safe_06": {
-      "preview": "/assets/common/panels/a_safe_06_preview.webp",
-      "full": "/assets/common/panels/a_safe_06_master.webp"
-    },
     "a1_door": {
       "preview": "/assets/common/panels/a1_door_preview.webp",
       "full": "/assets/common/panels/a1_door_master.webp"
@@ -150,53 +102,53 @@
       "preview": "/assets/common/panels/a6_report_preview.webp",
       "full": "/assets/common/panels/a6_report_master.webp"
     },
-    "b_ending_intimacy": {
-      "preview": "/assets/common/panels/b_ending_intimacy_preview.webp",
-      "full": "/assets/common/panels/b_ending_intimacy_master.webp"
+    "a_ending_intimacy": {
+      "preview": "/assets/common/panels/a_ending_intimacy_preview.webp",
+      "full": "/assets/common/panels/a_ending_intimacy_master.webp"
     },
-    "b_ending_main": {
-      "preview": "/assets/common/panels/b_ending_main_preview.webp",
-      "full": "/assets/common/panels/b_ending_main_master.webp"
+    "a_ending_main": {
+      "preview": "/assets/common/panels/a_ending_main_preview.webp",
+      "full": "/assets/common/panels/a_ending_main_master.webp"
     },
-    "b_ending_normal": {
-      "preview": "/assets/common/panels/b_ending_normal_preview.webp",
-      "full": "/assets/common/panels/b_ending_normal_master.webp"
+    "a_ending_normal": {
+      "preview": "/assets/common/panels/a_ending_normal_preview.webp",
+      "full": "/assets/common/panels/a_ending_normal_master.webp"
     },
-    "b_open_01": {
-      "preview": "/assets/common/panels/b_open_01_preview.webp",
-      "full": "/assets/common/panels/b_open_01_master.webp"
+    "a_open_01": {
+      "preview": "/assets/common/panels/a_open_01_preview.webp",
+      "full": "/assets/common/panels/a_open_01_master.webp"
     },
-    "b_open_02": {
-      "preview": "/assets/common/panels/b_open_02_preview.webp",
-      "full": "/assets/common/panels/b_open_02_master.webp"
+    "a_open_02": {
+      "preview": "/assets/common/panels/a_open_02_preview.webp",
+      "full": "/assets/common/panels/a_open_02_master.webp"
     },
-    "b_open_03": {
-      "preview": "/assets/common/panels/b_open_03_preview.webp",
-      "full": "/assets/common/panels/b_open_03_master.webp"
+    "a_open_03": {
+      "preview": "/assets/common/panels/a_open_03_preview.webp",
+      "full": "/assets/common/panels/a_open_03_master.webp"
     },
-    "b_safe_01": {
-      "preview": "/assets/common/panels/b_safe_01_preview.webp",
-      "full": "/assets/common/panels/b_safe_01_master.webp"
+    "a_safe_01": {
+      "preview": "/assets/common/panels/a_safe_01_preview.webp",
+      "full": "/assets/common/panels/a_safe_01_master.webp"
     },
-    "b_safe_02": {
-      "preview": "/assets/common/panels/b_safe_02_preview.webp",
-      "full": "/assets/common/panels/b_safe_02_master.webp"
+    "a_safe_02": {
+      "preview": "/assets/common/panels/a_safe_02_preview.webp",
+      "full": "/assets/common/panels/a_safe_02_master.webp"
     },
-    "b_safe_03": {
-      "preview": "/assets/common/panels/b_safe_03_preview.webp",
-      "full": "/assets/common/panels/b_safe_03_master.webp"
+    "a_safe_03": {
+      "preview": "/assets/common/panels/a_safe_03_preview.webp",
+      "full": "/assets/common/panels/a_safe_03_master.webp"
     },
-    "b_safe_04": {
-      "preview": "/assets/common/panels/b_safe_04_preview.webp",
-      "full": "/assets/common/panels/b_safe_04_master.webp"
+    "a_safe_04": {
+      "preview": "/assets/common/panels/a_safe_04_preview.webp",
+      "full": "/assets/common/panels/a_safe_04_master.webp"
     },
-    "b_safe_05": {
-      "preview": "/assets/common/panels/b_safe_05_preview.webp",
-      "full": "/assets/common/panels/b_safe_05_master.webp"
+    "a_safe_05": {
+      "preview": "/assets/common/panels/a_safe_05_preview.webp",
+      "full": "/assets/common/panels/a_safe_05_master.webp"
     },
-    "b_safe_06": {
-      "preview": "/assets/common/panels/b_safe_06_preview.webp",
-      "full": "/assets/common/panels/b_safe_06_master.webp"
+    "a_safe_06": {
+      "preview": "/assets/common/panels/a_safe_06_preview.webp",
+      "full": "/assets/common/panels/a_safe_06_master.webp"
     },
     "b1_glass": {
       "preview": "/assets/common/panels/b1_glass_preview.webp",
@@ -293,6 +245,54 @@
     "b6_sleep": {
       "preview": "/assets/common/panels/b6_sleep_preview.webp",
       "full": "/assets/common/panels/b6_sleep_master.webp"
+    },
+    "b_ending_intimacy": {
+      "preview": "/assets/common/panels/b_ending_intimacy_preview.webp",
+      "full": "/assets/common/panels/b_ending_intimacy_master.webp"
+    },
+    "b_ending_main": {
+      "preview": "/assets/common/panels/b_ending_main_preview.webp",
+      "full": "/assets/common/panels/b_ending_main_master.webp"
+    },
+    "b_ending_normal": {
+      "preview": "/assets/common/panels/b_ending_normal_preview.webp",
+      "full": "/assets/common/panels/b_ending_normal_master.webp"
+    },
+    "b_open_01": {
+      "preview": "/assets/common/panels/b_open_01_preview.webp",
+      "full": "/assets/common/panels/b_open_01_master.webp"
+    },
+    "b_open_02": {
+      "preview": "/assets/common/panels/b_open_02_preview.webp",
+      "full": "/assets/common/panels/b_open_02_master.webp"
+    },
+    "b_open_03": {
+      "preview": "/assets/common/panels/b_open_03_preview.webp",
+      "full": "/assets/common/panels/b_open_03_master.webp"
+    },
+    "b_safe_01": {
+      "preview": "/assets/common/panels/b_safe_01_preview.webp",
+      "full": "/assets/common/panels/b_safe_01_master.webp"
+    },
+    "b_safe_02": {
+      "preview": "/assets/common/panels/b_safe_02_preview.webp",
+      "full": "/assets/common/panels/b_safe_02_master.webp"
+    },
+    "b_safe_03": {
+      "preview": "/assets/common/panels/b_safe_03_preview.webp",
+      "full": "/assets/common/panels/b_safe_03_master.webp"
+    },
+    "b_safe_04": {
+      "preview": "/assets/common/panels/b_safe_04_preview.webp",
+      "full": "/assets/common/panels/b_safe_04_master.webp"
+    },
+    "b_safe_05": {
+      "preview": "/assets/common/panels/b_safe_05_preview.webp",
+      "full": "/assets/common/panels/b_safe_05_master.webp"
+    },
+    "b_safe_06": {
+      "preview": "/assets/common/panels/b_safe_06_preview.webp",
+      "full": "/assets/common/panels/b_safe_06_master.webp"
     },
     "sixth_01": {
       "preview": "/assets/common/panels/sixth_01_preview.webp",
