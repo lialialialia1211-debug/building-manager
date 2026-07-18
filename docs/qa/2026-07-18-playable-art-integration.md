@@ -5,10 +5,9 @@
 
 ## 自動驗證
 
-- Tested game commit：此遊戲提交尚未完成完整 `check`，因此不可部署或開始人工 QA。
-- Evidence commit：此紀錄建立時尚無驗證證據提交。
-- 驗證命令：`npm --prefix prototype-web run check`。
-- 預期涵蓋：content/assets validators、Vitest、production build、三個 Playwright viewport，以及 adult-off 路線不請求成人 manifest 或成人圖片。
+- Tested game commit：`e6e0dbc794ab52484a4c072f7f7df58bb343388d`，已通過完整 `npm --prefix prototype-web run check`。
+- Evidence commit：本 QA 證據會以獨立報告提交保存；它不改變已測遊戲提交。
+- 驗證結果：content/assets validators 通過；Vitest 39 files、306 tests 通過；production build 通過；三個 Playwright viewport 共 48 tests 通過，adult-off 路線不請求成人 manifest 或成人圖片。
 
 ## 部署狀態
 
