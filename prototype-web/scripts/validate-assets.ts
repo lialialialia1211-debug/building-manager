@@ -79,7 +79,7 @@ export function validateAssetDirectory(
 }
 
 export function runAssetValidation(
-  contentDirectory = resolve(process.cwd(), '../content'),
+  contentDirectory = resolve(process.cwd(), '../content/office-comic'),
   assetDirectory = resolve(contentDirectory, 'assets/office-comic'),
 ): AssetValidationResult {
   try {

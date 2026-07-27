@@ -8,7 +8,7 @@ import { parseOfficeEpisode } from '@/domain/episode-schema'
 import { resolveRoute } from '@/domain/route-resolver'
 
 const episode = parseOfficeEpisode(JSON.parse(readFileSync(
-  resolve(process.cwd(), '../content/office-episode.json'),
+  resolve(process.cwd(), '../content/office-comic/office-episode.json'),
   'utf8',
 )) as unknown)
 
@@ -56,7 +56,7 @@ describe('dynamic comic dialogue', () => {
 
       expect(getRoutePresentation(resolution, episode)).toMatchObject({
         title: route.title,
-        revealDialogue: route.dialogue,
+        revealDialogue: route.revealDialogue,
         revealArtId: route.revealArtId,
       })
     },

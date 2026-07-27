@@ -4,7 +4,7 @@ import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
   plugins: [react()],
-  publicDir: fileURLToPath(new URL('../content', import.meta.url)),
+  publicDir: fileURLToPath(new URL('../content/office-comic', import.meta.url)),
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),

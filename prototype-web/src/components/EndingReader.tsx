@@ -3,6 +3,7 @@ import { useStore } from 'zustand'
 import type { ComicStore } from '@/app/store'
 import { getRoutePresentation } from '@/domain/dialogue'
 import { AssetImage } from './AssetImage'
+import { DialogueOverlay } from './DialogueOverlay'
 
 export interface EndingReaderProps {
   store: ComicStore
@@ -25,7 +26,7 @@ export function EndingReader({ store }: EndingReaderProps) {
 
   if (!presentation) return null
 
-  const pages = chunk(presentation.endingArtIds, 4)
+  const pages = chunk(presentation.endingFrames, 4)
   const page = pages[pageIndex] ?? []
 
   return (
@@ -37,17 +38,18 @@ export function EndingReader({ store }: EndingReaderProps) {
       </header>
 
       <div className="ending-page">
-        {page.map((artId, index) => {
+        {page.map((frame, index) => {
           const frameNumber = pageIndex * 4 + index + 1
           return (
-            <figure key={artId}>
+            <figure key={frame.artId}>
               <AssetImage
-                artId={artId}
+                artId={frame.artId}
                 alt={`結局分鏡 ${frameNumber}`}
                 aspectRatio={index === 0 && pages.length === 1
                   ? '4 / 5'
                   : '4 / 3'}
               />
+              <DialogueOverlay lines={frame.lines} maxLines={3} />
               <figcaption>{String(frameNumber).padStart(2, '0')}</figcaption>
             </figure>
           )

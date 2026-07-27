@@ -11,8 +11,8 @@ function readJson(relativePath: string): unknown {
   return JSON.parse(readFileSync(path, 'utf8')) as unknown
 }
 
-const rawEpisode = readJson('../../content/office-episode.json')
-const rawAssetPlan = readJson('../../content/office-asset-plan.json')
+const rawEpisode = readJson('../../content/office-comic/office-episode.json')
+const rawAssetPlan = readJson('../../content/office-comic/office-asset-plan.json')
 
 describe('office episode schema', () => {
   it('accepts the checked-in episode and complete directed route matrix', () => {
@@ -38,10 +38,23 @@ describe('office episode schema', () => {
     expect(new Set(episode.perfectFingerprint).size).toBe(8)
     expect(episode.sideRoutes).toHaveLength(20)
     expect(directedPairs.size).toBe(20)
-    expect(episode.perfectEnding.endingArtIds).toHaveLength(12)
+    expect(episode.perfectEnding.endingFrames).toHaveLength(12)
+    expect(episode.sideEndings).toHaveLength(10)
+    expect(new Set(episode.sideEndings.map((ending) => ending.id)).size)
+      .toBe(10)
     for (const route of episode.sideRoutes) {
-      expect(route.endingArtIds).toHaveLength(4)
-      expect(route.dialogue).toHaveLength(2)
+      expect(route.pairDialogue).toHaveLength(2)
+      expect(route.revealDialogue).toHaveLength(2)
+      expect(episode.sideEndings.some(
+        (ending) => ending.id === route.endingSequenceId,
+      )).toBe(true)
+    }
+    for (const frame of [
+      ...episode.perfectEnding.endingFrames,
+      ...episode.sideEndings.flatMap((ending) => ending.frames),
+    ]) {
+      expect(frame.lines.length).toBeGreaterThanOrEqual(1)
+      expect(frame.lines.length).toBeLessThanOrEqual(3)
     }
     expect(() => validateEpisodeAssets(episode, assetPlan)).not.toThrow()
   })
@@ -64,6 +77,30 @@ describe('office episode schema', () => {
     expect(() => parseOfficeEpisode(invalid)).toThrow(
       /all 20 directed character pairs/i,
     )
+  })
+
+  it('preserves approved comic dialogue separately for each story layer', () => {
+    const episode = parseOfficeEpisode(rawEpisode)
+    const route = episode.sideRoutes.find(
+      (candidate) => candidate.id === 'side-male-rover-female-rover',
+    )
+    const ending = episode.sideEndings.find(
+      (candidate) => candidate.id === 'male-rover-female-rover',
+    )
+
+    expect(route?.pairDialogue).toEqual([
+      '男：「今晚別跟我搶。」',
+      '女：「看你本事。」',
+    ])
+    expect(route?.revealDialogue).toEqual([
+      '女漂泊者：「這些錯頁明早一定被發現。」',
+      '男漂泊者：「那就先鎖門。」',
+    ])
+    expect(ending?.frames[0]?.lines).toEqual([
+      '女漂泊者：「鎖門是為了藏文件？」',
+      '男漂泊者：「一半。另一半是妳。」',
+      '女漂泊者：「那就過來。」',
+    ])
   })
 
   it('rejects an episode that references an unknown art id', () => {

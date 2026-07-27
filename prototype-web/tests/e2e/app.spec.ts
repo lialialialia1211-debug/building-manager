@@ -15,6 +15,7 @@ test.beforeEach(async ({ page }) => {
 test('adult gate leads directly to the office comic builder', async ({ page }) => {
   await enterGame(page)
 
+  await expect(page).toHaveTitle('鎖門之後｜辦公室漫畫編排器')
   await expect(page.getByRole('region', { name: '漫畫分鏡' })).toBeVisible()
   await expect(page.getByRole('region', { name: '故事卡牌' })).toBeVisible()
   await expect(page.getByRole('button', { name: /第 1 格：空格/ })).toBeVisible()

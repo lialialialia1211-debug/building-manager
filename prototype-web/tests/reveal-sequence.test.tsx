@@ -8,7 +8,7 @@ import { parseOfficeEpisode } from '@/domain/episode-schema'
 import type { StorageAdapter } from '@/domain/persistence'
 
 const episode = parseOfficeEpisode(JSON.parse(readFileSync(
-  resolve(process.cwd(), '../content/office-episode.json'),
+  resolve(process.cwd(), '../content/office-comic/office-episode.json'),
   'utf8',
 )) as unknown)
 

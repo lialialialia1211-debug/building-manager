@@ -20,7 +20,10 @@ export interface RoutePresentation {
   title: string
   revealArtId: string
   revealDialogue: readonly [string, string]
-  endingArtIds: readonly string[]
+  endingFrames: readonly {
+    artId: string
+    lines: readonly string[]
+  }[]
 }
 
 export function buildRevealPanels(
@@ -53,7 +56,7 @@ export function getRoutePresentation(
       title: episode.perfectEnding.title,
       revealArtId: episode.perfectEnding.revealArtId,
       revealDialogue: episode.perfectEnding.revealDialogue,
-      endingArtIds: episode.perfectEnding.endingArtIds,
+      endingFrames: episode.perfectEnding.endingFrames,
     }
   }
 
@@ -63,11 +66,17 @@ export function getRoutePresentation(
   if (!route) {
     throw new Error(`Unknown side route: ${resolution.routeId}`)
   }
+  const ending = episode.sideEndings.find(
+    (candidate) => candidate.id === route.endingSequenceId,
+  )
+  if (!ending) {
+    throw new Error(`Unknown side ending: ${route.endingSequenceId}`)
+  }
   return {
     title: route.title,
     revealArtId: route.revealArtId,
-    revealDialogue: route.dialogue,
-    endingArtIds: route.endingArtIds,
+    revealDialogue: route.revealDialogue,
+    endingFrames: ending.frames,
   }
 }
 
@@ -87,7 +96,7 @@ function buildPanelLines(
         candidate.leadCharacterId === characters[0]?.characterId
         && candidate.partnerCharacterId === characters[1]?.characterId,
     )
-    if (route) return [...route.dialogue]
+    if (route) return [...route.pairDialogue]
   }
   if (characters.length === 1) {
     return [

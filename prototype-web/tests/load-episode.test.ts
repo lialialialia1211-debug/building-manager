@@ -6,7 +6,7 @@ import {
 } from '@/domain/load-episode'
 
 const episodeJson = readFileSync(
-  resolve(process.cwd(), '../content/office-episode.json'),
+  resolve(process.cwd(), '../content/office-comic/office-episode.json'),
   'utf8',
 )
 

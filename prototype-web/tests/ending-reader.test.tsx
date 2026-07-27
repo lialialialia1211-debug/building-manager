@@ -8,7 +8,7 @@ import { parseOfficeEpisode } from '@/domain/episode-schema'
 import type { StorageAdapter } from '@/domain/persistence'
 
 const episode = parseOfficeEpisode(JSON.parse(readFileSync(
-  resolve(process.cwd(), '../content/office-episode.json'),
+  resolve(process.cwd(), '../content/office-comic/office-episode.json'),
   'utf8',
 )) as unknown)
 
@@ -41,6 +41,8 @@ describe('EndingReader', () => {
     expect(screen.getAllByRole('img', { name: /結局分鏡/ })).toHaveLength(4)
     expect(screen.getByRole('img', { name: '結局分鏡 1' }))
       .toHaveAttribute('src', expect.stringContaining('perfect_01'))
+    expect(screen.getByText('先把最後一頁簽完。', { exact: false }))
+      .toBeVisible()
     expect(screen.getByRole('button', { name: '上一頁' })).toBeDisabled()
 
     await user.click(screen.getByRole('button', { name: '下一頁' }))
@@ -62,6 +64,9 @@ describe('EndingReader', () => {
 
     expect(screen.getByText('第 1 / 1 頁')).toBeInTheDocument()
     expect(screen.getAllByRole('img', { name: /結局分鏡/ })).toHaveLength(4)
+    expect(screen.getByText('要不要做點不能寫進事故報告的事？', {
+      exact: false,
+    })).toBeVisible()
     expect(screen.getByRole('button', { name: '下一頁' })).toBeDisabled()
   })
 

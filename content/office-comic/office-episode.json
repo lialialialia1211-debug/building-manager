@@ -1,0 +1,444 @@
+{
+  "schemaVersion": 1,
+  "id": "office-comic-episode-01",
+  "title": "鎖門之後",
+  "fixedOpeningArtId": "office_opening_01",
+  "cards": [
+    {
+      "id": "card_char_male_rover",
+      "kind": "character",
+      "title": "男漂泊者",
+      "shortLabel": "男漂泊者",
+      "artId": "card_char_male_rover",
+      "line": "男漂泊者：「我先去。出事再一起跑。」",
+      "characterId": "male-rover"
+    },
+    {
+      "id": "card_char_female_rover",
+      "kind": "character",
+      "title": "女漂泊者",
+      "shortLabel": "女漂泊者",
+      "artId": "card_char_female_rover",
+      "line": "女漂泊者：「別把有趣的事都搶走。」",
+      "characterId": "female-rover"
+    },
+    {
+      "id": "card_char_xiangli_yao",
+      "kind": "character",
+      "title": "相里要",
+      "shortLabel": "相里要",
+      "artId": "card_char_xiangli_yao",
+      "line": "相里要：「照規矩來。或者，別留下證據。」",
+      "characterId": "xiangli-yao"
+    },
+    {
+      "id": "card_char_changli",
+      "kind": "character",
+      "title": "長離",
+      "shortLabel": "長離",
+      "artId": "card_char_changli",
+      "line": "長離：「規矩是給白天的人看的。」",
+      "characterId": "changli"
+    },
+    {
+      "id": "card_char_boss_mingshi",
+      "kind": "character",
+      "title": "阿列夫一",
+      "shortLabel": "阿列夫一",
+      "artId": "card_char_boss_mingshi",
+      "line": "阿列夫一：「我不在時，你們玩得很熱鬧。」",
+      "characterId": "aleph-one"
+    },
+    {
+      "id": "card_scene_executive_corridor",
+      "kind": "scene",
+      "title": "主管樓層走廊",
+      "shortLabel": "主管走廊",
+      "artId": "card_scene_executive_corridor",
+      "line": "旁白：「感應燈一盞一盞熄了。」"
+    },
+    {
+      "id": "card_scene_boss_office",
+      "kind": "scene",
+      "title": "老闆私人辦公室",
+      "shortLabel": "老闆辦公室",
+      "artId": "card_scene_boss_office",
+      "line": "旁白：「門後沒有聲音，鎖卻還亮著。」"
+    },
+    {
+      "id": "card_scene_glass_meeting_room",
+      "kind": "scene",
+      "title": "玻璃會議室",
+      "shortLabel": "玻璃會議室",
+      "artId": "card_scene_glass_meeting_room",
+      "line": "旁白：「玻璃反光把兩道人影貼在一起。」"
+    },
+    {
+      "id": "card_scene_copy_archive_room",
+      "kind": "scene",
+      "title": "資料影印室",
+      "shortLabel": "資料影印室",
+      "artId": "card_scene_copy_archive_room",
+      "line": "旁白：「影印機還在吐出不該留下的紙。」"
+    },
+    {
+      "id": "card_prop_master_keycard",
+      "kind": "prop",
+      "title": "萬用門卡",
+      "shortLabel": "萬用門卡",
+      "artId": "card_prop_master_keycard",
+      "line": "旁白：「嗶。最高權限通過。」"
+    },
+    {
+      "id": "card_prop_merger_contract",
+      "kind": "prop",
+      "title": "併購合約",
+      "shortLabel": "併購合約",
+      "artId": "card_prop_merger_contract",
+      "line": "旁白：「最後一頁，只差一個簽名。」"
+    },
+    {
+      "id": "card_prop_blind_remote",
+      "kind": "prop",
+      "title": "百葉窗遙控器",
+      "shortLabel": "百葉窗遙控",
+      "artId": "card_prop_blind_remote",
+      "line": "旁白：「百葉窗慢慢合上。」"
+    },
+    {
+      "id": "card_prop_whisky_set",
+      "kind": "prop",
+      "title": "威士忌酒具",
+      "shortLabel": "威士忌酒具",
+      "artId": "card_prop_whisky_set",
+      "line": "旁白：「兩只杯子。顯然不是一個人喝。」"
+    }
+  ],
+  "perfectFingerprint": [
+    "card_char_male_rover",
+    "card_char_changli",
+    "card_scene_executive_corridor",
+    "card_scene_boss_office",
+    "card_prop_master_keycard",
+    "card_prop_merger_contract",
+    "card_prop_blind_remote",
+    "card_prop_whisky_set"
+  ],
+  "perfectEnding": {
+    "id": "perfect-locked-door",
+    "title": "完美結局：鎖門之後",
+    "revealDialogue": [
+      "男漂泊者：「門開了。妳可以先放開我嗎？」",
+      "長離：「你真的想我放開？」"
+    ],
+    "revealArtId": "ending_perfect_sixth",
+    "endingFrames": [
+      {"artId":"perfect_01","lines":["長離：「先把最後一頁簽完。」","男漂泊者：「妳靠這麼近，我怎麼簽？」"]},
+      {"artId":"perfect_02","lines":["男漂泊者：「工作做完了，妳還不走？」","長離：「我留下來，本來就不只為了工作。」"]},
+      {"artId":"perfect_03","lines":["長離：「接下來不是命令。想不想，自己說。」","男漂泊者：「想。門都鎖了，別讓我等。」"]},
+      {"artId":"perfect_04","lines":["長離：「那就別再裝乖。」","男漂泊者：「是妳先動手的。」"]},
+      {"artId":"perfect_05","lines":["長離：「合約別弄髒。」","男漂泊者：「這種時候妳還管合約？」","長離：「明天還要交。」"]},
+      {"artId":"perfect_06","lines":["男漂泊者：「妳根本是故意的……」","長離：「現在才知道？」"]},
+      {"artId":"perfect_07","lines":["長離：「看著我。」","男漂泊者：「妳先別停。」"]},
+      {"artId":"perfect_08","lines":["長離：「桌子要是壞了，你負責。」","男漂泊者：「壞了算老闆的。」"]},
+      {"artId":"perfect_09","lines":["長離：「再快一點。」","男漂泊者：「這可是妳說的。」"]},
+      {"artId":"perfect_10","lines":["長離：「一起……別停。」","男漂泊者：「長離——」"]},
+      {"artId":"perfect_11","lines":["長離：「褲子穿好，菜鳥。」","男漂泊者：「妳先把扣子扣上。」"]},
+      {"artId":"perfect_12","lines":["長離：「合約簽了，人也睡了。今晚效率不錯。」","男漂泊者：「妳的績效算法有問題。」","旁白：「完美結局：鎖門之後」"]}
+    ]
+  },
+  "sideRoutes": [
+    {
+      "id": "side-male-rover-female-rover",
+      "leadCharacterId": "male-rover",
+      "partnerCharacterId": "female-rover",
+      "title": "支線：加班搭檔",
+      "pairDialogue": ["男：「今晚別跟我搶。」", "女：「看你本事。」"],
+      "revealDialogue": ["女漂泊者：「這些錯頁明早一定被發現。」", "男漂泊者：「那就先鎖門。」"],
+      "revealArtId": "side_male_rover_female_rover_sixth",
+      "endingSequenceId": "male-rover-female-rover"
+    },
+    {
+      "id": "side-female-rover-male-rover",
+      "leadCharacterId": "female-rover",
+      "partnerCharacterId": "male-rover",
+      "title": "支線：反客為主",
+      "pairDialogue": ["女：「你跟緊一點。」", "男：「妳別突然停。」"],
+      "revealDialogue": ["女：「門我鎖了。你還想裝忙？」", "男：「我在等妳先開口。」"],
+      "revealArtId": "side_male_rover_female_rover_sixth",
+      "endingSequenceId": "male-rover-female-rover"
+    },
+    {
+      "id": "side-male-rover-xiangli-yao",
+      "leadCharacterId": "male-rover",
+      "partnerCharacterId": "xiangli-yao",
+      "title": "支線：錯誤校正",
+      "pairDialogue": ["男：「你一直盯著我？」", "相：「因為你一直出錯。」"],
+      "revealDialogue": ["相里要：「你今晚一直不專心。」", "男漂泊者：「因為你一直靠這麼近。」"],
+      "revealArtId": "side_male_rover_xiangli_yao_sixth",
+      "endingSequenceId": "male-rover-xiangli-yao"
+    },
+    {
+      "id": "side-xiangli-yao-male-rover",
+      "leadCharacterId": "xiangli-yao",
+      "partnerCharacterId": "male-rover",
+      "title": "支線：領帶校正",
+      "pairDialogue": ["相：「領帶歪了。」", "男：「你可以靠近點整理。」"],
+      "revealDialogue": ["相：「你今晚一直盯著我。」", "男：「現在才發現？」"],
+      "revealArtId": "side_male_rover_xiangli_yao_sixth",
+      "endingSequenceId": "male-rover-xiangli-yao"
+    },
+    {
+      "id": "side-male-rover-changli",
+      "leadCharacterId": "male-rover",
+      "partnerCharacterId": "changli",
+      "title": "支線：計畫之外",
+      "pairDialogue": ["男：「妳早就有計畫？」", "長：「計畫裡本來沒有你。」"],
+      "revealDialogue": ["男漂泊者：「老闆辦公室不是在另一邊？」", "長離：「今晚先處理你。」"],
+      "revealArtId": "side_male_rover_changli_sixth",
+      "endingSequenceId": "male-rover-changli"
+    },
+    {
+      "id": "side-changli-male-rover",
+      "leadCharacterId": "changli",
+      "partnerCharacterId": "male-rover",
+      "title": "支線：先處理你",
+      "pairDialogue": ["長：「跟我來。」", "男：「妳至少先說去哪。」"],
+      "revealDialogue": ["長：「老闆辦公室先不管。」", "男：「所以妳要先處理我？」"],
+      "revealArtId": "side_male_rover_changli_sixth",
+      "endingSequenceId": "male-rover-changli"
+    },
+    {
+      "id": "side-male-rover-aleph-one",
+      "leadCharacterId": "male-rover",
+      "partnerCharacterId": "aleph-one",
+      "title": "支線：老闆都聽見了",
+      "pairDialogue": ["男：「老闆，你都聽到了？」", "阿：「每一句。」"],
+      "revealDialogue": ["阿列夫一：「忠誠不是嘴上說說。」", "男漂泊者：「那你想怎麼驗？」"],
+      "revealArtId": "side_male_rover_boss_mingshi_sixth",
+      "endingSequenceId": "male-rover-aleph-one"
+    },
+    {
+      "id": "side-aleph-one-male-rover",
+      "leadCharacterId": "aleph-one",
+      "partnerCharacterId": "male-rover",
+      "title": "支線：留下驗收",
+      "pairDialogue": ["阿：「留下。」", "男：「這算加班嗎？」"],
+      "revealDialogue": ["阿：「留下。我有事要驗。」", "男：「這次又要驗什麼？」"],
+      "revealArtId": "side_male_rover_boss_mingshi_sixth",
+      "endingSequenceId": "male-rover-aleph-one"
+    },
+    {
+      "id": "side-female-rover-xiangli-yao",
+      "leadCharacterId": "female-rover",
+      "partnerCharacterId": "xiangli-yao",
+      "title": "支線：別太正經",
+      "pairDialogue": ["女：「你太正經了。」", "相：「妳太不正經。」"],
+      "revealDialogue": ["女漂泊者：「看來我們要困一會兒。」", "相里要：「妳笑得太開心了。」"],
+      "revealArtId": "side_female_rover_xiangli_yao_sixth",
+      "endingSequenceId": "female-rover-xiangli-yao"
+    },
+    {
+      "id": "side-xiangli-yao-female-rover",
+      "leadCharacterId": "xiangli-yao",
+      "partnerCharacterId": "female-rover",
+      "title": "支線：電梯停了",
+      "pairDialogue": ["相：「別亂跑。」", "女：「那你抓緊。」"],
+      "revealDialogue": ["相：「電梯停了，別亂動。」", "女：「你抱這麼緊，我怎麼動？」"],
+      "revealArtId": "side_female_rover_xiangli_yao_sixth",
+      "endingSequenceId": "female-rover-xiangli-yao"
+    },
+    {
+      "id": "side-female-rover-changli",
+      "leadCharacterId": "female-rover",
+      "partnerCharacterId": "changli",
+      "title": "支線：看妳學多快",
+      "pairDialogue": ["女：「前輩要教我嗎？」", "長：「看妳學得多快。」"],
+      "revealDialogue": ["長離：「妳今天惹的麻煩不少。」", "女漂泊者：「前輩不是最會收尾？」"],
+      "revealArtId": "side_female_rover_changli_sixth",
+      "endingSequenceId": "female-rover-changli"
+    },
+    {
+      "id": "side-changli-female-rover",
+      "leadCharacterId": "changli",
+      "partnerCharacterId": "female-rover",
+      "title": "支線：麻煩收尾",
+      "pairDialogue": ["長：「妳在試探我。」", "女：「現在才發現？」"],
+      "revealDialogue": ["長：「妳今天惹的麻煩不少。」", "女：「所以我來找最會收尾的人。」"],
+      "revealArtId": "side_female_rover_changli_sixth",
+      "endingSequenceId": "female-rover-changli"
+    },
+    {
+      "id": "side-female-rover-aleph-one",
+      "leadCharacterId": "female-rover",
+      "partnerCharacterId": "aleph-one",
+      "title": "支線：坐下來談",
+      "pairDialogue": ["女：「我有條件。」", "阿：「坐下來談。」"],
+      "revealDialogue": ["女漂泊者：「我拿到合約，你拿什麼交換？」", "阿列夫一：「妳想要什麼？」"],
+      "revealArtId": "side_female_rover_boss_mingshi_sixth",
+      "endingSequenceId": "female-rover-aleph-one"
+    },
+    {
+      "id": "side-aleph-one-female-rover",
+      "leadCharacterId": "aleph-one",
+      "partnerCharacterId": "female-rover",
+      "title": "支線：談判桌換人",
+      "pairDialogue": ["阿：「妳膽子很大。」", "女：「老闆不喜歡？」"],
+      "revealDialogue": ["阿：「妳坐了我的位置。」", "女：「現在是我的談判桌。」"],
+      "revealArtId": "side_female_rover_boss_mingshi_sixth",
+      "endingSequenceId": "female-rover-aleph-one"
+    },
+    {
+      "id": "side-xiangli-yao-changli",
+      "leadCharacterId": "xiangli-yao",
+      "partnerCharacterId": "changli",
+      "title": "支線：不肯退讓",
+      "pairDialogue": ["相：「這次我不讓。」", "長：「那就來搶。」"],
+      "revealDialogue": ["相里要：「這份是我的。」", "長離：「你想拿走，就靠近一點。」"],
+      "revealArtId": "side_xiangli_yao_changli_sixth",
+      "endingSequenceId": "xiangli-yao-changli"
+    },
+    {
+      "id": "side-changli-xiangli-yao",
+      "leadCharacterId": "changli",
+      "partnerCharacterId": "xiangli-yao",
+      "title": "支線：合約歸屬",
+      "pairDialogue": ["長：「你慢了一步。」", "相：「還沒結束。」"],
+      "revealDialogue": ["長：「這份合約歸我。」", "相：「妳可以試著拿走。」"],
+      "revealArtId": "side_xiangli_yao_changli_sixth",
+      "endingSequenceId": "xiangli-yao-changli"
+    },
+    {
+      "id": "side-xiangli-yao-aleph-one",
+      "leadCharacterId": "xiangli-yao",
+      "partnerCharacterId": "aleph-one",
+      "title": "支線：只改今晚",
+      "pairDialogue": ["相：「你又改行程。」", "阿：「只改今晚。」"],
+      "revealDialogue": ["阿列夫一：「你今晚比平常慢。」", "相里要：「因為你比平常急。」"],
+      "revealArtId": "side_xiangli_yao_boss_mingshi_sixth",
+      "endingSequenceId": "xiangli-yao-aleph-one"
+    },
+    {
+      "id": "side-aleph-one-xiangli-yao",
+      "leadCharacterId": "aleph-one",
+      "partnerCharacterId": "xiangli-yao",
+      "title": "支線：不是命令",
+      "pairDialogue": ["阿：「門鎖上。」", "相：「你先說原因。」"],
+      "revealDialogue": ["阿：「門鎖上。」", "相：「先說今晚不是命令。」"],
+      "revealArtId": "side_xiangli_yao_boss_mingshi_sixth",
+      "endingSequenceId": "xiangli-yao-aleph-one"
+    },
+    {
+      "id": "side-changli-aleph-one",
+      "leadCharacterId": "changli",
+      "partnerCharacterId": "aleph-one",
+      "title": "支線：現在討回",
+      "pairDialogue": ["長：「這次你欠我。」", "阿：「妳可以現在討。」"],
+      "revealDialogue": ["長離：「你又把爛攤子留給我。」", "阿列夫一：「妳還是來了。」"],
+      "revealArtId": "side_changli_boss_mingshi_sixth",
+      "endingSequenceId": "changli-aleph-one"
+    },
+    {
+      "id": "side-aleph-one-changli",
+      "leadCharacterId": "aleph-one",
+      "partnerCharacterId": "changli",
+      "title": "支線：別算進工作",
+      "pairDialogue": ["阿：「妳還是來了。」", "長：「只為拿走我該拿的。」"],
+      "revealDialogue": ["阿：「妳還是來替我收尾。」", "長：「別把自己算進工作裡。」"],
+      "revealArtId": "side_changli_boss_mingshi_sixth",
+      "endingSequenceId": "changli-aleph-one"
+    }
+  ],
+  "sideEndings": [
+    {
+      "id": "male-rover-female-rover",
+      "frames": [
+        {"artId":"side_male_rover_female_rover_01","lines":["女漂泊者：「鎖門是為了藏文件？」","男漂泊者：「一半。另一半是妳。」","女漂泊者：「那就過來。」"]},
+        {"artId":"side_male_rover_female_rover_02","lines":["女漂泊者：「影印機還在跑……」","男漂泊者：「讓它跑。」"]},
+        {"artId":"side_male_rover_female_rover_03","lines":["男漂泊者：「小聲一點，外面聽得到。」","女漂泊者：「那你就別讓我叫。」"]},
+        {"artId":"side_male_rover_female_rover_04","lines":["男漂泊者：「它印出什麼？」","女漂泊者：「不准看。直接碎掉。」"]}
+      ]
+    },
+    {
+      "id": "male-rover-xiangli-yao",
+      "frames": [
+        {"artId":"side_male_rover_xiangli_yao_01","lines":["相里要：「這不是工作要求。你確定？」","男漂泊者：「確定。現在輪到我教你分心。」"]},
+        {"artId":"side_male_rover_xiangli_yao_02","lines":["相里要：「新人都這麼急？」","男漂泊者：「只對你。」"]},
+        {"artId":"side_male_rover_xiangli_yao_03","lines":["相里要：「慢一點，桌子會響。」","男漂泊者：「你先別催我快。」"]},
+        {"artId":"side_male_rover_xiangli_yao_04","lines":["相里要：「領帶歪了。」","男漂泊者：「是你弄的。」"]}
+      ]
+    },
+    {
+      "id": "male-rover-changli",
+      "frames": [
+        {"artId":"side_male_rover_changli_01","lines":["長離：「還有最後一次反悔機會。」","男漂泊者：「妳都拉我進來了，別浪費。」"]},
+        {"artId":"side_male_rover_changli_02","lines":["長離：「看來菜鳥也不是什麼都不懂。」","男漂泊者：「妳可以再確認一次。」"]},
+        {"artId":"side_male_rover_changli_03","lines":["長離：「對，就是這樣。」","男漂泊者：「妳別在這時候命令我。」"]},
+        {"artId":"side_male_rover_changli_04","lines":["男漂泊者：「我的領帶呢？」","長離：「算今晚的加班費。」"]}
+      ]
+    },
+    {
+      "id": "male-rover-aleph-one",
+      "frames": [
+        {"artId":"side_male_rover_boss_mingshi_01","lines":["阿列夫一：「這不是命令。」","男漂泊者：「很好。我也不是被逼的。」"]},
+        {"artId":"side_male_rover_boss_mingshi_02","lines":["阿列夫一：「你的試用期表現，很大膽。」","男漂泊者：「那就給我轉正。」"]},
+        {"artId":"side_male_rover_boss_mingshi_03","lines":["男漂泊者：「老闆也會分心？」","阿列夫一：「你就是原因。」"]},
+        {"artId":"side_male_rover_boss_mingshi_04","lines":["阿列夫一：「明天直接報到。」","男漂泊者：「這面試流程最好別公開。」"]}
+      ]
+    },
+    {
+      "id": "female-rover-xiangli-yao",
+      "frames": [
+        {"artId":"side_female_rover_xiangli_yao_01","lines":["女漂泊者：「要不要做點不能寫進事故報告的事？」","相里要：「妳先確定不是玩笑。」","女漂泊者：「我很確定。」"]},
+        {"artId":"side_female_rover_xiangli_yao_02","lines":["女漂泊者：「秘書的服務都這麼周到？」","相里要：「只處理緊急狀況。」"]},
+        {"artId":"side_female_rover_xiangli_yao_03","lines":["相里要：「電梯隨時會動。」","女漂泊者：「那你最好快一點。」"]},
+        {"artId":"side_female_rover_xiangli_yao_04","lines":["女漂泊者：「事故報告怎麼寫？」","相里要：「設備正常。乘客失控。」"]}
+      ]
+    },
+    {
+      "id": "female-rover-changli",
+      "frames": [
+        {"artId":"side_female_rover_changli_01","lines":["女漂泊者：「我不是在開玩笑。」","長離：「很好。我也不喜歡浪費時間。」"]},
+        {"artId":"side_female_rover_changli_02","lines":["女漂泊者：「妳收尾都這麼徹底？」","長離：「才剛開始。」"]},
+        {"artId":"side_female_rover_changli_03","lines":["長離：「別躲，看著我。」","女漂泊者：「我根本沒想躲。」"]},
+        {"artId":"side_female_rover_changli_04","lines":["女漂泊者：「這樣算處理完了？」","長離：「文件算。妳還沒有。」"]}
+      ]
+    },
+    {
+      "id": "female-rover-aleph-one",
+      "frames": [
+        {"artId":"side_female_rover_boss_mingshi_01","lines":["女漂泊者：「先說好，這是我的條件，不是你的命令。」","阿列夫一：「成交。」"]},
+        {"artId":"side_female_rover_boss_mingshi_02","lines":["阿列夫一：「妳很會談判。」","女漂泊者：「我還沒開價。」"]},
+        {"artId":"side_female_rover_boss_mingshi_03","lines":["女漂泊者：「老闆，現在誰說了算？」","阿列夫一：「繼續，我再回答。」"]},
+        {"artId":"side_female_rover_boss_mingshi_04","lines":["女漂泊者：「條件寫這裡？」","阿列夫一：「妳已經先收訂金了。」"]}
+      ]
+    },
+    {
+      "id": "xiangli-yao-changli",
+      "frames": [
+        {"artId":"side_xiangli_yao_changli_01","lines":["相里要：「我們是在做蠢事。」","長離：「你要停嗎？」","相里要：「不。」"]},
+        {"artId":"side_xiangli_yao_changli_02","lines":["長離：「你工作時可沒這麼積極。」","相里要：「妳工作時不會閉嘴。」"]},
+        {"artId":"side_xiangli_yao_changli_03","lines":["長離：「就這點本事？」","相里要：「妳再說一次。」"]},
+        {"artId":"side_xiangli_yao_changli_04","lines":["長離：「輸的去見老闆。」","相里要：「剛才妳怎麼不怕輸？」"]}
+      ]
+    },
+    {
+      "id": "xiangli-yao-aleph-one",
+      "frames": [
+        {"artId":"side_xiangli_yao_boss_mingshi_01","lines":["相里要：「先說清楚，這不是加班命令。」","阿列夫一：「不是。是我在等你。」"]},
+        {"artId":"side_xiangli_yao_boss_mingshi_02","lines":["阿列夫一：「你還是最懂我的行程。」","相里要：「閉嘴。這段沒排進去。」"]},
+        {"artId":"side_xiangli_yao_boss_mingshi_03","lines":["相里要：「明早九點還有會。」","阿列夫一：「那就別浪費時間。」"]},
+        {"artId":"side_xiangli_yao_boss_mingshi_04","lines":["相里要：「九點開會，十點簽約。」","阿列夫一：「今晚的行程呢？」","相里要：「已完成。」"]}
+      ]
+    },
+    {
+      "id": "changli-aleph-one",
+      "frames": [
+        {"artId":"side_changli_boss_mingshi_01","lines":["長離：「工作吵完了。接下來，是我自己要的。」","阿列夫一：「我也是。」"]},
+        {"artId":"side_changli_boss_mingshi_02","lines":["長離：「你道歉的方式還是這麼差。」","阿列夫一：「妳的反應不像不滿意。」"]},
+        {"artId":"side_changli_boss_mingshi_03","lines":["長離：「再快一點，別讓我等。」","阿列夫一：「妳從來沒耐心。」"]},
+        {"artId":"side_changli_boss_mingshi_04","lines":["長離：「合約我帶走。你自己收桌子。」","阿列夫一：「這才是妳真正的報復？」"]}
+      ]
+    }
+  ]
+}

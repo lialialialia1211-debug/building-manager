@@ -45,8 +45,20 @@ export interface DirectedSideRoute {
   leadCharacterId: string;
   partnerCharacterId: string;
   title: string;
-  dialogue: readonly [string, string];
-  endingArtIds: readonly [string, string, string, string];
+  pairDialogue: readonly [string, string];
+  revealDialogue: readonly [string, string];
+  revealArtId: string;
+  endingSequenceId: string;
+}
+
+export interface EndingFrame {
+  artId: string;
+  lines: readonly [string, ...string[]];
+}
+
+export interface SideEnding {
+  id: string;
+  frames: readonly [EndingFrame, EndingFrame, EndingFrame, EndingFrame];
 }
 
 export interface OfficeEpisode {
@@ -63,13 +75,14 @@ export interface OfficeEpisode {
     id: string;
     title: string;
     revealDialogue: readonly [string, string];
-    endingArtIds: readonly [
-      string, string, string, string,
-      string, string, string, string,
-      string, string, string, string
+    endingFrames: readonly [
+      EndingFrame, EndingFrame, EndingFrame, EndingFrame,
+      EndingFrame, EndingFrame, EndingFrame, EndingFrame,
+      EndingFrame, EndingFrame, EndingFrame, EndingFrame
     ];
   };
   sideRoutes: readonly DirectedSideRoute[];
+  sideEndings: readonly SideEnding[];
 }
 
 export type RouteResolution =
@@ -90,6 +103,7 @@ Lead direction is determined by the first character card in slot order. This mak
 
 ## Runtime asset contract
 
+- Source path: `content/office-comic/assets/office-comic/<art-id>.png`.
 - Runtime path: `/assets/office-comic/<art-id>.png`.
 - Art IDs are the approved IDs in
   `docs/art/2026-07-27-office-comic-production-package/05-export-naming-qa.md`.
@@ -105,8 +119,8 @@ Lead direction is determined by the first character card in slot order. This mak
 
 - Create: `prototype-web/src/domain/episode-schema.ts`
 - Create: `prototype-web/src/domain/load-episode.ts`
-- Create: `content/office-episode.json`
-- Create: `content/office-asset-plan.json`
+- Create: `content/office-comic/office-episode.json`
+- Create: `content/office-comic/office-asset-plan.json`
 - Create: `prototype-web/tests/episode-schema.test.ts`
 - Remove: tracked legacy room JSON and legacy asset manifests superseded by these two files
 
@@ -151,7 +165,7 @@ Expected: FAIL because the schema and content do not exist.
 
 ```powershell
 npm --prefix prototype-web test -- episode-schema.test.ts
-rg "TODO|TBD|FIXME|placeholder dialogue" prototype-web/src/domain content/office-*.json
+rg "TODO|TBD|FIXME|placeholder dialogue" prototype-web/src/domain content/office-comic/*.json
 ```
 
 Expected: tests PASS and the review search returns no unfinished implementation marker.
@@ -159,7 +173,7 @@ Expected: tests PASS and the review search returns no unfinished implementation 
 **Step 5: Commit**
 
 ```powershell
-git add prototype-web/src/domain/episode-schema.ts prototype-web/src/domain/load-episode.ts prototype-web/tests/episode-schema.test.ts content/office-episode.json content/office-asset-plan.json
+git add prototype-web/src/domain/episode-schema.ts prototype-web/src/domain/load-episode.ts prototype-web/tests/episode-schema.test.ts content/office-comic/office-episode.json content/office-comic/office-asset-plan.json
 git commit -m "feat: define office comic episode content"
 ```
 

@@ -22,6 +22,12 @@ art/office-comic-2026-07-27/masters/
 {asset_id}.png
 ```
 
+完成後直接放進：
+
+```text
+content/office-comic/assets/office-comic/{asset_id}.png
+```
+
 不要加 `final`、`new`、日期、版本號、中文、空格或括號。
 
 ## 2. 技術畫布
@@ -207,8 +213,7 @@ ui_episode_title
 ## 7. 回交後由 Codex 處理
 
 1. 檢查尺寸、alpha、檔名與缺件。
-2. 產生 WebP 與縮圖。
-3. 更新 asset manifest。
-4. 寫入 `03`、`04`、`06` 的對話資料。
-5. 執行 `npm --prefix prototype-web run check`。
-6. 部署精確 commit 到 GitHub 預覽後再開始人工 QA。
+2. 確認程式能以相同 asset ID 取代占位圖。
+3. 重新驗證 87 份機器規格與實際 PNG。
+4. 執行 `npm --prefix prototype-web run check`。
+5. 部署精確 commit 到 GitHub 預覽後再開始人工 QA。

@@ -17,11 +17,16 @@ const dialoguePairSchema = z.tuple([
   z.string().trim().min(1),
 ])
 
-const fourArtIdsSchema = z.tuple([
-  z.string().trim().min(1),
-  z.string().trim().min(1),
-  z.string().trim().min(1),
-  z.string().trim().min(1),
+const endingFrameSchema = z.object({
+  artId: z.string().trim().min(1),
+  lines: z.array(z.string().trim().min(1)).min(1).max(3),
+}).strict()
+
+const fourEndingFramesSchema = z.tuple([
+  endingFrameSchema,
+  endingFrameSchema,
+  endingFrameSchema,
+  endingFrameSchema,
 ])
 
 const directedSideRouteSchema = z.object({
@@ -29,9 +34,10 @@ const directedSideRouteSchema = z.object({
   leadCharacterId: z.string().trim().min(1),
   partnerCharacterId: z.string().trim().min(1),
   title: z.string().trim().min(1),
-  dialogue: dialoguePairSchema,
+  pairDialogue: dialoguePairSchema,
+  revealDialogue: dialoguePairSchema,
   revealArtId: z.string().trim().min(1),
-  endingArtIds: fourArtIdsSchema,
+  endingSequenceId: z.string().trim().min(1),
 }).strict()
 
 const officeEpisodeSchema = z.object({
@@ -55,22 +61,26 @@ const officeEpisodeSchema = z.object({
     title: z.string().trim().min(1),
     revealDialogue: dialoguePairSchema,
     revealArtId: z.string().trim().min(1),
-    endingArtIds: z.tuple([
-      z.string().trim().min(1),
-      z.string().trim().min(1),
-      z.string().trim().min(1),
-      z.string().trim().min(1),
-      z.string().trim().min(1),
-      z.string().trim().min(1),
-      z.string().trim().min(1),
-      z.string().trim().min(1),
-      z.string().trim().min(1),
-      z.string().trim().min(1),
-      z.string().trim().min(1),
-      z.string().trim().min(1),
+    endingFrames: z.tuple([
+      endingFrameSchema,
+      endingFrameSchema,
+      endingFrameSchema,
+      endingFrameSchema,
+      endingFrameSchema,
+      endingFrameSchema,
+      endingFrameSchema,
+      endingFrameSchema,
+      endingFrameSchema,
+      endingFrameSchema,
+      endingFrameSchema,
+      endingFrameSchema,
     ]),
   }).strict(),
   sideRoutes: z.array(directedSideRouteSchema).length(20),
+  sideEndings: z.array(z.object({
+    id: z.string().trim().min(1),
+    frames: fourEndingFramesSchema,
+  }).strict()).length(10),
 }).strict().superRefine((episode, context) => {
   const cardIds = episode.cards.map((card) => card.id)
   if (new Set(cardIds).size !== cardIds.length) {
@@ -166,6 +176,38 @@ const officeEpisodeSchema = z.object({
       path: ['sideRoutes'],
     })
   }
+
+  const sideEndingIds = episode.sideEndings.map((ending) => ending.id)
+  if (new Set(sideEndingIds).size !== sideEndingIds.length) {
+    context.addIssue({
+      code: 'custom',
+      message: 'side ending ids must be unique',
+      path: ['sideEndings'],
+    })
+  }
+  const endingUseCounts = new Map<string, number>()
+  for (const route of episode.sideRoutes) {
+    endingUseCounts.set(
+      route.endingSequenceId,
+      (endingUseCounts.get(route.endingSequenceId) ?? 0) + 1,
+    )
+    if (!sideEndingIds.includes(route.endingSequenceId)) {
+      context.addIssue({
+        code: 'custom',
+        message: `unknown side ending: ${route.endingSequenceId}`,
+        path: ['sideRoutes'],
+      })
+    }
+  }
+  if (
+    sideEndingIds.some((endingId) => endingUseCounts.get(endingId) !== 2)
+  ) {
+    context.addIssue({
+      code: 'custom',
+      message: 'each side ending must be shared by both route directions',
+      path: ['sideEndings'],
+    })
+  }
 })
 
 const assetDefinitionSchema = z.object({
@@ -219,11 +261,11 @@ export function getEpisodeArtIds(episode: OfficeEpisode): string[] {
     episode.fixedOpeningArtId,
     ...episode.cards.map((card) => card.artId),
     episode.perfectEnding.revealArtId,
-    ...episode.perfectEnding.endingArtIds,
-    ...episode.sideRoutes.flatMap((route) => [
-      route.revealArtId,
-      ...route.endingArtIds,
-    ]),
+    ...episode.perfectEnding.endingFrames.map((frame) => frame.artId),
+    ...episode.sideRoutes.map((route) => route.revealArtId),
+    ...episode.sideEndings.flatMap(
+      (ending) => ending.frames.map((frame) => frame.artId),
+    ),
   ]
 }
 

@@ -11,11 +11,11 @@ import { validateAssetDirectory } from '../scripts/validate-assets'
 import { validateContentDocuments } from '../scripts/validate-content'
 
 const episode = JSON.parse(readFileSync(
-  resolve(process.cwd(), '../content/office-episode.json'),
+  resolve(process.cwd(), '../content/office-comic/office-episode.json'),
   'utf8',
 )) as Record<string, unknown>
 const assetPlan = JSON.parse(readFileSync(
-  resolve(process.cwd(), '../content/office-asset-plan.json'),
+  resolve(process.cwd(), '../content/office-comic/office-asset-plan.json'),
   'utf8',
 )) as Record<string, unknown>
 

@@ -22,7 +22,7 @@ export function validateContentDocuments(
 }
 
 export function runContentValidation(
-  contentDirectory = resolve(process.cwd(), '../content'),
+  contentDirectory = resolve(process.cwd(), '../content/office-comic'),
 ): string[] {
   try {
     const episodeInput: unknown = JSON.parse(readFileSync(
