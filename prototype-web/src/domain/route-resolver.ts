@@ -58,7 +58,8 @@ export function resolveRoute(
     }
   }
 
-  const [leadCharacterId, partnerCharacterId] = characterIds
+  const leadCharacterId = characterIds[0]!
+  const partnerCharacterId = characterIds[1]!
   const route = episode.sideRoutes.find(
     (candidate) =>
       candidate.leadCharacterId === leadCharacterId

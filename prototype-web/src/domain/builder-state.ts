@@ -57,7 +57,10 @@ export function moveCard(
   }
 
   const next = [...slots]
-  ;[next[fromIndex], next[toIndex]] = [next[toIndex], next[fromIndex]]
+  const fromCard = next[fromIndex] ?? null
+  const toCard = next[toIndex] ?? null
+  next[fromIndex] = toCard
+  next[toIndex] = fromCard
   return asBuilderSlots(next)
 }
 

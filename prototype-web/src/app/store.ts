@@ -190,7 +190,13 @@ export function createComicStore(
 
       advanceReveal() {
         set((state) => {
-          if (state.screen !== 'reveal' || !state.resolution) return state
+          if (
+            state.screen !== 'reveal'
+            || !state.resolution
+            || state.resolution.kind === 'invalid'
+          ) {
+            return state
+          }
           if (state.revealStep < 4) {
             return {
               ...state,

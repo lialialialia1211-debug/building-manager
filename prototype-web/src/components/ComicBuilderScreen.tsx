@@ -70,7 +70,7 @@ export function ComicBuilderScreen({ store }: ComicBuilderScreenProps) {
 
   return (
     <section className="comic-builder" aria-labelledby="episode-title">
-      <header className="comic-builder__header">
+      <header className="comic-builder__header" aria-label="劇集狀態">
         <div>
           <p className="eyebrow">EPISODE 01 · OFFICE AFTER HOURS</p>
           <h1 id="episode-title">{episode.title}</h1>
@@ -133,7 +133,11 @@ export function ComicBuilderScreen({ store }: ComicBuilderScreenProps) {
           </article>
         </section>
 
-        <aside className="builder-controls">
+        <aside
+          className="builder-controls"
+          role="region"
+          aria-label="編排操作"
+        >
           <CardTray
             cards={episode.cards}
             usedCardIds={usedCardIds}
