@@ -1,0 +1,15 @@
+{
+ "asset_id": "b1_neighbor",
+ "source": "card-b1_neighbor_s32_00001_.png",
+ "seed": 32,
+ "steps": 36,
+ "cfg": 4.5,
+ "sampler": "er_sde",
+ "scheduler": "simple",
+ "model_filename": "anima-aesthetic-v1.1.safetensors",
+ "style": "anima native illustration",
+ "cast": "wuwa cartethyia/cantarella/brant/rover",
+ "size_kb": 45,
+ "note": "",
+ "review_status": "selected_v2"
+}

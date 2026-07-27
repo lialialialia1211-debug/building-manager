@@ -1,0 +1,19 @@
+{
+ "asset_id": "layer-a1_fuse-char",
+ "seed": 502,
+ "steps": 36,
+ "cfg": 4.5,
+ "sampler": "er_sde",
+ "scheduler": "simple",
+ "width": 1536,
+ "height": 864,
+ "model_filename": "anima-aesthetic-v1.1.safetensors",
+ "workflow_filename": "stylelock_batch.py",
+ "positive_prompt": "masterpiece, best quality, year 2025, newest, highres, safe, anime screenshot, clean cel animation, crisp dark lineart, two-step cel shading, mature adult characters, clear silhouette, cinematic night lighting, controlled highlights, detailed expressive adult eyes, 16:9 composition, no text in image.\n\nLin Yuwei (placeholder cast: changli (wuthering waves)), a 28-year-old adult woman, 165 cm tall, mature slim build, long flowing pink-to-red multicolored hair in a loose ponytail with a feather hair ornament and hair intakes, amber eyes, bright pupils. She wears a dark plum knitted long-sleeve top, charcoal trousers, dark indoor shoes. Cautious observant adult expression and deliberate body language.\n\nkneeling on one knee, holding a narrow flashlight in her left hand, right hand extended forward carefully, full body, solo, plain solid bright green screen background, even flat lighting.",
+ "negative_prompt": "worst quality, low quality, blurry, jpeg artifacts, chromatic aberration, artist name, text, watermark, logo, photorealistic, 3d render, chibi, child, teenager, school uniform, young-looking face, duplicate person, extra person, extra fingers, missing fingers, fused hands, malformed tools, inconsistent hair, inconsistent clothes, different eye color, cropped face, cropped hands, unreadable action, excessive bloom, broken perspective, mirrored room layout, nsfw, explicit, nudity, exposed genitals, sexual intercourse",
+ "comfy_output": "stylelock\\layers\\a1_fuse/layer-a1_fuse-char_s502_00001_.png",
+ "placeholder_cast": "wuthering waves",
+ "generation_date": "2026-07-17",
+ "manual_edits": "none",
+ "review_status": "pending"
+}

@@ -1,0 +1,20 @@
+{
+ "asset_id": "char-xu_anning-ref-back",
+ "seed": 112,
+ "steps": 36,
+ "cfg": 4.5,
+ "sampler": "er_sde",
+ "scheduler": "simple",
+ "width": 832,
+ "height": 1216,
+ "model_filename": "anima-aesthetic-v1.1.safetensors",
+ "workflow_filename": "native_batch.py",
+ "positive_prompt": "safe, Xu Anning (placeholder cast: sanhua (wuthering waves)), a 29-year-old adult woman, 168 cm tall, natural mature build, medium grey hair with a single braid, red eyes with mismatched pupils, a small mole under her mouth. She wears a dark green lightweight jacket over a black top and dark trousers.\n\nstanding, full body, arms relaxed at sides, plain light gray background, solo, back view, from behind.",
+ "negative_prompt": "worst quality, low quality, blurry, jpeg artifacts, chromatic aberration, artist name, text, watermark, logo, extra fingers, missing fingers, fused hands, duplicate person, extra person, split screen, comic panels, multiple panels, child, teenager, young-looking face, nsfw, explicit, nudity, exposed genitals, sexual intercourse",
+ "comfy_output": "nativestyle\\characters\\xu_anning/char-xu_anning-ref-back_s112_00001_.png",
+ "style": "anima native illustration (no style block)",
+ "placeholder_cast": "wuthering waves",
+ "generation_date": "2026-07-18",
+ "manual_edits": "none",
+ "review_status": "pending"
+}

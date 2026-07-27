@@ -1,0 +1,20 @@
+{
+ "asset_id": "char-lin_yuwei-ref-back",
+ "seed": 122,
+ "steps": 36,
+ "cfg": 4.5,
+ "sampler": "er_sde",
+ "scheduler": "simple",
+ "width": 832,
+ "height": 1216,
+ "model_filename": "anima-aesthetic-v1.1.safetensors",
+ "workflow_filename": "native_batch.py",
+ "positive_prompt": "safe, 1girl segment: changli (wuthering waves), wuthering waves, long hair, multicolored hair, red hair, pink hair, ponytail, feather hair ornament, hair intakes, amber eyes. She wears a dark plum knitted turtleneck sweater and charcoal grey trousers.\n\nstanding, full body, arms relaxed at sides, plain light gray background, solo, back view, from behind.",
+ "negative_prompt": "worst quality, low quality, score_1, score_2, score_3, blurry, jpeg artifacts, sepia, artist name, text, watermark, extra fingers, missing fingers, fused hands, duplicate person, extra person, split screen, comic panels, multiple panels, child, nsfw, explicit, nudity, exposed genitals, sexual intercourse",
+ "comfy_output": "nativestyle\\characters\\lin_yuwei/char-lin_yuwei-ref-back_s122_00001_.png",
+ "style": "anima native illustration (no style block)",
+ "placeholder_cast": "wuthering waves",
+ "generation_date": "2026-07-18",
+ "manual_edits": "none",
+ "review_status": "pending"
+}

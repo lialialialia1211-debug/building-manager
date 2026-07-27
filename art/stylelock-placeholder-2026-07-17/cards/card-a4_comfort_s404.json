@@ -1,0 +1,19 @@
+{
+ "asset_id": "card-a4_comfort",
+ "seed": 404,
+ "steps": 36,
+ "cfg": 4.5,
+ "sampler": "er_sde",
+ "scheduler": "simple",
+ "width": 1536,
+ "height": 864,
+ "model_filename": "anima-aesthetic-v1.1.safetensors",
+ "workflow_filename": "stylelock_batch.py",
+ "positive_prompt": "masterpiece, best quality, year 2025, newest, highres, safe, anime screenshot, clean cel animation, crisp dark lineart, two-step cel shading, mature adult characters, clear silhouette, cinematic night lighting, controlled highlights, detailed expressive adult eyes, 16:9 composition, no text in image.\n\nLin Yuwei (placeholder cast: changli (wuthering waves)), a 28-year-old adult woman, 165 cm tall, mature slim build, long flowing pink-to-red multicolored hair in a loose ponytail with a feather hair ornament and hair intakes, amber eyes, bright pupils. She wears a dark plum knitted long-sleeve top, charcoal trousers, dark indoor shoes. Cautious observant adult expression and deliberate body language.\n\nChen Haoran (placeholder cast: male rover (wuthering waves)), 1boy, a 31-year-old adult man, 182 cm tall, lean practical build, short black hair with crossed bangs and one long thin braid, glowing yellow eyes. He wears a dark navy work shirt with sleeves rolled to the elbows, black work trousers, and a compact black tool belt. He moves calmly and keeps his hands visible.\n\nInside a fictional low-magic urban apartment during a total blackout. The room has a fixed layout: entrance door on frame left, living area and window in the center, electrical panel on the right wall. Cold blue ambient darkness, controlled amber candlelight, a small red warning point, and an abnormal muted yellow six-grid glow. Clean cel animation, consistent room geometry, no readable text.\n\nMedium two-character sofa shot. Lin sits at the sofa edge on frame left recovering from a memory flash. Chen first pauses one arm-length away on frame right with an open asking gesture, then begins to sit closer only after her visible nod. Both hands, expressions, and exit path remain clear. Their bodies do not overlap.\n\nMaintain the exact approved character face, adult age appearance, hairstyle, hair accessory or eyebrow scar, eye color, body proportions, clothing state, handedness, room layout, prop design, camera-side continuity, and light direction. Do not add people, props, jewelry, text, or background openings.",
+ "negative_prompt": "worst quality, low quality, blurry, jpeg artifacts, chromatic aberration, artist name, text, watermark, logo, photorealistic, 3d render, chibi, child, teenager, school uniform, young-looking face, duplicate person, extra person, extra fingers, missing fingers, fused hands, malformed tools, inconsistent hair, inconsistent clothes, different eye color, cropped face, cropped hands, unreadable action, excessive bloom, broken perspective, mirrored room layout, nsfw, explicit, nudity, exposed genitals, sexual intercourse",
+ "comfy_output": "stylelock\\cards/card-a4_comfort_s404_00001_.png",
+ "placeholder_cast": "wuthering waves",
+ "generation_date": "2026-07-17",
+ "manual_edits": "none",
+ "review_status": "pending"
+}

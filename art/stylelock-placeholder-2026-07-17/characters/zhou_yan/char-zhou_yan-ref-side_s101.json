@@ -1,0 +1,19 @@
+{
+ "asset_id": "char-zhou_yan-ref-side",
+ "seed": 101,
+ "steps": 36,
+ "cfg": 4.5,
+ "sampler": "er_sde",
+ "scheduler": "simple",
+ "width": 832,
+ "height": 1216,
+ "model_filename": "anima-aesthetic-v1.1.safetensors",
+ "workflow_filename": "stylelock_batch.py",
+ "positive_prompt": "masterpiece, best quality, year 2025, newest, highres, safe, anime screenshot, clean cel animation, crisp dark lineart, two-step cel shading, mature adult characters, clear silhouette, cinematic night lighting, controlled highlights, detailed expressive adult eyes, 16:9 composition, no text in image.\n\nZhou Yan (placeholder cast: male rover (wuthering waves)), 1boy, a 33-year-old adult man, 185 cm tall, broad stable build, short black hair with crossed bangs and one long thin braid, glowing yellow eyes, subtle stubble on his chin. He wears a graphite-gray high-collar work jacket, dark work trousers, durable ankle boots. Calm professional posture.\n\ncharacter reference, full body, standing, arms relaxed at sides, plain light gray studio background, even neutral lighting, no props, solo, side profile view.",
+ "negative_prompt": "worst quality, low quality, blurry, jpeg artifacts, chromatic aberration, artist name, text, watermark, logo, photorealistic, 3d render, chibi, child, teenager, school uniform, young-looking face, duplicate person, extra person, extra fingers, missing fingers, fused hands, malformed tools, inconsistent hair, inconsistent clothes, different eye color, cropped face, cropped hands, unreadable action, excessive bloom, broken perspective, mirrored room layout, nsfw, explicit, nudity, exposed genitals, sexual intercourse",
+ "comfy_output": "stylelock\\characters\\zhou_yan/char-zhou_yan-ref-side_s101_00001_.png",
+ "placeholder_cast": "wuthering waves",
+ "generation_date": "2026-07-17",
+ "manual_edits": "none",
+ "review_status": "pending"
+}

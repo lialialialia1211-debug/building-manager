@@ -3,15 +3,16 @@ import { resolve } from 'node:path'
 import { afterEach, beforeEach, expect, test } from 'vitest'
 import { fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { App } from '@/app/App'
 import { useAppStore } from '@/app/store'
 import { parseRoom } from '@/domain/content-schema'
-import { greyboxPanel } from '@/domain/greybox-assets'
 import { createEmptyProgress } from '@/domain/progress'
 import { markRead, wasRead } from '@/domain/read-history'
 import { StoryEngine } from '@/domain/story-engine'
 import type { RoomDefinition } from '@/domain/types'
 import { ComicScreen } from '@/screens/ComicScreen'
+import { makeTestCatalog } from '../helpers/catalog'
+
+const catalog = makeTestCatalog()
 
 const comicCss = readFileSync(
   resolve(process.cwd(), 'src/styles/comic.css'),
@@ -47,6 +48,8 @@ const room = {
   schemaVersion: 1,
   id: 'room_a_blackout',
   title: '停電之夜',
+  backgroundAsset: 'bg_room_a',
+  openingAssets: ['a_open_01', 'a_open_02', 'a_open_03'],
   startNode: 'n1',
   safeNode: 'n1',
   endingAnchor: 'ending',
@@ -130,7 +133,7 @@ afterEach(() => {
 })
 
 test('renders exactly three neutral candidate actions with decorative images', () => {
-  const { container } = render(<ComicScreen roomId={room.id} />)
+  const { container } = render(<ComicScreen roomId={room.id} catalog={catalog} />)
   const candidates = screen.getAllByRole('button', {
     name: /^選擇行動：/,
   })
@@ -156,7 +159,7 @@ test('renders exactly three neutral candidate actions with decorative images', (
 
 test('locks all three candidates immediately after selection', async () => {
   const user = userEvent.setup()
-  render(<ComicScreen roomId={room.id} />)
+  render(<ComicScreen roomId={room.id} catalog={catalog} />)
   const candidates = screen.getAllByRole('button', {
     name: /^選擇行動：/,
   })
@@ -174,7 +177,7 @@ test('locks all three candidates immediately after selection', async () => {
 
 test('hides dialogue and consequences before selection then reveals them in a live region', async () => {
   const user = userEvent.setup()
-  render(<ComicScreen roomId={room.id} />)
+  render(<ComicScreen roomId={room.id} catalog={catalog} />)
 
   expect(
     screen.queryByText('林雨薇壓低聲音問：「是誰？」'),
@@ -200,7 +203,7 @@ test('shows numeric reveal deltas only when exact stats are enabled', async () =
   const progress = createEmptyProgress()
   progress.settings.exactStats = true
   useAppStore.setState({ progress })
-  render(<ComicScreen roomId={room.id} />)
+  render(<ComicScreen roomId={room.id} catalog={catalog} />)
 
   await user.click(screen.getByRole('button', {
     name: '選擇行動：查看門口',
@@ -213,7 +216,7 @@ test('shows numeric reveal deltas only when exact stats are enabled', async () =
 
 test('completes a reveal from the outer motion event and exposes its step marker', async () => {
   const user = userEvent.setup()
-  render(<ComicScreen roomId={room.id} />)
+  render(<ComicScreen roomId={room.id} catalog={catalog} />)
 
   await user.click(screen.getAllByRole('button', {
     name: /^選擇行動：/,
@@ -251,7 +254,7 @@ test('fast-forwards a read dialogue variant', async () => {
     'default',
   )
   useAppStore.setState({ progress })
-  render(<ComicScreen roomId={room.id} />)
+  render(<ComicScreen roomId={room.id} catalog={catalog} />)
 
   await user.click(screen.getAllByRole('button', {
     name: /^選擇行動：/,
@@ -276,7 +279,7 @@ test('uses unread speed when the same panel has a new dialogue variant', async (
     progress,
     engine: new StoryEngine(variantRoom),
   })
-  render(<ComicScreen roomId={room.id} />)
+  render(<ComicScreen roomId={room.id} catalog={catalog} />)
 
   await user.click(screen.getAllByRole('button', {
     name: /^選擇行動：/,
@@ -301,7 +304,7 @@ test('uses the circuit visual and unread cross-room speed in Room B', async () =
     progress,
     engine: new StoryEngine(roomB, progress.crossRoomFlags),
   })
-  render(<ComicScreen roomId={roomB.id} />)
+  render(<ComicScreen roomId={roomB.id} catalog={catalog} />)
 
   expect(screen.getByTestId('comic-screen')).toHaveAttribute(
     'data-room-visual-variant',
@@ -332,7 +335,7 @@ test('marks effective cross-room dialogue without marking default', async () => 
     progress,
     engine: new StoryEngine(roomB, progress.crossRoomFlags),
   })
-  render(<ComicScreen roomId={roomB.id} />)
+  render(<ComicScreen roomId={roomB.id} catalog={catalog} />)
 
   await user.click(screen.getAllByRole('button', {
     name: /^選擇行動：/,
@@ -361,7 +364,7 @@ test('defines the circuit-light overlay in comic CSS', () => {
 })
 
 test('shows six choice slots between fixed opening and ending anchors', () => {
-  render(<ComicScreen roomId={room.id} />)
+  render(<ComicScreen roomId={room.id} catalog={catalog} />)
 
   expect(screen.getByText('步驟 1 / 6')).toBeInTheDocument()
   expect(screen.getByTestId('comic-opening')).toHaveClass(
@@ -394,24 +397,22 @@ test('lays out the six choice slots across the full comic page', () => {
   )
 })
 
-test('uses the formal comic screen for the comic app route', () => {
-  render(<App />)
-
-  expect(screen.getByTestId('comic-screen')).toBeInTheDocument()
-  expect(screen.getAllByRole('button', {
-    name: /^選擇行動：/,
-  })).toHaveLength(3)
-})
-
-test('keeps panel ids out of playtest greyboxes', () => {
-  const playtestImage = decodeURIComponent(
-    greyboxPanel('a1_door', 0, false),
-  )
-  const developerImage = decodeURIComponent(
-    greyboxPanel('a1_door', 0, true),
+test('renders real delivered art instead of greybox svg', () => {
+  const { container } = render(
+    <ComicScreen roomId={room.id} catalog={catalog} />,
   )
 
-  expect(playtestImage).not.toContain('a1_door')
-  expect(playtestImage).toMatch(/<circle|<path|<rect/)
-  expect(developerImage).toContain('a1_door')
+  const html = container.innerHTML
+  expect(html).not.toContain('data:image/svg+xml')
+  expect(html).not.toContain('greybox')
+  expect(html).not.toContain('/adult/')
+
+  const previews = [...container.querySelectorAll(
+    '.candidate-card [data-asset-id]',
+  )]
+  expect(previews.length).toBe(3)
+  for (const preview of previews) {
+    expect(preview.getAttribute('src'))
+      .toMatch(/\/assets\/common\/panels\/.+_preview\.webp/)
+  }
 })

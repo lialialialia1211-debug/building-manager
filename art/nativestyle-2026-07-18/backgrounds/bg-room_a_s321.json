@@ -1,0 +1,20 @@
+{
+ "asset_id": "bg-room_a",
+ "seed": 321,
+ "steps": 36,
+ "cfg": 4.5,
+ "sampler": "er_sde",
+ "scheduler": "simple",
+ "width": 1536,
+ "height": 864,
+ "model_filename": "anima-aesthetic-v1.1.safetensors",
+ "workflow_filename": "native_batch.py",
+ "positive_prompt": "safe, no humans, scenery, empty room, wide shot. Inside a modern apartment living room at night during a blackout: entrance door on the left, window in the center, an electrical panel on the right wall, warm candlelight.",
+ "negative_prompt": "worst quality, low quality, score_1, score_2, score_3, blurry, jpeg artifacts, sepia, artist name, text, watermark, extra fingers, missing fingers, fused hands, duplicate person, extra person, split screen, comic panels, multiple panels, child, nsfw, explicit, nudity, exposed genitals, sexual intercourse, 1girl, 1boy, person",
+ "comfy_output": "nativestyle\\backgrounds/bg-room_a_s321_00001_.png",
+ "style": "anima native illustration (no style block)",
+ "placeholder_cast": "wuthering waves",
+ "generation_date": "2026-07-18",
+ "manual_edits": "none",
+ "review_status": "pending"
+}

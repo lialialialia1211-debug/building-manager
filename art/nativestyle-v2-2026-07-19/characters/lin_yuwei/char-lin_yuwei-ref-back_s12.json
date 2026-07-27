@@ -1,0 +1,17 @@
+{
+ "asset_id": "char-lin_yuwei-ref-back",
+ "seed": 12,
+ "steps": 36,
+ "cfg": 4.5,
+ "sampler": "er_sde",
+ "scheduler": "simple",
+ "width": 1536,
+ "height": 864,
+ "model_filename": "anima-aesthetic-v1.1.safetensors",
+ "positive_prompt": "safe, 1girl segment: cartethyia (wuthering waves), wuthering waves, long blonde hair, blue eyes, parted bangs, wearing her canonical ornate white and red armored dress with gold trim.\n\nfull body, standing, arms relaxed, plain light gray background, solo, back view, from behind.",
+ "negative_prompt": "worst quality, low quality, score_1, score_2, score_3, blurry, jpeg artifacts, sepia, artist name, text, watermark, extra fingers, missing fingers, fused hands, duplicate person, extra person, split screen, comic panels, multiple panels, child, nsfw, explicit, nudity, exposed genitals, sexual intercourse",
+ "style": "anima native illustration",
+ "cast": "wuwa cartethyia/cantarella/brant/rover canonical outfits",
+ "generation_date": "2026-07-19",
+ "review_status": "pending"
+}

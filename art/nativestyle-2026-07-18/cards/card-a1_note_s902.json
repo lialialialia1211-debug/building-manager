@@ -1,0 +1,19 @@
+{
+ "asset_id": "card-a1_note",
+ "seed": 902,
+ "steps": 36,
+ "cfg": 4.5,
+ "sampler": "er_sde",
+ "scheduler": "simple",
+ "width": 1536,
+ "height": 864,
+ "model_filename": "anima-aesthetic-v1.1.safetensors",
+ "workflow_filename": "final_batch.py",
+ "positive_prompt": "safe, 1girl, solo.\n\n1girl segment: changli (wuthering waves), wuthering waves, long hair, multicolored hair, red hair, pink hair, ponytail, feather hair ornament, hair intakes, amber eyes. She wears a dark plum knitted turtleneck sweater and charcoal grey trousers.\n\nInside a modern apartment living room at night during a blackout: entrance door on the left, window in the center, an electrical panel on the right wall, warm candlelight.\n\nHigh-angle close shot. Lin crouches beside one controlled candle and holds the edge of a folded note with two fingers. Heat reveals a faint geometric floor-plan impression on the back without any readable writing. The paper, copper dust, and her cautious adult expression are the visual focus.\n\nOne single continuous scene in one unified room. no text.",
+ "negative_prompt": "worst quality, low quality, score_1, score_2, score_3, blurry, jpeg artifacts, sepia, artist name, text, watermark, extra fingers, missing fingers, fused hands, duplicate person, extra person, split screen, comic panels, multiple panels, child, nsfw, explicit, nudity, exposed genitals, sexual intercourse",
+ "style": "anima native illustration",
+ "placeholder_cast": "wuthering waves",
+ "generation_date": "2026-07-18",
+ "manual_edits": "none",
+ "review_status": "pending"
+}

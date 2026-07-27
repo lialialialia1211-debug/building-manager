@@ -1,0 +1,19 @@
+{
+ "asset_id": "sixth_01",
+ "seed": 902,
+ "steps": 36,
+ "cfg": 4.5,
+ "sampler": "er_sde",
+ "scheduler": "simple",
+ "width": 1536,
+ "height": 864,
+ "model_filename": "anima-aesthetic-v1.1.safetensors",
+ "workflow_filename": "final_batch.py",
+ "positive_prompt": "safe, no humans.\n\nno humans, scenery. An old mid-rise apartment building exterior at night, rows of dark windows, one single impossible window glowing as a warm yellow six-cell grid, thin mist, quiet street below.\n\nOne single continuous scene. no text.",
+ "negative_prompt": "worst quality, low quality, score_1, score_2, score_3, blurry, jpeg artifacts, sepia, artist name, text, watermark, extra fingers, missing fingers, fused hands, duplicate person, extra person, split screen, comic panels, multiple panels, child, nsfw, explicit, nudity, exposed genitals, sexual intercourse",
+ "style": "anima native illustration",
+ "placeholder_cast": "wuthering waves",
+ "generation_date": "2026-07-18",
+ "manual_edits": "none",
+ "review_status": "pending"
+}

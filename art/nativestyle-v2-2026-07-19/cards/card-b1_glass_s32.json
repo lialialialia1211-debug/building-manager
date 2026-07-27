@@ -1,0 +1,17 @@
+{
+ "asset_id": "card-b1_glass",
+ "seed": 32,
+ "steps": 36,
+ "cfg": 4.5,
+ "sampler": "er_sde",
+ "scheduler": "simple",
+ "width": 1536,
+ "height": 864,
+ "model_filename": "anima-aesthetic-v1.1.safetensors",
+ "positive_prompt": "safe, 1girl, solo.\n\n1girl segment: cantarella (wuthering waves), wuthering waves, long purple hair, purple eyes, wearing her canonical elegant dark purple aristocratic gown.\n\nInside a modern apartment at night: entrance on the left, a sound-editing desk and sofa in the center, the shared wall on the right, moonlight through the window and small green recorder lights.\n\nHero side medium-close shot. Xu presses a thick clear glass against the abnormal wall and listens with one ear while her other hand controls a dual-track recorder. Water inside the glass forms six distinct ripples. Her adult face, both hands, the glass, and the wall seam are clearly readable.\n\nOne single continuous scene in one unified room. no text.",
+ "negative_prompt": "worst quality, low quality, score_1, score_2, score_3, blurry, jpeg artifacts, sepia, artist name, text, watermark, extra fingers, missing fingers, fused hands, duplicate person, extra person, split screen, comic panels, multiple panels, child, nsfw, explicit, nudity, exposed genitals, sexual intercourse",
+ "style": "anima native illustration",
+ "cast": "wuwa cartethyia/cantarella/brant/rover canonical outfits",
+ "generation_date": "2026-07-19",
+ "review_status": "pending"
+}

@@ -1,0 +1,20 @@
+{
+ "asset_id": "layer-a1_fuse-fx",
+ "seed": 501,
+ "steps": 36,
+ "cfg": 4.5,
+ "sampler": "er_sde",
+ "scheduler": "simple",
+ "width": 1536,
+ "height": 864,
+ "model_filename": "anima-aesthetic-v1.1.safetensors",
+ "workflow_filename": "stylelock_batch.py",
+ "positive_prompt": "abstract light effect overlay on pure black background: soft amber candlelight spill from lower left, one small red warning point, a muted yellow six-cell grid glow pattern, gentle glow shapes only, no objects, no humans, no text.",
+ "negative_prompt": "worst quality, low quality, blurry, jpeg artifacts, chromatic aberration, artist name, text, watermark, logo, photorealistic, 3d render, chibi, child, teenager, school uniform, young-looking face, duplicate person, extra person, extra fingers, missing fingers, fused hands, malformed tools, inconsistent hair, inconsistent clothes, different eye color, cropped face, cropped hands, unreadable action, excessive bloom, broken perspective, mirrored room layout, nsfw, explicit, nudity, exposed genitals, sexual intercourse",
+ "comfy_output": "stylelock\\layers\\a1_fuse/layer-a1_fuse-fx_s501_00001_.png",
+ "placeholder_cast": "wuthering waves",
+ "generation_date": "2026-07-17",
+ "manual_edits": "none",
+ "review_status": "selected_v01",
+ "selected_from_candidate": "layer-a1_fuse-fx_s501.json"
+}

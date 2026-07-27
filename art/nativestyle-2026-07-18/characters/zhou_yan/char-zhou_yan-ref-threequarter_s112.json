@@ -1,0 +1,20 @@
+{
+ "asset_id": "char-zhou_yan-ref-threequarter",
+ "seed": 112,
+ "steps": 36,
+ "cfg": 4.5,
+ "sampler": "er_sde",
+ "scheduler": "simple",
+ "width": 832,
+ "height": 1216,
+ "model_filename": "anima-aesthetic-v1.1.safetensors",
+ "workflow_filename": "native_batch.py",
+ "positive_prompt": "safe, Zhou Yan (placeholder cast: male rover (wuthering waves)), 1boy, a 33-year-old adult man, 185 cm tall, broad stable build, short black hair with crossed bangs and one long thin braid, glowing yellow eyes, subtle stubble on his chin. He wears a graphite-gray high-collar work jacket and dark work trousers.\n\nstanding, full body, arms relaxed at sides, plain light gray background, solo, three-quarter view.",
+ "negative_prompt": "worst quality, low quality, blurry, jpeg artifacts, chromatic aberration, artist name, text, watermark, logo, extra fingers, missing fingers, fused hands, duplicate person, extra person, split screen, comic panels, multiple panels, child, teenager, young-looking face, nsfw, explicit, nudity, exposed genitals, sexual intercourse",
+ "comfy_output": "nativestyle\\characters\\zhou_yan/char-zhou_yan-ref-threequarter_s112_00001_.png",
+ "style": "anima native illustration (no style block)",
+ "placeholder_cast": "wuthering waves",
+ "generation_date": "2026-07-18",
+ "manual_edits": "none",
+ "review_status": "pending"
+}

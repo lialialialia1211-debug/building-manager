@@ -1,0 +1,16 @@
+{
+ "asset_id": "char-xu_anning-sheet",
+ "type": "manual contact sheet (PIL assembly)",
+ "sources": {
+  "front": "char-xu_anning-ref-front_s101.json",
+  "threequarter": "char-xu_anning-ref-threequarter_s101.json",
+  "side": "char-xu_anning-ref-side_s102.json",
+  "back": "char-xu_anning-ref-back_s102.json"
+ },
+ "busts": [
+  "neutral s201",
+  "tense s201"
+ ],
+ "review_status": "selected_v01",
+ "note": "labels (name/age/height/ADULT) added in assembly per spec 02 section 6"
+}

@@ -49,6 +49,8 @@ const roomSchema = z.object({
   schemaVersion: z.literal(1),
   id: z.string().min(1),
   title: z.string().min(1),
+  backgroundAsset: z.string().min(1).optional(),
+  openingAssets: z.array(z.string().trim().min(1)).length(3).optional(),
   startNode: z.string().min(1),
   alternateStartNodes: z.record(z.string(), z.string()).optional(),
   safeNode: z.string().min(1),
@@ -80,6 +82,21 @@ const roomSchema = z.object({
   endingContent: z.record(endingIdSchema, endingContentSchema),
 }).superRefine((room, context) => {
   if (!room.drafting) return
+
+  if (!room.backgroundAsset) {
+    context.addIssue({
+      code: 'custom',
+      message: 'drafting rooms require backgroundAsset',
+      path: ['backgroundAsset'],
+    })
+  }
+  if (!room.openingAssets) {
+    context.addIssue({
+      code: 'custom',
+      message: 'drafting rooms require three openingAssets',
+      path: ['openingAssets'],
+    })
+  }
 
   const panelIds = Object.keys(room.panels)
   if (panelIds.length < room.drafting.dealSize) {

@@ -1,0 +1,20 @@
+{
+ "asset_id": "b_adult_05",
+ "seed": 821,
+ "steps": 36,
+ "cfg": 4.5,
+ "sampler": "er_sde",
+ "scheduler": "simple",
+ "width": 1536,
+ "height": 864,
+ "model_filename": "anima-aesthetic-v1.1.safetensors",
+ "workflow_filename": "native_batch.py",
+ "positive_prompt": "explicit, nude, sex, vaginal, lying, on side, hetero, leg lock, 1girl, 1boy, hetero couple.\n\n1girl segment: sanhua (wuthering waves), wuthering waves, grey hair, medium hair, single braid, red eyes, mismatched pupils, mole under mouth.\n\n1boy segment: rover (wuthering waves), wuthering waves, male focus, black hair, crossed bangs, long braid, yellow eyes, stubble.\n\nInside a modern apartment bedroom corner at night, a comfortable bed placed away from the walls, soft moonlight, calm private atmosphere.\n\nSide-lying face-to-face intimate scene on the bed: Xu lifts one leg wrapped over Zhou's waist while he supports himself on one arm. Both adult faces clearly visible with mutual pleasure and trust, soft moonlight on skin.\n\nno text.",
+ "negative_prompt": "worst quality, low quality, score_1, score_2, score_3, blurry, jpeg artifacts, sepia, artist name, text, watermark, extra fingers, missing fingers, fused hands, duplicate person, extra person, split screen, comic panels, multiple panels, child, unconscious, sleeping, intoxicated, coercion, restraint, forced expression, fear, crying, injury, violence, childlike body, flat chest",
+ "comfy_output": "nativestyle\\adult\\room_b/b_adult_05_s821_00001_.png",
+ "style": "anima native illustration (no style block)",
+ "placeholder_cast": "wuthering waves",
+ "generation_date": "2026-07-18",
+ "manual_edits": "none",
+ "review_status": "pending"
+}

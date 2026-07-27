@@ -1,0 +1,20 @@
+{
+ "asset_id": "char-xu_anning-ref-threequarter",
+ "seed": 122,
+ "steps": 36,
+ "cfg": 4.5,
+ "sampler": "er_sde",
+ "scheduler": "simple",
+ "width": 832,
+ "height": 1216,
+ "model_filename": "anima-aesthetic-v1.1.safetensors",
+ "workflow_filename": "native_batch.py",
+ "positive_prompt": "safe, 1girl segment: sanhua (wuthering waves), wuthering waves, grey hair, medium hair, single braid, red eyes, mismatched pupils, mole under mouth. She wears a dark green light jacket over a black top and dark trousers.\n\nstanding, full body, arms relaxed at sides, plain light gray background, solo, three-quarter view.",
+ "negative_prompt": "worst quality, low quality, score_1, score_2, score_3, blurry, jpeg artifacts, sepia, artist name, text, watermark, extra fingers, missing fingers, fused hands, duplicate person, extra person, split screen, comic panels, multiple panels, child, nsfw, explicit, nudity, exposed genitals, sexual intercourse",
+ "comfy_output": "nativestyle\\characters\\xu_anning/char-xu_anning-ref-threequarter_s122_00001_.png",
+ "style": "anima native illustration (no style block)",
+ "placeholder_cast": "wuthering waves",
+ "generation_date": "2026-07-18",
+ "manual_edits": "none",
+ "review_status": "pending"
+}

@@ -1,0 +1,19 @@
+{
+ "asset_id": "char-xu_anning-ref-threequarter",
+ "seed": 101,
+ "steps": 36,
+ "cfg": 4.5,
+ "sampler": "er_sde",
+ "scheduler": "simple",
+ "width": 832,
+ "height": 1216,
+ "model_filename": "anima-aesthetic-v1.1.safetensors",
+ "workflow_filename": "stylelock_batch.py",
+ "positive_prompt": "masterpiece, best quality, year 2025, newest, highres, safe, anime screenshot, clean cel animation, crisp dark lineart, two-step cel shading, mature adult characters, clear silhouette, cinematic night lighting, controlled highlights, detailed expressive adult eyes, 16:9 composition, no text in image.\n\nXu Anning (placeholder cast: sanhua (wuthering waves)), a 29-year-old adult woman, 168 cm tall, natural mature build, medium grey hair with a single braid, red eyes with mismatched pupils, a small mole under her mouth. She wears a dark green lightweight jacket over a black top and dark trousers. Alert, direct, precise listening and recording gestures.\n\ncharacter reference, full body, standing, arms relaxed at sides, plain light gray studio background, even neutral lighting, no props, solo, three-quarter view.",
+ "negative_prompt": "worst quality, low quality, blurry, jpeg artifacts, chromatic aberration, artist name, text, watermark, logo, photorealistic, 3d render, chibi, child, teenager, school uniform, young-looking face, duplicate person, extra person, extra fingers, missing fingers, fused hands, malformed tools, inconsistent hair, inconsistent clothes, different eye color, cropped face, cropped hands, unreadable action, excessive bloom, broken perspective, mirrored room layout, nsfw, explicit, nudity, exposed genitals, sexual intercourse",
+ "comfy_output": "stylelock\\characters\\xu_anning/char-xu_anning-ref-threequarter_s101_00001_.png",
+ "placeholder_cast": "wuthering waves",
+ "generation_date": "2026-07-17",
+ "manual_edits": "none",
+ "review_status": "pending"
+}

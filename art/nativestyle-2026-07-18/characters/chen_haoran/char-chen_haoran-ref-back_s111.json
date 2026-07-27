@@ -1,0 +1,20 @@
+{
+ "asset_id": "char-chen_haoran-ref-back",
+ "seed": 111,
+ "steps": 36,
+ "cfg": 4.5,
+ "sampler": "er_sde",
+ "scheduler": "simple",
+ "width": 832,
+ "height": 1216,
+ "model_filename": "anima-aesthetic-v1.1.safetensors",
+ "workflow_filename": "native_batch.py",
+ "positive_prompt": "safe, Chen Haoran (placeholder cast: male rover (wuthering waves)), 1boy, a 31-year-old adult man, 182 cm tall, lean practical build, short black hair with crossed bangs and one long thin braid, glowing yellow eyes. He wears a dark navy work shirt with sleeves rolled to the elbows, black work trousers, and a compact black tool belt.\n\nstanding, full body, arms relaxed at sides, plain light gray background, solo, back view, from behind.",
+ "negative_prompt": "worst quality, low quality, blurry, jpeg artifacts, chromatic aberration, artist name, text, watermark, logo, extra fingers, missing fingers, fused hands, duplicate person, extra person, split screen, comic panels, multiple panels, child, teenager, young-looking face, nsfw, explicit, nudity, exposed genitals, sexual intercourse",
+ "comfy_output": "nativestyle\\characters\\chen_haoran/char-chen_haoran-ref-back_s111_00001_.png",
+ "style": "anima native illustration (no style block)",
+ "placeholder_cast": "wuthering waves",
+ "generation_date": "2026-07-18",
+ "manual_edits": "none",
+ "review_status": "pending"
+}

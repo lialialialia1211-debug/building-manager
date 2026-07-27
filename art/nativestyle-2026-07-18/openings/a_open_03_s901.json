@@ -1,0 +1,19 @@
+{
+ "asset_id": "a_open_03",
+ "seed": 901,
+ "steps": 36,
+ "cfg": 4.5,
+ "sampler": "er_sde",
+ "scheduler": "simple",
+ "width": 1536,
+ "height": 864,
+ "model_filename": "anima-aesthetic-v1.1.safetensors",
+ "workflow_filename": "final_batch.py",
+ "positive_prompt": "safe, 1boy, solo.\n\n1boy segment: rover (wuthering waves), wuthering waves, male focus, black hair, crossed bangs, long braid, yellow eyes. He wears a dark navy work shirt with sleeves rolled up, black trousers and a black tool belt.\n\nIn a modern apartment building hallway at night with cold emergency lighting.\n\nMedium shot. Chen arrives in the hallway carrying a sealed rectangular toolbox, standing before an apartment door, raising his hand to knock, both hands visible.\n\nOne single continuous scene. no text.",
+ "negative_prompt": "worst quality, low quality, score_1, score_2, score_3, blurry, jpeg artifacts, sepia, artist name, text, watermark, extra fingers, missing fingers, fused hands, duplicate person, extra person, split screen, comic panels, multiple panels, child, nsfw, explicit, nudity, exposed genitals, sexual intercourse",
+ "style": "anima native illustration",
+ "placeholder_cast": "wuthering waves",
+ "generation_date": "2026-07-18",
+ "manual_edits": "none",
+ "review_status": "pending"
+}

@@ -1,0 +1,20 @@
+{
+ "asset_id": "ui-styleboard",
+ "seed": 601,
+ "steps": 36,
+ "cfg": 4.5,
+ "sampler": "er_sde",
+ "scheduler": "simple",
+ "width": 1536,
+ "height": 864,
+ "model_filename": "anima-aesthetic-v1.1.safetensors",
+ "workflow_filename": "stylelock_batch.py",
+ "positive_prompt": "game UI style board, flat clean cel style, organized grid layout: dark midnight indigo panels, graphite gray frames, warm window-yellow accent glow, comic panel frames of varying sizes, rounded rectangular buttons in normal, hover, and disabled states, small status icons as simple geometric shapes, thumbnail frames, an old apartment building silhouette with one glowing yellow six-cell window grid, no text, no letters, no numbers, no humans.",
+ "negative_prompt": "worst quality, low quality, blurry, jpeg artifacts, chromatic aberration, artist name, text, watermark, logo, photorealistic, 3d render, chibi, child, teenager, school uniform, young-looking face, duplicate person, extra person, extra fingers, missing fingers, fused hands, malformed tools, inconsistent hair, inconsistent clothes, different eye color, cropped face, cropped hands, unreadable action, excessive bloom, broken perspective, mirrored room layout, nsfw, explicit, nudity, exposed genitals, sexual intercourse, person, human, character",
+ "comfy_output": "stylelock\\ui/ui-styleboard_s601_00001_.png",
+ "placeholder_cast": "wuthering waves",
+ "generation_date": "2026-07-17",
+ "manual_edits": "none",
+ "review_status": "selected_v01",
+ "selected_from_candidate": "ui-styleboard_s601.json"
+}

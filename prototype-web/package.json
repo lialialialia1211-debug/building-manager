@@ -16,7 +16,9 @@
     "test:e2e": "playwright test",
     "validate:content": "tsx scripts/validate-content.ts",
     "validate:assets": "tsx scripts/validate-assets.ts",
-    "check": "npm run validate:content && npm run validate:assets && npm test && npm run build && npm run test:e2e"
+    "assets:sync": "tsx scripts/sync-runtime-assets.ts --write",
+    "assets:check-runtime": "tsx scripts/sync-runtime-assets.ts --check",
+    "check": "npm run assets:check-runtime && npm run validate:content && npm run validate:assets && npm test && npm run build && npm run test:e2e"
   },
   "dependencies": {
     "react": "19.2.7",

@@ -406,22 +406,19 @@ test('formal validation rejects an invalid gallery sequence reference', () => {
   )
 })
 
-test('asset CLI uses greybox manifest mode as its only mode source', () => {
+test('asset CLI validates the committed playable + adult manifests', () => {
   const result = spawnSync(
     process.execPath,
     ['--import', 'tsx', 'scripts/validate-assets.ts'],
     {
       cwd: process.cwd(),
       encoding: 'utf8',
-      env: {
-        ...process.env,
-        ART_MODE: 'formal',
-      },
+      env: { ...process.env },
     },
   )
 
   expect(result.status).toBe(0)
   expect(result.stdout).toContain(
-    'asset-manifest: greybox mode, formal art files are not required',
+    'asset-manifest: playable mode valid',
   )
 })

@@ -1,0 +1,20 @@
+{
+ "asset_id": "char-lin_yuwei-ref-front",
+ "seed": 111,
+ "steps": 36,
+ "cfg": 4.5,
+ "sampler": "er_sde",
+ "scheduler": "simple",
+ "width": 832,
+ "height": 1216,
+ "model_filename": "anima-aesthetic-v1.1.safetensors",
+ "workflow_filename": "native_batch.py",
+ "positive_prompt": "safe, Lin Yuwei (placeholder cast: changli (wuthering waves)), a 28-year-old adult woman, 165 cm tall, mature slim build, long flowing pink-to-red multicolored hair in a loose ponytail with a feather hair ornament and hair intakes, amber eyes, bright pupils. She wears a dark plum knitted long-sleeve top, charcoal trousers, dark indoor shoes.\n\nstanding, full body, arms relaxed at sides, plain light gray background, solo, front view, facing viewer.",
+ "negative_prompt": "worst quality, low quality, blurry, jpeg artifacts, chromatic aberration, artist name, text, watermark, logo, extra fingers, missing fingers, fused hands, duplicate person, extra person, split screen, comic panels, multiple panels, child, teenager, young-looking face, nsfw, explicit, nudity, exposed genitals, sexual intercourse",
+ "comfy_output": "nativestyle\\characters\\lin_yuwei/char-lin_yuwei-ref-front_s111_00001_.png",
+ "style": "anima native illustration (no style block)",
+ "placeholder_cast": "wuthering waves",
+ "generation_date": "2026-07-18",
+ "manual_edits": "none",
+ "review_status": "pending"
+}

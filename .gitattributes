@@ -1,0 +1,9 @@
+# Keep runtime manifests LF so the deterministic asset check byte-compares
+# identically on every platform (assets:check-runtime).
+content/asset-manifest.json text eol=lf
+content/adult-asset-manifest.json text eol=lf
+
+# Delivered and runtime art are binary.
+*.webp binary
+*.png binary
+*.psd binary
