@@ -1,4 +1,4 @@
-# 05｜輸出、命名與驗收
+# 05｜輸出、命名與內容驗收
 
 ## 1. 交付目錄
 
@@ -22,12 +22,13 @@ art/office-comic-2026-07-27/masters/
 {asset_id}.png
 ```
 
-不要加入 `final`、`new`、日期、版本號、中文、空格或括號。修改版直接覆蓋
-同一 asset ID，由 Git 保存版本歷史。
+不要加 `final`、`new`、日期、版本號、中文、空格或括號。
 
-## 2. 尺寸表
+## 2. 技術畫布
 
-| 類型 | 尺寸 | 背景 |
+這些只為程式裁切與顯示，不限制畫風：
+
+| 類型 | 建議畫布 | 背景 |
 |---|---:|---|
 | 角色設定表 | `2048 × 2048` | 不限 |
 | 人物卡 | `1638 × 2048` | 透明 |
@@ -41,28 +42,29 @@ art/office-comic-2026-07-27/masters/
 | 18+ 背景 | `2560 × 1440` | 不透明 |
 | 標題條 | `2048 × 512` | 透明 |
 
-全部使用 sRGB PNG。透明背景必須是真 alpha，不接受白底或棋盤格畫進圖片。
+若美術工作流需要其他解析度，可以等比例放大；長寬比不要改。全部使用
+sRGB PNG。透明背景必須是真 alpha。
 
 ## 3. 完整 87 份 asset ID
 
 ### 角色設定表：5
 
 ```text
-char_jiang_boyu_sheet
-char_tang_kexin_sheet
-char_shen_yao_sheet
-char_fang_manru_sheet
-char_he_chengfeng_sheet
+char_male_rover_sheet
+char_female_rover_sheet
+char_xiangli_yao_sheet
+char_changli_sheet
+char_boss_mingshi_sheet
 ```
 
 ### 卡牌：13
 
 ```text
-card_char_jiang_boyu
-card_char_tang_kexin
-card_char_shen_yao
-card_char_fang_manru
-card_char_he_chengfeng
+card_char_male_rover
+card_char_female_rover
+card_char_xiangli_yao
+card_char_changli
+card_char_boss_mingshi
 card_scene_executive_corridor
 card_scene_boss_office
 card_scene_glass_meeting_room
@@ -100,33 +102,61 @@ perfect_12
 ### 支線第六格：10
 
 ```text
-side_jiang_boyu_tang_kexin_sixth
-side_jiang_boyu_shen_yao_sixth
-side_jiang_boyu_fang_manru_sixth
-side_jiang_boyu_he_chengfeng_sixth
-side_tang_kexin_shen_yao_sixth
-side_tang_kexin_fang_manru_sixth
-side_tang_kexin_he_chengfeng_sixth
-side_shen_yao_fang_manru_sixth
-side_shen_yao_he_chengfeng_sixth
-side_fang_manru_he_chengfeng_sixth
+side_male_rover_female_rover_sixth
+side_male_rover_xiangli_yao_sixth
+side_male_rover_changli_sixth
+side_male_rover_boss_mingshi_sixth
+side_female_rover_xiangli_yao_sixth
+side_female_rover_changli_sixth
+side_female_rover_boss_mingshi_sixth
+side_xiangli_yao_changli_sixth
+side_xiangli_yao_boss_mingshi_sixth
+side_changli_boss_mingshi_sixth
 ```
 
 ### 支線後續：40
 
-每個前綴都有 `_01`、`_02`、`_03`、`_04`：
-
 ```text
-side_jiang_boyu_tang_kexin
-side_jiang_boyu_shen_yao
-side_jiang_boyu_fang_manru
-side_jiang_boyu_he_chengfeng
-side_tang_kexin_shen_yao
-side_tang_kexin_fang_manru
-side_tang_kexin_he_chengfeng
-side_shen_yao_fang_manru
-side_shen_yao_he_chengfeng
-side_fang_manru_he_chengfeng
+side_male_rover_female_rover_01
+side_male_rover_female_rover_02
+side_male_rover_female_rover_03
+side_male_rover_female_rover_04
+side_male_rover_xiangli_yao_01
+side_male_rover_xiangli_yao_02
+side_male_rover_xiangli_yao_03
+side_male_rover_xiangli_yao_04
+side_male_rover_changli_01
+side_male_rover_changli_02
+side_male_rover_changli_03
+side_male_rover_changli_04
+side_male_rover_boss_mingshi_01
+side_male_rover_boss_mingshi_02
+side_male_rover_boss_mingshi_03
+side_male_rover_boss_mingshi_04
+side_female_rover_xiangli_yao_01
+side_female_rover_xiangli_yao_02
+side_female_rover_xiangli_yao_03
+side_female_rover_xiangli_yao_04
+side_female_rover_changli_01
+side_female_rover_changli_02
+side_female_rover_changli_03
+side_female_rover_changli_04
+side_female_rover_boss_mingshi_01
+side_female_rover_boss_mingshi_02
+side_female_rover_boss_mingshi_03
+side_female_rover_boss_mingshi_04
+side_xiangli_yao_changli_01
+side_xiangli_yao_changli_02
+side_xiangli_yao_changli_03
+side_xiangli_yao_changli_04
+side_xiangli_yao_boss_mingshi_01
+side_xiangli_yao_boss_mingshi_02
+side_xiangli_yao_boss_mingshi_03
+side_xiangli_yao_boss_mingshi_04
+side_changli_boss_mingshi_01
+side_changli_boss_mingshi_02
+side_changli_boss_mingshi_03
+side_changli_boss_mingshi_04
 ```
 
 ### UI：5
@@ -139,48 +169,46 @@ ui_age_gate_bg
 ui_episode_title
 ```
 
-總數驗算：
+總數：
 
 ```text
 5 + 13 + 1 + 13 + 10 + 40 + 5 = 87
 ```
 
-## 4. 單張 QA
+## 4. 單張內容 QA
 
-- [ ] 檔名與 asset ID 完全一致。
-- [ ] 寬高與透明需求正確。
-- [ ] sRGB，沒有 CMYK 偏色。
-- [ ] 除角色設定表的開發註記外，沒有文字、對話框、擬聲字、Logo、浮水印或簽名。
-- [ ] 臉、眼睛、手指、關鍵道具與成人姿勢沒有明顯生成錯誤。
-- [ ] 重要內容位於中央 70%，四邊可安全裁切。
-- [ ] 至少一個角落能放程式對話。
-- [ ] 成人角色看起來明確成年。
+- [ ] Asset ID 與檔名正確。
+- [ ] 畫面符合 `02`、`03` 或 `04` 指定的姿勢與動作。
+- [ ] 角色視線、表情與對話情緒相符。
+- [ ] 主要角色、手部、道具與成人姿勢能讀懂。
+- [ ] 有足夠低細節空間放指定對話。
+- [ ] 圖內沒有畫死中文、氣泡、旁白、Logo、浮水印或簽名。
+- [ ] 角色看起來明確成年。
 
-## 5. 角色連續性 QA
+## 5. 漫畫連續性 QA
 
-- [ ] 五名角色都通過設定表後才批量生產漫畫。
-- [ ] 髮型、髮色、眼睛、膚色、身高差與體型一致。
-- [ ] 固定配件一致：唐可欣耳環、沈曜眼鏡、方曼如耳墜、賀承峰腕錶。
-- [ ] 同一路線衣物狀態逐格變化，不跳接或復原。
-- [ ] 同一路線背景家具、燈光方向與時間一致。
+- [ ] 同一路線角色造型與身體特徵一致。
+- [ ] 地點、家具與光線方向接續。
+- [ ] 衣物狀態逐格變化，不突然脫光或穿回。
+- [ ] `02` 的姿勢能合理接到 `03`。
+- [ ] `04` 保留剛結束的痕跡，但已回到辦公室笑點。
 - [ ] 沒有多手、多指、融合肢體或不可能關節。
 
-## 6. 成人內容 QA
+## 6. 對話驗收
 
-- [ ] 畫面能辨認雙方清醒並主動回應。
-- [ ] 不呈現恐懼、被迫、昏迷、醉倒或無法拒絕。
-- [ ] 沒有未成年外觀、校園服裝或年齡含糊元素。
-- [ ] 同性配對與異性配對使用相同完成標準。
-- [ ] 不含暴力、流血、排泄、獵奇傷害或真實人物肖像。
-- [ ] 不模仿受保護遊戲、動畫或漫畫角色。
+美術不必把文字畫進圖，但應用文件中的台詞檢查構圖：
 
-## 7. 回交方式
+- [ ] 說話者的嘴型、視線與情緒合理。
+- [ ] 第一個氣泡位置不會蓋住另一人的臉。
+- [ ] 擬聲字位置不遮擋主要動作。
+- [ ] 最多三個氣泡都能按順序放入。
+- [ ] 反向人物順序仍可共用同一張圖。
 
-每次可回交任意完整小批，但請保持目錄與 asset ID。Codex 收到後負責：
+## 7. 回交後由 Codex 處理
 
-1. 自動檢查尺寸、alpha、檔名與缺件。
-2. 產生 runtime WebP 與縮圖。
+1. 檢查尺寸、alpha、檔名與缺件。
+2. 產生 WebP 與縮圖。
 3. 更新 asset manifest。
-4. 接入灰階版本正在使用的相同 ID。
+4. 寫入 `03`、`04`、`06` 的對話資料。
 5. 執行 `npm --prefix prototype-web run check`。
-6. 部署精確 commit 到 GitHub 預覽後再交人工 QA。
+6. 部署精確 commit 到 GitHub 預覽後再開始人工 QA。
