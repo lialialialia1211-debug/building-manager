@@ -1,5 +1,5 @@
 {
-  "name": "building-manager-web-prototype",
+  "name": "office-comic-builder",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -16,9 +16,7 @@
     "test:e2e": "playwright test",
     "validate:content": "tsx scripts/validate-content.ts",
     "validate:assets": "tsx scripts/validate-assets.ts",
-    "assets:sync": "tsx scripts/sync-runtime-assets.ts --write",
-    "assets:check-runtime": "tsx scripts/sync-runtime-assets.ts --check",
-    "check": "npm run assets:check-runtime && npm run validate:content && npm run validate:assets && npm test && npm run build && npm run test:e2e"
+    "check": "npm run validate:content && npm run validate:assets && npm test && npm run build && npm run test:e2e"
   },
   "dependencies": {
     "react": "19.2.7",
