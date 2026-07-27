@@ -63,4 +63,36 @@ describe('App flow', () => {
     expect(await screen.findByRole('heading', { name: '成人內容確認' }))
       .toBeInTheDocument()
   })
+
+  it('routes a completed arrangement through reveal and ending screens', async () => {
+    const store = createComicStore({
+      storage,
+      loadEpisode: async () => episode,
+    })
+    const user = userEvent.setup()
+    render(<App store={store} />)
+
+    await screen.findByRole('heading', { name: '成人內容確認' })
+    await user.click(screen.getByRole('button', {
+      name: '我已年滿 18 歲，進入遊戲',
+    }))
+    act(() => {
+      episode.perfectFingerprint.forEach((cardId, index) => {
+        store.getState().placeCard(cardId, index)
+      })
+      store.getState().submit()
+    })
+    expect(screen.getByRole('heading', {
+      name: '門鎖上後，沒人再照規矩來。',
+    })).toBeInTheDocument()
+
+    act(() => {
+      for (let index = 0; index < 5; index += 1) {
+        store.getState().advanceReveal()
+      }
+    })
+    expect(screen.getByRole('heading', {
+      name: '完美結局：鎖門之後',
+    })).toBeInTheDocument()
+  })
 })

@@ -4,6 +4,10 @@ import {
   comicStore,
   type ComicStore,
 } from './store'
+import { AgeGate } from '@/components/AgeGate'
+import { ComicBuilderScreen } from '@/components/ComicBuilderScreen'
+import { EndingReader } from '@/components/EndingReader'
+import { RevealSequence } from '@/components/RevealSequence'
 
 export interface AppProps {
   store?: ComicStore
@@ -11,7 +15,6 @@ export interface AppProps {
 
 export function App({ store = comicStore }: AppProps) {
   const screen = useStore(store, (state) => state.screen)
-  const episode = useStore(store, (state) => state.episode)
   const errorMessage = useStore(store, (state) => state.errorMessage)
   const initialize = useStore(store, (state) => state.initialize)
   const confirmAge = useStore(store, (state) => state.confirmAge)
@@ -45,23 +48,30 @@ export function App({ store = comicStore }: AppProps) {
   if (screen === 'age-gate') {
     return (
       <main className="app-shell">
-        <section aria-labelledby="age-gate-title">
-          <h1 id="age-gate-title">成人內容確認</h1>
-          <p>本遊戲包含成年人之間的露骨性內容。</p>
-          <p>所有登場人物在本作中均為成年人，互動皆為自願。</p>
-          <button type="button" onClick={confirmAge}>
-            我已年滿 18 歲，進入遊戲
-          </button>
-          <a href="about:blank">離開</a>
-        </section>
+        <AgeGate onConfirm={confirmAge} />
+      </main>
+    )
+  }
+
+  if (screen === 'reveal') {
+    return (
+      <main className="app-shell">
+        <RevealSequence store={store} />
+      </main>
+    )
+  }
+
+  if (screen === 'ending') {
+    return (
+      <main className="app-shell">
+        <EndingReader store={store} />
       </main>
     )
   }
 
   return (
     <main className="app-shell">
-      <h1>{episode?.title ?? '鎖門之後'}</h1>
-      <p>辦公室漫畫編排器</p>
+      <ComicBuilderScreen store={store} />
     </main>
   )
 }
