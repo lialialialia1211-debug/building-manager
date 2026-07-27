@@ -19,10 +19,15 @@ export class EpisodeLoadError extends Error {
 export async function fetchOfficeEpisode(
   signal?: AbortSignal,
   fetcher: typeof fetch = globalThis.fetch,
+  baseUrl: string = import.meta.env.BASE_URL,
 ): Promise<OfficeEpisode> {
+  const normalizedBaseUrl = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`
   let response: Response
   try {
-    response = await fetcher('/office-episode.json', { signal })
+    response = await fetcher(
+      `${normalizedBaseUrl}office-episode.json`,
+      { signal },
+    )
   } catch (error) {
     throw new EpisodeLoadError(
       'network',

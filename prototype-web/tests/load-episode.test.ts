@@ -11,6 +11,23 @@ const episodeJson = readFileSync(
 )
 
 describe('fetchOfficeEpisode', () => {
+  it('loads content relative to the deployment base path', async () => {
+    let requestedUrl = ''
+    const fetcher: typeof fetch = async (input) => {
+      requestedUrl = String(input)
+      return new Response(episodeJson, { status: 200 })
+    }
+    const fetchWithBase = fetchOfficeEpisode as unknown as (
+      signal: AbortSignal | undefined,
+      request: typeof fetch,
+      baseUrl: string,
+    ) => ReturnType<typeof fetchOfficeEpisode>
+
+    await fetchWithBase(undefined, fetcher, '/building-manager/')
+
+    expect(requestedUrl).toBe('/building-manager/office-episode.json')
+  })
+
   it('loads and validates the office episode', async () => {
     const fetcher: typeof fetch = async () =>
       new Response(episodeJson, {
