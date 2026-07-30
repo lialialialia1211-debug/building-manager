@@ -117,12 +117,8 @@
   "perfectFingerprint": [
     "card_char_male_rover",
     "card_char_changli",
-    "card_scene_executive_corridor",
     "card_scene_boss_office",
-    "card_prop_master_keycard",
-    "card_prop_merger_contract",
-    "card_prop_blind_remote",
-    "card_prop_whisky_set"
+    "card_prop_merger_contract"
   ],
   "perfectEnding": {
     "id": "perfect-locked-door",
