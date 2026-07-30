@@ -124,6 +124,49 @@ test('click, drag, keyboard, and refresh share the same persistent arrangement',
     .toBeVisible()
 })
 
+test('legacy eight-slot saves migrate without losing age or unlocks', async ({ page }) => {
+  await page.evaluate(() => {
+    localStorage.setItem('office-comic-builder:v1', JSON.stringify({
+      schemaVersion: 1,
+      ageConfirmed: true,
+      slots: [
+        'card_char_male_rover',
+        'card_char_changli',
+        'card_scene_executive_corridor',
+        'card_scene_boss_office',
+        'card_prop_master_keycard',
+        'card_prop_merger_contract',
+        'card_prop_blind_remote',
+        'card_prop_whisky_set',
+      ],
+      unlockedRouteIds: ['side-male-rover-changli'],
+    }))
+  })
+  await page.reload()
+
+  await expect(page.getByRole('heading', { name: '鎖門之後' })).toBeVisible()
+  await expect(page.getByRole('button', { name: /空格/ })).toHaveCount(4)
+  await expect(page.getByRole('heading', { name: '成人內容確認' }))
+    .toHaveCount(0)
+
+  await page.getByRole('button', { name: '加入男漂泊者' }).click()
+  const migrated = await page.evaluate(() => JSON.parse(
+    localStorage.getItem('office-comic-builder:v1') ?? '{}',
+  ) as {
+    schemaVersion?: number
+    ageConfirmed?: boolean
+    slots?: Array<string | null>
+    unlockedRouteIds?: string[]
+  })
+
+  expect(migrated).toMatchObject({
+    schemaVersion: 2,
+    ageConfirmed: true,
+    slots: ['card_char_male_rover', null, null, null],
+    unlockedRouteIds: ['side-male-rover-changli'],
+  })
+})
+
 test('formal art loads and never overflows the viewport', async ({ page }) => {
   await enterGame(page)
 
