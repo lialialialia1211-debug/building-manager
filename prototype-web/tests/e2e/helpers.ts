@@ -43,18 +43,24 @@ export async function addCards(
 
 export async function fillPerfectRoute(page: Page) {
   await addCards(page, {
-    characters: ['男漂泊者', '長離'],
-    scenes: ['主管樓層走廊', '老闆私人辦公室'],
-    props: ['萬用門卡', '併購合約', '百葉窗遙控器', '威士忌酒具'],
+    props: ['併購合約'],
+  })
+  await addCards(page, {
+    characters: ['長離'],
+  })
+  await addCards(page, {
+    scenes: ['老闆私人辦公室'],
+  })
+  await addCards(page, {
+    characters: ['男漂泊者'],
   })
 }
 
 export async function revealEnding(page: Page) {
   await page.getByRole('button', { name: '演下去' }).click()
-  for (let panel = 2; panel <= 5; panel += 1) {
-    await page.getByRole('button', { name: `揭露第 ${panel} 格` }).click()
-  }
-  await page.getByRole('button', { name: '閱讀結局' }).click()
+  const continueButton = page.getByRole('button', { name: '閱讀後續' })
+  await expect(continueButton).toBeVisible()
+  await continueButton.click()
 }
 
 export async function resetSave(page: Page) {

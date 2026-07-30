@@ -19,10 +19,14 @@ test('adult gate leads directly to the office comic builder', async ({ page }) =
   await expect(page.getByRole('region', { name: '漫畫分鏡' })).toBeVisible()
   await expect(page.getByRole('region', { name: '故事卡牌' })).toBeVisible()
   await expect(page.getByRole('button', { name: /第 1 格：空格/ })).toBeVisible()
+  await expect(page.getByRole('button', { name: /空格/ })).toHaveCount(4)
+  await expect(page.getByText('主線似乎需要兩名人物')).toBeVisible()
+  await expect(page.getByText('再放入一個場景與一件關鍵物品'))
+    .toBeVisible()
   await expect(page.getByText('第六格尚未揭露')).toBeVisible()
 })
 
-test('exact fingerprint unlocks the twelve-frame perfect ending', async ({ page }) => {
+test('unordered perfect set unlocks the twelve-frame perfect ending', async ({ page }) => {
   await enterGame(page)
   await fillPerfectRoute(page)
   await revealEnding(page)
@@ -46,37 +50,52 @@ test('the first character in slot order selects each directed side route', async
   await enterGame(page)
   await addCards(page, {
     characters: ['女漂泊者', '相里要'],
-    scenes: ['主管樓層走廊', '玻璃會議室', '資料影印室'],
-    props: ['萬用門卡', '併購合約', '威士忌酒具'],
+    scenes: ['玻璃會議室'],
+    props: ['萬用門卡'],
   })
   await page.getByRole('button', { name: '演下去' }).click()
   await expect(page.getByText('支線：別太正經')).toBeVisible()
+  const forwardCg = page.getByRole('img', { name: '路線 CG' })
+  await expect(forwardCg).toBeVisible()
+  const forwardSource = await forwardCg.getAttribute('src')
   await page.getByRole('button', { name: '回去重排' }).click()
 
   await page.getByRole('button', { name: '第 1 格：女漂泊者' }).click()
   await page.getByRole('button', { name: '第 2 格：相里要' }).click()
   await page.getByRole('button', { name: '演下去' }).click()
   await expect(page.getByText('支線：電梯停了')).toBeVisible()
+  const reversedCg = page.getByRole('img', { name: '路線 CG' })
+  await expect(reversedCg).toBeVisible()
+  await expect(reversedCg).toHaveAttribute('src', forwardSource ?? '')
 })
 
-test('invalid character count preserves all eight cards', async ({ page }) => {
+test('three or four characters use the first directed pair and still reveal a CG', async ({ page }) => {
   await enterGame(page)
   await addCards(page, {
-    scenes: [
-      '主管樓層走廊',
-      '老闆私人辦公室',
-      '玻璃會議室',
-      '資料影印室',
-    ],
-    props: ['萬用門卡', '併購合約', '百葉窗遙控器', '威士忌酒具'],
+    characters: ['長離', '相里要', '女漂泊者', '阿列夫一'],
+  })
+
+  await page.getByRole('button', { name: '演下去' }).click()
+
+  await expect(page.getByText('支線：合約歸屬')).toBeVisible()
+  await expect(page.getByRole('img', { name: '路線 CG' })).toBeVisible()
+  await expect(page.getByRole('button', { name: '閱讀後續' })).toBeVisible()
+})
+
+test('fewer than two characters preserves all four cards', async ({ page }) => {
+  await enterGame(page)
+  await addCards(page, {
+    characters: ['男漂泊者'],
+    scenes: ['老闆私人辦公室', '玻璃會議室'],
+    props: ['萬用門卡'],
   })
 
   await page.getByRole('button', { name: '演下去' }).click()
 
   await expect(page.getByRole('status')).toContainText(
-    '只有辦公室和道具，沒人演。重排。',
+    '至少需要兩名人物',
   )
-  for (let slot = 1; slot <= 8; slot += 1) {
+  for (let slot = 1; slot <= 4; slot += 1) {
     await expect(page.getByRole('button', {
       name: new RegExp(`第 ${slot} 格：(?!空格)`),
     })).toBeVisible()
@@ -115,7 +134,10 @@ test('formal art loads and never overflows the viewport', async ({ page }) => {
   )).toBeVisible()
   await expect(page.getByTestId('asset-placeholder')).toHaveCount(0)
   const overflow = await page.evaluate(
-    () => document.documentElement.scrollWidth - window.innerWidth,
+    () => (
+      document.documentElement.scrollWidth
+      - document.documentElement.clientWidth
+    ),
   )
   expect(overflow).toBeLessThanOrEqual(1)
 
