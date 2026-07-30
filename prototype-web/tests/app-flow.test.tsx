@@ -87,9 +87,8 @@ describe('App flow', () => {
     })).toBeInTheDocument()
 
     act(() => {
-      for (let index = 0; index < 5; index += 1) {
-        store.getState().advanceReveal()
-      }
+      store.getState().revealAll()
+      store.getState().advanceReveal()
     })
     expect(screen.getByRole('heading', {
       name: '完美結局：鎖門之後',

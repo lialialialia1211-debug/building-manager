@@ -6,11 +6,11 @@ import { AssetImage } from './AssetImage'
 import { CardTray } from './CardTray'
 import { ComicPanelSlot } from './ComicPanelSlot'
 
-const groups = [
-  { label: '第一幕', slots: [0, 1] },
-  { label: '第二幕', slots: [2] },
-  { label: '第三幕', slots: [3, 4] },
-  { label: '第四幕', slots: [5, 6, 7] },
+const slotConfigs = [
+  { index: 0, label: '第一格', hint: '主線似乎需要兩名人物' },
+  { index: 1, label: '第二格' },
+  { index: 2, label: '第三格', hint: '再放入一個場景與一件關鍵物品' },
+  { index: 3, label: '第四格' },
 ] as const
 
 function invalidMessage(resolution: RouteResolution | null): string {
@@ -24,16 +24,16 @@ function invalidMessage(resolution: RouteResolution | null): string {
   if (resolution.reason === 'unknown-card') {
     return '這張卡不在劇本裡。請重新載入。'
   }
+  if (resolution.reason === 'route-data') {
+    return '這組人物的支線資料缺漏，請更換人物或調整順序。'
+  }
   if (resolution.characterCount === 0) {
-    return '只有辦公室和道具，沒人演。重排。'
+    return '至少需要兩名人物。先從牌庫選兩個人，再調整格子順序。'
   }
   if (resolution.characterCount === 1) {
-    return '一個人忙完整晚，這不是雙人漫畫。再放一個人。'
+    return '至少需要兩名人物。請再選一名人物，或調整格子順序。'
   }
-  if (resolution.characterCount === 3) {
-    return '三個人都想插手，四格根本演不完。留下兩個。'
-  }
-  return '整間公司都擠進來了。這不是尾牙，重排。'
+  return '這組編排無法成線，請更換卡片或調整順序。'
 }
 
 export interface ComicBuilderScreenProps {
@@ -75,7 +75,7 @@ export function ComicBuilderScreen({ store }: ComicBuilderScreenProps) {
           <p className="eyebrow">EPISODE 01 · OFFICE AFTER HOURS</p>
           <h1 id="episode-title">{episode.title}</h1>
         </div>
-        <p>{usedCardIds.size} / 8 張卡</p>
+        <p>{usedCardIds.size} / 4 張卡</p>
       </header>
 
       <div className="comic-builder__workspace">
@@ -90,35 +90,33 @@ export function ComicBuilderScreen({ store }: ComicBuilderScreenProps) {
           </article>
 
           <div className="slot-groups">
-            {groups.map((group) => (
+            {slotConfigs.map((config) => {
+              const cardId = slots[config.index]
+              return (
               <fieldset
-                key={group.label}
-                className={`slot-group slot-group--${group.slots.length}`}
-                aria-label={group.label}
+                key={config.label}
+                className="slot-group slot-group--1"
+                aria-label={config.label}
               >
-                <legend>{group.label}</legend>
+                <legend>{config.label}</legend>
                 <div>
-                  {group.slots.map((slotIndex) => {
-                    const cardId = slots[slotIndex]
-                    return (
-                      <ComicPanelSlot
-                        key={slotIndex}
-                        index={slotIndex}
-                        card={cardId ? cardsById.get(cardId) ?? null : null}
-                        selected={selectedSlot === slotIndex}
-                        onSelect={selectSlot}
-                        onRemove={(index) => {
-                          removeCard(index)
-                          setSelectedSlot(null)
-                        }}
-                        onDropCard={placeCard}
-                        onMoveCard={moveCard}
-                      />
-                    )
-                  })}
+                  <ComicPanelSlot
+                    index={config.index}
+                    card={cardId ? cardsById.get(cardId) ?? null : null}
+                    hint={'hint' in config ? config.hint : undefined}
+                    selected={selectedSlot === config.index}
+                    onSelect={selectSlot}
+                    onRemove={(index) => {
+                      removeCard(index)
+                      setSelectedSlot(null)
+                    }}
+                    onDropCard={placeCard}
+                    onMoveCard={moveCard}
+                  />
                 </div>
               </fieldset>
-            ))}
+              )
+            })}
           </div>
 
           <article className="locked-panel" aria-label="第六格鎖定">

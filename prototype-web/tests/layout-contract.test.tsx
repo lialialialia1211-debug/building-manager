@@ -12,7 +12,7 @@ const episode = parseOfficeEpisode(JSON.parse(readFileSync(
 )) as unknown)
 
 describe('responsive layout contract', () => {
-  it('exposes the builder status, page, tray, controls, and four acts', async () => {
+  it('exposes the builder status, page, tray, controls, and four slots', async () => {
     const storage: StorageAdapter = {
       getItem: () => null,
       setItem: () => undefined,
@@ -34,7 +34,7 @@ describe('responsive layout contract', () => {
       .toBeInTheDocument()
     expect(screen.getByRole('region', { name: '編排操作' }))
       .toBeInTheDocument()
-    expect(screen.getAllByRole('group', { name: /第[一二三四]幕/ }))
+    expect(screen.getAllByRole('group', { name: /第[一二三四]格/ }))
       .toHaveLength(4)
   })
 })

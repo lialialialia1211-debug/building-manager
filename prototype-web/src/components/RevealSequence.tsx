@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useStore } from 'zustand'
 import type { ComicStore } from '@/app/store'
 import {
@@ -17,7 +18,24 @@ export function RevealSequence({ store }: RevealSequenceProps) {
   const resolution = useStore(store, (state) => state.resolution)
   const revealStep = useStore(store, (state) => state.revealStep)
   const advanceReveal = useStore(store, (state) => state.advanceReveal)
+  const revealAll = useStore(store, (state) => state.revealAll)
   const returnToBuilder = useStore(store, (state) => state.returnToBuilder)
+
+  const hasValidRoute = Boolean(
+    episode && resolution && resolution.kind !== 'invalid',
+  )
+
+  useEffect(() => {
+    if (!hasValidRoute || revealStep >= 4) return
+    if (
+      globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    ) {
+      revealAll()
+      return
+    }
+    const timer = globalThis.setTimeout(advanceReveal, 220)
+    return () => globalThis.clearTimeout(timer)
+  }, [advanceReveal, hasValidRoute, revealAll, revealStep])
 
   if (!episode || !resolution || resolution.kind === 'invalid') return null
 
@@ -27,7 +45,6 @@ export function RevealSequence({ store }: RevealSequenceProps) {
   )
   const cardsById = new Map(episode.cards.map((card) => [card.id, card]))
   const presentation = getRoutePresentation(resolution, episode)
-  const nextPanelNumber = revealStep + 2
 
   return (
     <section className="reveal-screen" aria-labelledby="reveal-title">
@@ -80,7 +97,7 @@ export function RevealSequence({ store }: RevealSequenceProps) {
         <article className="sixth-panel">
           <AssetImage
             artId={presentation.revealArtId}
-            alt="第六格結局分鏡"
+            alt="路線 CG"
             aspectRatio="4 / 5"
           />
           <DialogueOverlay lines={presentation.revealDialogue} />
@@ -93,11 +110,15 @@ export function RevealSequence({ store }: RevealSequenceProps) {
           type="button"
           className="primary-action"
           onClick={advanceReveal}
+          hidden={revealStep < 4}
         >
-          {revealStep === 4
-            ? '閱讀結局'
-            : `揭露第 ${nextPanelNumber} 格`}
+          閱讀後續
         </button>
+        {revealStep < 4 && (
+          <p className="reveal-progress" role="status" aria-live="polite">
+            正在揭露第 {revealStep + 2} 格…
+          </p>
+        )}
       </footer>
     </section>
   )

@@ -17,10 +17,10 @@ const storage: StorageAdapter = {
   setItem: () => undefined,
 }
 
-async function renderBuilder() {
+async function renderBuilder(selectedEpisode = episode) {
   const store = createComicStore({
     storage,
-    loadEpisode: async () => episode,
+    loadEpisode: async () => selectedEpisode,
   })
   await act(async () => {
     await store.getState().initialize()
@@ -34,16 +34,21 @@ async function renderBuilder() {
 }
 
 describe('ComicBuilderScreen', () => {
-  it('shows the opening, four slot groups, and locked final panel', async () => {
+  it('shows four player slots, two hints, and the locked final panel', async () => {
     await renderBuilder()
 
     expect(screen.getByRole('img', { name: '固定開場分鏡' }))
       .toBeInTheDocument()
-    for (const label of ['第一幕', '第二幕', '第三幕', '第四幕']) {
+    for (const label of ['第一格', '第二格', '第三格', '第四格']) {
       expect(screen.getByRole('group', { name: label })).toBeInTheDocument()
     }
     expect(screen.getByText('第六格尚未揭露')).toBeInTheDocument()
-    expect(screen.getAllByRole('button', { name: /空格/ })).toHaveLength(8)
+    expect(screen.getAllByRole('button', { name: /空格/ })).toHaveLength(4)
+    expect(screen.getByText('0 / 4 張卡')).toBeInTheDocument()
+    expect(screen.getByText('主線似乎需要兩名人物'))
+      .toBeInTheDocument()
+    expect(screen.getByText('再放入一個場景與一件關鍵物品'))
+      .toBeInTheDocument()
   })
 
   it('filters the 5 / 4 / 4 tray and prevents reused cards', async () => {
@@ -92,6 +97,22 @@ describe('ComicBuilderScreen', () => {
     expect(submit).toBeEnabled()
   })
 
+  it('allows any card kind in either hinted slot', async () => {
+    const { store } = await renderBuilder()
+
+    act(() => {
+      store.getState().placeCard('card_scene_glass_meeting_room', 0)
+      store.getState().placeCard('card_char_changli', 2)
+    })
+
+    expect(screen.getByRole('button', {
+      name: '第 1 格：玻璃會議室',
+    })).toBeInTheDocument()
+    expect(screen.getByRole('button', {
+      name: '第 3 格：長離',
+    })).toBeInTheDocument()
+  })
+
   it('announces invalid feedback while preserving every slot', async () => {
     const { store, user } = await renderBuilder()
     const nonCharacters = episode.cards.filter(
@@ -106,8 +127,54 @@ describe('ComicBuilderScreen', () => {
     await user.click(screen.getByRole('button', { name: '演下去' }))
 
     expect(screen.getByRole('status')).toHaveTextContent(
-      '只有辦公室和道具，沒人演。重排。',
+      '至少需要兩名人物。先從牌庫選兩個人，再調整格子順序。',
     )
     expect(store.getState().slots.every(Boolean)).toBe(true)
+  })
+
+  it('asks for at least two characters when only one is selected', async () => {
+    const { store, user } = await renderBuilder()
+    act(() => {
+      [
+        'card_char_male_rover',
+        'card_scene_glass_meeting_room',
+        'card_scene_boss_office',
+        'card_prop_master_keycard',
+      ].forEach((cardId, index) => {
+        store.getState().placeCard(cardId, index)
+      })
+    })
+
+    await user.click(screen.getByRole('button', { name: '演下去' }))
+
+    expect(screen.getByRole('status')).toHaveTextContent(
+      '至少需要兩名人物。請再選一名人物，或調整格子順序。',
+    )
+  })
+
+  it('shows a controlled message when directed route data is missing', async () => {
+    const incompleteEpisode = {
+      ...episode,
+      sideRoutes: episode.sideRoutes.filter(
+        (route) => route.id !== 'side-male-rover-changli',
+      ),
+    }
+    const { store, user } = await renderBuilder(incompleteEpisode)
+    act(() => {
+      [
+        'card_char_male_rover',
+        'card_char_changli',
+        'card_scene_glass_meeting_room',
+        'card_prop_master_keycard',
+      ].forEach((cardId, index) => {
+        store.getState().placeCard(cardId, index)
+      })
+    })
+
+    await user.click(screen.getByRole('button', { name: '演下去' }))
+
+    expect(screen.getByRole('status')).toHaveTextContent(
+      '這組人物的支線資料缺漏，請更換人物或調整順序。',
+    )
   })
 })

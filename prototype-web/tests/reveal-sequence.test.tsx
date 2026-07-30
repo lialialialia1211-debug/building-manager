@@ -1,5 +1,4 @@
-import { act, render, screen } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
+import { act, fireEvent, render, screen } from '@testing-library/react'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { createComicStore } from '@/app/store'
@@ -30,39 +29,64 @@ async function createRevealStore() {
   return store
 }
 
+function stubReducedMotion(matches: boolean) {
+  vi.stubGlobal('matchMedia', vi.fn(() => ({ matches })))
+}
+
+afterEach(() => {
+  vi.useRealTimers()
+  vi.unstubAllGlobals()
+})
+
 describe('RevealSequence', () => {
-  it('reveals panels two through five in order, then unlocks panel six', async () => {
+  it('reveals all four panels and the route CG without repeated clicks', async () => {
+    vi.useFakeTimers()
+    stubReducedMotion(false)
     const store = await createRevealStore()
-    const user = userEvent.setup()
     render(<RevealSequence store={store} />)
 
     expect(screen.getAllByText('尚未揭露')).toHaveLength(4)
+    expect(screen.queryByRole('button', { name: /揭露第/ }))
+      .not.toBeInTheDocument()
 
-    for (let panel = 2; panel <= 5; panel += 1) {
-      await user.click(screen.getByRole('button', {
-        name: `揭露第 ${panel} 格`,
-      }))
-      expect(screen.getByRole('group', {
-        name: `第 ${panel} 格已揭露`,
-      })).toBeInTheDocument()
-    }
+    await act(async () => {
+      await vi.runAllTimersAsync()
+    })
 
-    expect(screen.getByRole('img', { name: '第六格結局分鏡' }))
+    expect(screen.getAllByRole('group', { name: /格已揭露/ }))
+      .toHaveLength(4)
+    expect(screen.getByRole('img', { name: '路線 CG' }))
       .toBeInTheDocument()
     expect(screen.getByText('你真的想我放開？', { exact: false }))
       .toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: '閱讀結局' }))
+    fireEvent.click(screen.getByRole('button', { name: '閱讀後續' }))
     expect(store.getState().screen).toBe('ending')
   })
 
+  it('shows all panels and the route CG immediately for reduced motion', async () => {
+    stubReducedMotion(true)
+    const store = await createRevealStore()
+
+    await act(async () => {
+      render(<RevealSequence store={store} />)
+    })
+
+    expect(screen.getAllByRole('group', { name: /格已揭露/ }))
+      .toHaveLength(4)
+    expect(screen.getByRole('img', { name: '路線 CG' }))
+      .toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '閱讀後續' })).toBeEnabled()
+  })
+
   it('returns to the builder without changing the arrangement', async () => {
+    vi.useFakeTimers()
+    stubReducedMotion(false)
     const store = await createRevealStore()
     const before = store.getState().slots
-    const user = userEvent.setup()
     render(<RevealSequence store={store} />)
 
-    await user.click(screen.getByRole('button', { name: '回去重排' }))
+    fireEvent.click(screen.getByRole('button', { name: '回去重排' }))
 
     expect(store.getState().screen).toBe('builder')
     expect(store.getState().slots).toEqual(before)

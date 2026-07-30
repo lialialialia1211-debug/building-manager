@@ -9,6 +9,7 @@ interface DragPayload {
 export interface ComicPanelSlotProps {
   index: number
   card: ComicCard | null
+  hint?: string
   selected: boolean
   onSelect(index: number): void
   onRemove(index: number): void
@@ -19,6 +20,7 @@ export interface ComicPanelSlotProps {
 export function ComicPanelSlot({
   index,
   card,
+  hint,
   selected,
   onSelect,
   onRemove,
@@ -54,8 +56,11 @@ export function ComicPanelSlot({
           aria-label={`第 ${slotNumber} 格：空格`}
           onClick={() => onSelect(index)}
         >
-          <span aria-hidden="true">＋</span>
+          <span className="comic-slot__add" aria-hidden="true">＋</span>
           <small>第 {slotNumber} 格</small>
+          {hint && (
+            <span className="comic-slot__hint">{hint}</span>
+          )}
         </button>
       </article>
     )
