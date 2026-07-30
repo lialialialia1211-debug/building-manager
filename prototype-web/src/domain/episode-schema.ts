@@ -51,10 +51,6 @@ const officeEpisodeSchema = z.object({
     z.string().trim().min(1),
     z.string().trim().min(1),
     z.string().trim().min(1),
-    z.string().trim().min(1),
-    z.string().trim().min(1),
-    z.string().trim().min(1),
-    z.string().trim().min(1),
   ]),
   perfectEnding: z.object({
     id: z.string().trim().min(1),

@@ -18,9 +18,9 @@ const knownCards = new Set([
 ])
 
 describe('builder state', () => {
-  it('creates exactly eight empty slots', () => {
+  it('creates exactly four empty slots', () => {
     expect(createEmptySlots()).toEqual([
-      null, null, null, null, null, null, null, null,
+      null, null, null, null,
     ])
   })
 
@@ -37,26 +37,26 @@ describe('builder state', () => {
 
     expect(firstOpenSlot(slots)).toBe(1)
     expect(placeCard(slots, 'card-b', knownCards)).toEqual([
-      'card-a', 'card-b', null, null, null, null, null, null,
+      'card-a', 'card-b', null, null,
     ])
   })
 
   it('moves a placed card and swaps occupied destinations', () => {
     const initial = [
-      'card-a', 'card-b', null, null, null, null, null, null,
+      'card-a', 'card-b', null, null,
     ] as const
 
     expect(moveCard(initial, 0, 3)).toEqual([
-      null, 'card-b', null, 'card-a', null, null, null, null,
+      null, 'card-b', null, 'card-a',
     ])
     expect(moveCard(initial, 0, 1)).toEqual([
-      'card-b', 'card-a', null, null, null, null, null, null,
+      'card-b', 'card-a', null, null,
     ])
   })
 
   it('returns a slotted card to the tray', () => {
     const initial = [
-      'card-a', null, null, null, null, null, null, null,
+      'card-a', null, null, null,
     ] as const
 
     expect(removeCard(initial, 0)).toEqual(createEmptySlots())
@@ -64,7 +64,7 @@ describe('builder state', () => {
 
   it('rejects unknown and duplicate cards without changing slots', () => {
     const initial = [
-      'card-a', null, null, null, null, null, null, null,
+      'card-a', null, null, null,
     ] as const
 
     expect(placeCard(initial, 'missing', knownCards, 2)).toBe(initial)

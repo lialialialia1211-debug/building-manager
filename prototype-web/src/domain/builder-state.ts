@@ -3,14 +3,10 @@ export type BuilderSlots = readonly [
   string | null,
   string | null,
   string | null,
-  string | null,
-  string | null,
-  string | null,
-  string | null,
 ]
 
 export function createEmptySlots(): BuilderSlots {
-  return [null, null, null, null, null, null, null, null]
+  return [null, null, null, null]
 }
 
 export function firstOpenSlot(slots: BuilderSlots): number | null {
@@ -76,12 +72,12 @@ export function removeCard(
 }
 
 function isSlotIndex(index: number): boolean {
-  return Number.isInteger(index) && index >= 0 && index < 8
+  return Number.isInteger(index) && index >= 0 && index < 4
 }
 
 function asBuilderSlots(values: Array<string | null>): BuilderSlots {
-  if (values.length !== 8) {
-    throw new Error('Builder slots must contain exactly eight positions')
+  if (values.length !== 4) {
+    throw new Error('Builder slots must contain exactly four positions')
   }
   return values as unknown as BuilderSlots
 }

@@ -34,8 +34,12 @@ describe('office episode schema', () => {
     expect(episode.cards).toHaveLength(13)
     expect(cardCounts).toEqual({ character: 5, scene: 4, prop: 4 })
     expect(new Set(episode.cards.map((card) => card.id)).size).toBe(13)
-    expect(episode.perfectFingerprint).toHaveLength(8)
-    expect(new Set(episode.perfectFingerprint).size).toBe(8)
+    expect(episode.perfectFingerprint).toEqual([
+      'card_char_male_rover',
+      'card_char_changli',
+      'card_scene_boss_office',
+      'card_prop_merger_contract',
+    ])
     expect(episode.sideRoutes).toHaveLength(20)
     expect(directedPairs.size).toBe(20)
     expect(episode.perfectEnding.endingFrames).toHaveLength(12)
