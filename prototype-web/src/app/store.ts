@@ -47,6 +47,7 @@ export interface ComicAppState {
   removeCard(slotIndex: number): void
   submit(): void
   advanceReveal(): void
+  revealAll(): void
   returnToBuilder(): void
 }
 
@@ -79,7 +80,7 @@ export function createComicStore(
       >,
     ) => {
       saveComicState({
-        schemaVersion: 1,
+        schemaVersion: 2,
         ageConfirmed: state.ageConfirmed,
         slots: state.slots,
         unlockedRouteIds: state.unlockedRouteIds,
@@ -103,11 +104,26 @@ export function createComicStore(
         })
         try {
           const episode = await dependencies.loadEpisode()
-          set((state) => ({
-            episode,
-            screen: state.ageConfirmed ? 'builder' : 'age-gate',
-            errorMessage: null,
-          }))
+          set((state) => {
+            const savedCardIds = state.slots.filter(
+              (cardId): cardId is string => cardId !== null,
+            )
+            const knownCardIds = new Set(
+              episode.cards.map((card) => card.id),
+            )
+            const slotsAreValid = savedCardIds.every(
+              (cardId) => knownCardIds.has(cardId),
+            ) && new Set(savedCardIds).size === savedCardIds.length
+            const next = {
+              ...state,
+              episode,
+              slots: slotsAreValid ? state.slots : createEmptySlots(),
+              screen: state.ageConfirmed ? 'builder' as const : 'age-gate' as const,
+              errorMessage: null,
+            }
+            if (!slotsAreValid) persist(next)
+            return next
+          })
         } catch (error) {
           set({
             screen: 'error',
@@ -215,6 +231,22 @@ export function createComicStore(
           }
           persist(next)
           return next
+        })
+      },
+
+      revealAll() {
+        set((state) => {
+          if (
+            state.screen !== 'reveal'
+            || !state.resolution
+            || state.resolution.kind === 'invalid'
+          ) {
+            return state
+          }
+          return {
+            ...state,
+            revealStep: 4,
+          }
         })
       },
 

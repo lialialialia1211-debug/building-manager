@@ -32,11 +32,9 @@ function createStorage(initial: Record<string, string> = {}): {
 }
 
 const savedState: ComicSave = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   ageConfirmed: true,
-  slots: [
-    'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h',
-  ],
+  slots: ['a', 'b', 'c', 'd'],
   unlockedRouteIds: ['perfect-locked-door'],
 }
 
@@ -47,6 +45,24 @@ describe('comic persistence', () => {
     })
 
     expect(loadComicSave(storage)).toEqual(savedState)
+  })
+
+  it('migrates an eight-slot save while preserving age and unlocks', () => {
+    const { storage } = createStorage({
+      [COMIC_SAVE_KEY]: JSON.stringify({
+        schemaVersion: 1,
+        ageConfirmed: true,
+        slots: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'],
+        unlockedRouteIds: ['side-male-rover-changli'],
+      }),
+    })
+
+    expect(loadComicSave(storage)).toEqual({
+      schemaVersion: 2,
+      ageConfirmed: true,
+      slots: [null, null, null, null],
+      unlockedRouteIds: ['side-male-rover-changli'],
+    })
   })
 
   it.each([

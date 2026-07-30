@@ -5,7 +5,10 @@ import {
   createComicStore,
   type ComicStoreDependencies,
 } from '@/app/store'
-import type { StorageAdapter } from '@/domain/persistence'
+import {
+  COMIC_SAVE_KEY,
+  type StorageAdapter,
+} from '@/domain/persistence'
 
 const episode = parseOfficeEpisode(JSON.parse(readFileSync(
   resolve(process.cwd(), '../content/office-comic/office-episode.json'),
@@ -66,7 +69,8 @@ describe('comic app store', () => {
   })
 
   it('confirms age and places, moves, and removes cards', async () => {
-    const store = createTestStore()
+    const storage = createMemoryStorage()
+    const store = createTestStore({ storage })
     await store.getState().initialize()
 
     store.getState().confirmAge()
@@ -78,7 +82,58 @@ describe('comic app store', () => {
     expect(store.getState().screen).toBe('builder')
     expect(store.getState().slots[3]).toBe('card_char_male_rover')
     expect(store.getState().slots[1]).toBeNull()
+    expect(JSON.parse(storage.getItem(COMIC_SAVE_KEY) ?? '{}')).toMatchObject({
+      schemaVersion: 2,
+    })
   })
+
+  it.each([
+    [
+      'unknown card',
+      [
+        'card_unknown',
+        'card_char_changli',
+        'card_scene_boss_office',
+        'card_prop_merger_contract',
+      ],
+    ],
+    [
+      'duplicate card',
+      [
+        'card_char_male_rover',
+        'card_char_male_rover',
+        'card_scene_boss_office',
+        'card_prop_merger_contract',
+      ],
+    ],
+  ])(
+    'clears a saved arrangement containing an %s without losing progress',
+    async (_, slots) => {
+      const storage = createMemoryStorage()
+      storage.setItem(COMIC_SAVE_KEY, JSON.stringify({
+        schemaVersion: 2,
+        ageConfirmed: true,
+        slots,
+        unlockedRouteIds: ['side-male-rover-changli'],
+      }))
+      const store = createTestStore({ storage })
+
+      await store.getState().initialize()
+
+      expect(store.getState()).toMatchObject({
+        screen: 'builder',
+        ageConfirmed: true,
+        slots: [null, null, null, null],
+        unlockedRouteIds: ['side-male-rover-changli'],
+      })
+      expect(JSON.parse(storage.getItem(COMIC_SAVE_KEY) ?? '{}')).toMatchObject({
+        schemaVersion: 2,
+        ageConfirmed: true,
+        slots: [null, null, null, null],
+        unlockedRouteIds: ['side-male-rover-changli'],
+      })
+    },
+  )
 
   it('keeps the arrangement and explains an invalid submission', async () => {
     const store = createTestStore()
@@ -102,7 +157,7 @@ describe('comic app store', () => {
     expect(store.getState().slots).toEqual(beforeSubmit)
   })
 
-  it('reveals a valid ending in sequence and persists its unlock', async () => {
+  it('reveals a valid ending at once and persists its unlock', async () => {
     const storage = createMemoryStorage()
     const store = createComicStore({
       storage,
@@ -124,10 +179,9 @@ describe('comic app store', () => {
       },
     })
 
-    for (let step = 1; step <= 4; step += 1) {
-      store.getState().advanceReveal()
-      expect(store.getState().revealStep).toBe(step)
-    }
+    store.getState().revealAll()
+    expect(store.getState().revealStep).toBe(4)
+    expect(store.getState().screen).toBe('reveal')
     store.getState().advanceReveal()
 
     expect(store.getState().screen).toBe('ending')
@@ -145,5 +199,15 @@ describe('comic app store', () => {
     expect(restored.getState().unlockedRouteIds).toEqual([
       'perfect-locked-door',
     ])
+  })
+
+  it('does not reveal all before a valid route is submitted', async () => {
+    const store = createTestStore()
+    await store.getState().initialize()
+
+    store.getState().revealAll()
+
+    expect(store.getState().revealStep).toBe(0)
+    expect(store.getState().screen).toBe('age-gate')
   })
 })
