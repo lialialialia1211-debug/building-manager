@@ -12,11 +12,6 @@ const episode = parseOfficeEpisode(JSON.parse(readFileSync(
   'utf8',
 )) as unknown)
 
-const sideFillers = episode.cards
-  .filter((card) => card.kind !== 'character')
-  .slice(0, 6)
-  .map((card) => card.id)
-
 function cardIdForCharacter(characterId: string): string {
   const card = episode.cards.find(
     (candidate) => candidate.characterId === characterId,
@@ -26,32 +21,31 @@ function cardIdForCharacter(characterId: string): string {
 }
 
 describe('dynamic comic dialogue', () => {
-  it('limits every reveal grid to at most two text lines', () => {
-    const arrangements = [
-      episode.perfectFingerprint,
-      ...episode.sideRoutes.map((route) => [
-        cardIdForCharacter(route.leadCharacterId),
-        sideFillers[0]!,
-        cardIdForCharacter(route.partnerCharacterId),
-        ...sideFillers.slice(1),
-      ]),
+  it('builds exactly one card and one line per reveal panel', () => {
+    const slots = [
+      cardIdForCharacter('male-rover'),
+      'card_scene_glass_meeting_room',
+      cardIdForCharacter('changli'),
+      'card_prop_master_keycard',
     ]
 
-    for (const arrangement of arrangements) {
-      const panels = buildRevealPanels(arrangement, episode)
-      expect(panels).toHaveLength(4)
-      expect(panels.every((panel) => panel.lines.length <= 2)).toBe(true)
-      expect(panels.every((panel) => panel.lines.length >= 1)).toBe(true)
-    }
+    const panels = buildRevealPanels(slots, episode)
+
+    expect(panels).toHaveLength(4)
+    expect(panels.map((panel) => panel.cardIds)).toEqual(
+      slots.map((cardId) => [cardId]),
+    )
+    expect(panels.every((panel) => panel.lines.length === 1)).toBe(true)
   })
 
   it.each(episode.sideRoutes)(
-    'uses the approved directed exchange for $id',
+    'uses the approved directed presentation for $id',
     (route) => {
       const resolution = resolveRoute([
         cardIdForCharacter(route.leadCharacterId),
         cardIdForCharacter(route.partnerCharacterId),
-        ...sideFillers,
+        'card_scene_glass_meeting_room',
+        'card_prop_master_keycard',
       ], episode)
 
       expect(getRoutePresentation(resolution, episode)).toMatchObject({
@@ -62,17 +56,45 @@ describe('dynamic comic dialogue', () => {
     },
   )
 
-  it('uses character speech plus the first non-character narration', () => {
-    const lines = buildRevealPanels([
-      'card_char_female_rover',
-      'card_prop_master_keycard',
-      'card_scene_boss_office',
-      ...episode.cards.slice(0, 5).map((card) => card.id),
-    ], episode)[0]?.lines
+  it('uses directed pair dialogue for the first two characters', () => {
+    const route = episode.sideRoutes.find(
+      (candidate) =>
+        candidate.leadCharacterId === 'changli'
+        && candidate.partnerCharacterId === 'xiangli-yao',
+    )
+    if (!route) throw new Error('missing directed dialogue fixture')
 
-    expect(lines).toEqual([
-      '女漂泊者：「別把有趣的事都搶走。」',
-      '旁白：「嗶。最高權限通過。」',
-    ])
+    const panels = buildRevealPanels([
+      cardIdForCharacter('changli'),
+      'card_scene_glass_meeting_room',
+      cardIdForCharacter('xiangli-yao'),
+      'card_prop_master_keycard',
+    ], episode)
+
+    expect(panels[0]?.lines).toEqual([route.pairDialogue[0]])
+    expect(panels[2]?.lines).toEqual([route.pairDialogue[1]])
+  })
+
+  it('keeps extra characters in the early dialogue without changing the pair', () => {
+    const route = episode.sideRoutes.find(
+      (candidate) =>
+        candidate.leadCharacterId === 'changli'
+        && candidate.partnerCharacterId === 'xiangli-yao',
+    )
+    const extraCard = episode.cards.find(
+      (candidate) => candidate.characterId === 'female-rover',
+    )
+    if (!route || !extraCard) throw new Error('missing dialogue fixture')
+
+    const panels = buildRevealPanels([
+      cardIdForCharacter('changli'),
+      cardIdForCharacter('xiangli-yao'),
+      extraCard.id,
+      'card_prop_master_keycard',
+    ], episode)
+
+    expect(panels[0]?.lines).toEqual([route.pairDialogue[0]])
+    expect(panels[1]?.lines).toEqual([route.pairDialogue[1]])
+    expect(panels[2]?.lines).toEqual([extraCard.line])
   })
 })

@@ -5,6 +5,7 @@ export type InvalidRouteReason =
   | 'unknown-card'
   | 'duplicate-card'
   | 'character-count'
+  | 'route-data'
 
 export type RouteResolution =
   | { kind: 'perfect'; routeId: string }
@@ -24,7 +25,7 @@ export function resolveRoute(
   slots: readonly (string | null)[],
   episode: OfficeEpisode,
 ): RouteResolution {
-  if (slots.length !== 8 || slots.some((cardId) => cardId === null)) {
+  if (slots.length !== 4 || slots.some((cardId) => cardId === null)) {
     return { kind: 'invalid', reason: 'incomplete' }
   }
 
@@ -37,9 +38,11 @@ export function resolveRoute(
     return { kind: 'invalid', reason: 'duplicate-card' }
   }
 
-  if (cardIds.every(
-    (cardId, index) => cardId === episode.perfectFingerprint[index],
-  )) {
+  const perfectCardIds = new Set(episode.perfectFingerprint)
+  if (
+    cardIds.length === perfectCardIds.size
+    && cardIds.every((cardId) => perfectCardIds.has(cardId))
+  ) {
     return {
       kind: 'perfect',
       routeId: episode.perfectEnding.id,
@@ -50,7 +53,7 @@ export function resolveRoute(
     const characterId = cardsById.get(cardId)?.characterId
     return characterId ? [characterId] : []
   })
-  if (characterIds.length !== 2) {
+  if (characterIds.length < 2) {
     return {
       kind: 'invalid',
       reason: 'character-count',
@@ -66,10 +69,7 @@ export function resolveRoute(
       && candidate.partnerCharacterId === partnerCharacterId,
   )
   if (!route) {
-    throw new Error(
-      `Episode invariant failed: missing directed side route `
-      + `${leadCharacterId}->${partnerCharacterId}`,
-    )
+    return { kind: 'invalid', reason: 'route-data' }
   }
 
   return {

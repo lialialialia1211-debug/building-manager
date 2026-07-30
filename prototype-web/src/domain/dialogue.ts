@@ -1,15 +1,5 @@
-import type {
-  ComicCard,
-  OfficeEpisode,
-} from './episode-schema'
+import type { OfficeEpisode } from './episode-schema'
 import type { RouteResolution } from './route-resolver'
-
-const revealGroups = [
-  [0, 1],
-  [2],
-  [3, 4],
-  [5, 6, 7],
-] as const
 
 export interface RevealPanel {
   cardIds: string[]
@@ -31,15 +21,32 @@ export function buildRevealPanels(
   episode: OfficeEpisode,
 ): RevealPanel[] {
   const cardsById = new Map(episode.cards.map((card) => [card.id, card]))
+  const cards = slots.flatMap((cardId) => {
+    const card = cardsById.get(cardId)
+    return card ? [card] : []
+  })
+  const characters = cards.filter(
+    (card): card is typeof card & { characterId: string } =>
+      card.kind === 'character' && Boolean(card.characterId),
+  )
+  const route = characters.length >= 2
+    ? episode.sideRoutes.find(
+        (candidate) =>
+          candidate.leadCharacterId === characters[0]?.characterId
+          && candidate.partnerCharacterId === characters[1]?.characterId,
+      )
+    : undefined
 
-  return revealGroups.map((indices) => {
-    const cards = indices.flatMap((index) => {
-      const card = cardsById.get(slots[index] ?? '')
-      return card ? [card] : []
-    })
+  return cards.map((card) => {
+    let line = card.line
+    if (route && card.id === characters[0]?.id) {
+      line = route.pairDialogue[0]
+    } else if (route && card.id === characters[1]?.id) {
+      line = route.pairDialogue[1]
+    }
     return {
-      cardIds: cards.map((card) => card.id),
-      lines: buildPanelLines(cards, episode),
+      cardIds: [card.id],
+      lines: [line],
     }
   })
 }
@@ -78,31 +85,4 @@ export function getRoutePresentation(
     revealDialogue: route.revealDialogue,
     endingFrames: ending.frames,
   }
-}
-
-function buildPanelLines(
-  cards: readonly ComicCard[],
-  episode: OfficeEpisode,
-): string[] {
-  const characters = cards.filter(
-    (card): card is ComicCard & { characterId: string } =>
-      card.kind === 'character' && Boolean(card.characterId),
-  )
-  const nonCharacters = cards.filter((card) => card.kind !== 'character')
-
-  if (characters.length >= 2) {
-    const route = episode.sideRoutes.find(
-      (candidate) =>
-        candidate.leadCharacterId === characters[0]?.characterId
-        && candidate.partnerCharacterId === characters[1]?.characterId,
-    )
-    if (route) return [...route.pairDialogue]
-  }
-  if (characters.length === 1) {
-    return [
-      characters[0]!.line,
-      ...nonCharacters.slice(0, 1).map((card) => card.line),
-    ]
-  }
-  return nonCharacters.slice(0, 2).map((card) => card.line)
 }
