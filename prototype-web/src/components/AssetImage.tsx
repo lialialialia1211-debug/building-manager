@@ -48,6 +48,7 @@ export function AssetImage({
       className={className}
       src={`${baseUrl}assets/office-comic/${encodeURIComponent(artId)}.png`}
       alt={alt}
+      draggable={imageProps.draggable ?? false}
       style={{ ...imageProps.style, aspectRatio }}
       onError={(event) => {
         imageProps.onError?.(event)

@@ -2,6 +2,18 @@ import { fireEvent, render, screen } from '@testing-library/react'
 import { AssetImage } from '@/components/AssetImage'
 
 describe('AssetImage', () => {
+  it('does not start a native image drag that would steal parent card drag events', () => {
+    render(
+      <AssetImage
+        artId="card_char_male_rover"
+        alt="男漂泊者卡面"
+      />,
+    )
+
+    expect(screen.getByRole('img', { name: '男漂泊者卡面' }))
+      .toHaveAttribute('draggable', 'false')
+  })
+
   it('shows a stable labeled placeholder when planned art is missing', () => {
     render(
       <AssetImage

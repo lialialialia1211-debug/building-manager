@@ -31,12 +31,15 @@ test('exact fingerprint unlocks the twelve-frame perfect ending', async ({ page 
     name: '完美結局：鎖門之後',
   })).toBeVisible()
   await expect(page.getByText('第 1 / 3 頁')).toBeVisible()
-  await expect(page.getByText('perfect_01')).toBeVisible()
-  await expect(page.getByText('perfect_04')).toBeVisible()
+  await expect(page.getByRole('img', { name: '結局分鏡 1' }))
+    .toHaveAttribute('src', /perfect_01\.png$/)
+  await expect(page.getByRole('img', { name: '結局分鏡 4' }))
+    .toHaveAttribute('src', /perfect_04\.png$/)
 
   await page.getByRole('button', { name: '下一頁' }).click()
   await expect(page.getByText('第 2 / 3 頁')).toBeVisible()
-  await expect(page.getByText('perfect_05')).toBeVisible()
+  await expect(page.getByRole('img', { name: '結局分鏡 5' }))
+    .toHaveAttribute('src', /perfect_05\.png$/)
 })
 
 test('the first character in slot order selects each directed side route', async ({ page }) => {
@@ -102,11 +105,15 @@ test('click, drag, keyboard, and refresh share the same persistent arrangement',
     .toBeVisible()
 })
 
-test('missing art uses labeled placeholders and never overflows the viewport', async ({ page }) => {
+test('formal art loads and never overflows the viewport', async ({ page }) => {
   await enterGame(page)
 
-  await expect(page.getByText('office_opening_01')).toBeVisible()
-  await expect(page.getByText('card_char_male_rover')).toBeVisible()
+  await expect(page.getByRole('img', { name: '固定開場分鏡' }))
+    .toHaveAttribute('src', /office_opening_01\.png$/)
+  await expect(page.locator(
+    'img[src$="/assets/office-comic/card_char_male_rover.png"]',
+  )).toBeVisible()
+  await expect(page.getByTestId('asset-placeholder')).toHaveCount(0)
   const overflow = await page.evaluate(
     () => document.documentElement.scrollWidth - window.innerWidth,
   )
